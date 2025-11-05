@@ -27,13 +27,16 @@ export default function ProductModerationPage() {
   const [activeTab, setActiveTab] = useState<string>('ALL')
   const queryClient = useQueryClient()
 
-  const { data: products, isLoading } = useQuery<any[]>({
+  const { data, isLoading } = useQuery<any>({
     queryKey: ['admin-products', { search, status: activeTab === 'ALL' ? undefined : activeTab }],
     queryFn: () => apiClient.get('/admin/products', {
       search: search || undefined,
       status: activeTab === 'ALL' ? undefined : activeTab
     }),
   })
+
+  // Extract products array from response - API returns { data: [...], meta: {...} }
+  const products = Array.isArray(data) ? data : (data?.data || [])
 
   const updateStatusMutation = useMutation({
     mutationFn: ({ productId, status }: { productId: string; status: string }) =>
@@ -130,8 +133,8 @@ export default function ProductModerationPage() {
                                 />
                               </div>
                               <div>
-                                <p className="font-medium">{product.nameEn}</p>
-                                <p className="text-sm text-muted-foreground">{product.category?.nameEn}</p>
+                                <p className="font-medium">{product.name}</p>
+                                <p className="text-sm text-muted-foreground">{product.category?.name}</p>
                               </div>
                             </div>
                           </TableCell>

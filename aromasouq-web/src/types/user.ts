@@ -10,6 +10,7 @@ export interface User {
   status: UserStatus
   emailVerified: boolean
   preferredLanguage: 'en' | 'ar'
+  coinsBalance: number
   createdAt: Date
   updatedAt: Date
   vendor?: Vendor

@@ -89,10 +89,10 @@ export class CheckoutService {
         throw new BadRequestException('Insufficient coins balance');
       }
 
-      // 1 coin = 0.1 AED discount, maximum 50% of subtotal
+      // 1 coin = 1 AED discount, maximum 50% of subtotal
       const maxCoinsDiscount = subtotal * 0.5;
-      coinsDiscount = Math.min(coinsToUse * 0.1, maxCoinsDiscount);
-      coinsUsed = Math.floor(coinsDiscount / 0.1);
+      coinsDiscount = Math.min(coinsToUse * 1.0, maxCoinsDiscount);
+      coinsUsed = Math.floor(coinsDiscount);
     }
 
     const tax = (subtotal - coinsDiscount + shippingFee + giftWrappingCost) * 0.05;
@@ -114,7 +114,8 @@ export class CheckoutService {
           paymentMethod,
           subtotal,
           tax,
-          shippingFee: shippingFee + giftWrappingCost,
+          shippingFee: shippingFee,
+          giftWrappingFee: giftWrappingCost,
           discount: coinsDiscount,
           total,
           coinsUsed,

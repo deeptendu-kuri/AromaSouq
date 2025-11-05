@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
@@ -43,6 +43,13 @@ export default function CheckoutPage() {
   const [paymentMethod, setPaymentMethod] = useState("card")
   const [coinsToUse, setCoinsToUse] = useState(0)
   const [isSubmitting, setIsSubmitting] = useState(false)
+
+  // Redirect if cart is empty
+  useEffect(() => {
+    if (!cart || !cart.items || cart.items.length === 0) {
+      router.push('/cart')
+    }
+  }, [cart, router])
 
   // Coupon state
   const [couponCode, setCouponCode] = useState("")
@@ -143,8 +150,7 @@ export default function CheckoutPage() {
   }
 
   if (!cart || !cart.items || cart.items.length === 0) {
-    router.push('/cart')
-    return null
+    return <div className="container mx-auto px-4 py-8 text-center">Loading...</div>
   }
 
   return (

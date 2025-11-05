@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { useForm } from "react-hook-form"
@@ -15,8 +15,12 @@ import toast from "react-hot-toast"
 
 export default function LoginPage() {
   const router = useRouter()
-  const { login } = useAuth()
+  const { login, isAuthenticated, user } = useAuth()
   const [isLoading, setIsLoading] = useState(false)
+
+  useEffect(() => {
+    console.log('LoginPage mounted - isAuthenticated:', isAuthenticated, 'user:', user)
+  }, [])
 
   const form = useForm<LoginInput>({
     resolver: zodResolver(loginSchema),

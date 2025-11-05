@@ -23,12 +23,23 @@ export function formatCurrency(amount: number): string {
 /**
  * Format date
  */
-export function formatDate(date: Date | string): string {
-  return new Intl.DateTimeFormat('en-AE', {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-  }).format(new Date(date))
+export function formatDate(date: Date | string | null | undefined): string {
+  if (!date) return 'N/A'
+
+  try {
+    const dateObj = new Date(date)
+    if (isNaN(dateObj.getTime())) {
+      return 'Invalid Date'
+    }
+
+    return new Intl.DateTimeFormat('en-AE', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+    }).format(dateObj)
+  } catch (error) {
+    return 'Invalid Date'
+  }
 }
 
 /**

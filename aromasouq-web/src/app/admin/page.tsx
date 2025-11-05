@@ -109,10 +109,10 @@ export default function AdminDashboardPage() {
               {pendingVendors.map((vendor) => (
                 <div key={vendor.id} className="flex items-center justify-between p-4 border rounded-lg">
                   <div className="flex-1">
-                    <p className="font-medium">{vendor.businessName || `${vendor.firstName} ${vendor.lastName}`}</p>
-                    <p className="text-sm text-muted-foreground">{vendor.email}</p>
+                    <p className="font-medium">{vendor.businessName || `${vendor.user?.firstName} ${vendor.user?.lastName}`}</p>
+                    <p className="text-sm text-muted-foreground">{vendor.user?.email}</p>
                     <p className="text-xs text-muted-foreground mt-1">
-                      Applied {formatDate(vendor.appliedAt)}
+                      Applied {formatDate(vendor.createdAt)}
                     </p>
                   </div>
                   <Button size="sm" asChild>

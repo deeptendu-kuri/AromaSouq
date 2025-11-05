@@ -1,8 +1,8 @@
 "use client"
 
-import React, { useState } from "react"
+import React, { useState, useEffect } from "react"
 import Link from "next/link"
-import { usePathname, useSearchParams } from "next/navigation"
+import { usePathname, useRouter } from "next/navigation"
 import { Search, ShoppingCart, Heart, User, Menu } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -18,14 +18,14 @@ import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
 import { useAuth } from "@/hooks/useAuth"
 import { useCart } from "@/hooks/useCart"
 import { cn } from "@/lib/utils"
+// import { SearchBar } from "@/components/SearchBar"
+// import { CoinsWidget } from "@/components/layout/CoinsWidget"
 
 export function Header() {
   const { user, isAuthenticated, logout } = useAuth()
-  const { cart } = useCart()
-  const [searchQuery, setSearchQuery] = useState("")
+  const { cart, itemCount } = useCart()
   const pathname = usePathname()
-  const searchParams = useSearchParams()
-  const currentCategory = searchParams.get('category')
+  const router = useRouter()
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -72,7 +72,7 @@ export function Header() {
               href="/products"
               className={cn(
                 "text-sm font-medium transition-colors",
-                pathname === '/products' && !currentCategory
+                pathname === '/products'
                   ? "text-oud-gold border-b-2 border-oud-gold pb-1"
                   : "hover:text-oud-gold"
               )}
@@ -81,64 +81,40 @@ export function Header() {
             </Link>
             <Link
               href="/products?category=perfumes"
-              className={cn(
-                "text-sm font-medium transition-colors",
-                currentCategory === 'perfumes'
-                  ? "text-oud-gold border-b-2 border-oud-gold pb-1"
-                  : "hover:text-oud-gold"
-              )}
+              className="text-sm font-medium transition-colors hover:text-oud-gold"
             >
               Perfumes
             </Link>
             <Link
               href="/products?category=oud"
-              className={cn(
-                "text-sm font-medium transition-colors",
-                currentCategory === 'oud'
-                  ? "text-oud-gold border-b-2 border-oud-gold pb-1"
-                  : "hover:text-oud-gold"
-              )}
+              className="text-sm font-medium transition-colors hover:text-oud-gold"
             >
               Oud
             </Link>
             <Link
               href="/products?category=attars"
-              className={cn(
-                "text-sm font-medium transition-colors",
-                currentCategory === 'attars'
-                  ? "text-oud-gold border-b-2 border-oud-gold pb-1"
-                  : "hover:text-oud-gold"
-              )}
+              className="text-sm font-medium transition-colors hover:text-oud-gold"
             >
               Attars
             </Link>
             <Link
               href="/products?category=bakhoor"
-              className={cn(
-                "text-sm font-medium transition-colors",
-                currentCategory === 'bakhoor'
-                  ? "text-oud-gold border-b-2 border-oud-gold pb-1"
-                  : "hover:text-oud-gold"
-              )}
+              className="text-sm font-medium transition-colors hover:text-oud-gold"
             >
               Bakhoor
             </Link>
           </nav>
 
           {/* Search Bar */}
-          <div className="hidden md:flex flex-1 max-w-md relative">
-            <Input
-              type="search"
-              placeholder="Search fragrances..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-10"
-            />
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <div className="hidden md:flex flex-1 max-w-md">
+            {/* <SearchBar /> */}
           </div>
 
           {/* Actions */}
           <div className="flex items-center gap-2">
+            {/* Coins Widget */}
+            {/* <CoinsWidget /> */}
+
             {/* Wishlist */}
             <Button variant="ghost" size="icon" asChild>
               <Link href="/wishlist">
@@ -150,9 +126,9 @@ export function Header() {
             <Button variant="ghost" size="icon" asChild className="relative">
               <Link href="/cart">
                 <ShoppingCart className="h-5 w-5" />
-                {cart && cart.summary && cart.summary.itemCount > 0 && (
+                {itemCount > 0 && (
                   <Badge className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 text-xs bg-oud-gold">
-                    {cart.summary.itemCount}
+                    {itemCount}
                   </Badge>
                 )}
               </Link>
@@ -213,16 +189,7 @@ export function Header() {
 
         {/* Mobile Search */}
         <div className="md:hidden mt-4">
-          <div className="relative">
-            <Input
-              type="search"
-              placeholder="Search fragrances..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-10"
-            />
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-          </div>
+          {/* <SearchBar /> */}
         </div>
       </div>
     </header>

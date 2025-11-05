@@ -58,6 +58,13 @@ const createProductSchema = z.object({
   sillage: z.string().optional(),
   season: z.string().optional(),
 
+  // Classification (Phase 2)
+  productType: z.string().optional(),
+  region: z.string().optional(),
+  occasion: z.string().optional(),
+  oudType: z.string().optional(),
+  collection: z.string().optional(),
+
   // Advanced
   enableWhatsapp: z.boolean().optional(),
   whatsappNumber: z.string().optional(),
@@ -105,6 +112,11 @@ export default function NewProductPage() {
       longevity: "",
       sillage: "",
       season: "",
+      productType: "",
+      region: "",
+      occasion: "",
+      oudType: "",
+      collection: "",
       enableWhatsapp: false,
       whatsappNumber: "",
       coinsToAward: 0,
@@ -181,12 +193,13 @@ export default function NewProductPage() {
             {/* Main Content */}
             <div className="lg:col-span-2">
               <Tabs value={activeTab} onValueChange={setActiveTab}>
-                <TabsList className="grid w-full grid-cols-6">
+                <TabsList className="grid w-full grid-cols-7">
                   <TabsTrigger value="basic">Basic</TabsTrigger>
                   <TabsTrigger value="media">Media</TabsTrigger>
                   <TabsTrigger value="pricing">Pricing</TabsTrigger>
                   <TabsTrigger value="scent">Scent</TabsTrigger>
                   <TabsTrigger value="specs">Specs</TabsTrigger>
+                  <TabsTrigger value="classification">Class</TabsTrigger>
                   <TabsTrigger value="advanced">Advanced</TabsTrigger>
                 </TabsList>
 
@@ -797,7 +810,167 @@ export default function NewProductPage() {
                   </Card>
                 </TabsContent>
 
-                {/* Tab 6: Advanced */}
+                {/* Tab 6: Classification (Phase 2) */}
+                <TabsContent value="classification">
+                  <Card>
+                    <CardHeader>
+                      <CardTitle>Product Classification</CardTitle>
+                      <CardDescription>
+                        Classify your product for better discoverability by customers
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-6">
+                      {/* Product Type */}
+                      <FormField
+                        control={form.control}
+                        name="productType"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Product Type</FormLabel>
+                            <Select onValueChange={field.onChange} value={field.value}>
+                              <FormControl>
+                                <SelectTrigger>
+                                  <SelectValue placeholder="Select product type" />
+                                </SelectTrigger>
+                              </FormControl>
+                              <SelectContent>
+                                <SelectItem value="ORIGINAL">Original</SelectItem>
+                                <SelectItem value="CLONE">Clone</SelectItem>
+                                <SelectItem value="SIMILAR_DNA">Similar DNA</SelectItem>
+                                <SelectItem value="NICHE">Niche</SelectItem>
+                                <SelectItem value="ATTAR">Attar</SelectItem>
+                                <SelectItem value="BODY_SPRAY">Body Spray</SelectItem>
+                              </SelectContent>
+                            </Select>
+                            <FormDescription>
+                              What type of fragrance is this?
+                            </FormDescription>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+
+                      {/* Region */}
+                      <FormField
+                        control={form.control}
+                        name="region"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Origin Region</FormLabel>
+                            <Select onValueChange={field.onChange} value={field.value}>
+                              <FormControl>
+                                <SelectTrigger>
+                                  <SelectValue placeholder="Select region" />
+                                </SelectTrigger>
+                              </FormControl>
+                              <SelectContent>
+                                <SelectItem value="UAE">UAE</SelectItem>
+                                <SelectItem value="SAUDI">Saudi Arabia</SelectItem>
+                                <SelectItem value="KUWAIT">Kuwait</SelectItem>
+                                <SelectItem value="QATAR">Qatar</SelectItem>
+                                <SelectItem value="OMAN">Oman</SelectItem>
+                                <SelectItem value="BAHRAIN">Bahrain</SelectItem>
+                                <SelectItem value="FRANCE">France</SelectItem>
+                                <SelectItem value="ITALY">Italy</SelectItem>
+                                <SelectItem value="UK">United Kingdom</SelectItem>
+                                <SelectItem value="USA">United States</SelectItem>
+                                <SelectItem value="INDIA">India</SelectItem>
+                                <SelectItem value="THAILAND">Thailand</SelectItem>
+                              </SelectContent>
+                            </Select>
+                            <FormDescription>
+                              Where is this fragrance from?
+                            </FormDescription>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+
+                      {/* Occasion */}
+                      <FormField
+                        control={form.control}
+                        name="occasion"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Suitable Occasions</FormLabel>
+                            <FormControl>
+                              <Input
+                                placeholder="e.g., OFFICE,DAILY,PARTY,WEDDING,RAMADAN,EID"
+                                {...field}
+                              />
+                            </FormControl>
+                            <FormDescription>
+                              Comma-separated list of occasions (OFFICE, DAILY, PARTY, WEDDING, RAMADAN, EID)
+                            </FormDescription>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+
+                      {/* Oud Type (if applicable) */}
+                      <FormField
+                        control={form.control}
+                        name="oudType"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Oud Type (if applicable)</FormLabel>
+                            <Select onValueChange={field.onChange} value={field.value}>
+                              <FormControl>
+                                <SelectTrigger>
+                                  <SelectValue placeholder="Select oud type" />
+                                </SelectTrigger>
+                              </FormControl>
+                              <SelectContent>
+                                <SelectItem value="CAMBODIAN">Cambodian Oud</SelectItem>
+                                <SelectItem value="INDIAN">Indian Oud</SelectItem>
+                                <SelectItem value="THAI">Thai Oud</SelectItem>
+                                <SelectItem value="MALAYSIAN">Malaysian Oud</SelectItem>
+                                <SelectItem value="LAOTIAN">Laotian Oud</SelectItem>
+                                <SelectItem value="MUKHALLAT">Mukhallat</SelectItem>
+                              </SelectContent>
+                            </Select>
+                            <FormDescription>
+                              Leave empty if product doesn't contain oud
+                            </FormDescription>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+
+                      {/* Collection */}
+                      <FormField
+                        control={form.control}
+                        name="collection"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Collection</FormLabel>
+                            <Select onValueChange={field.onChange} value={field.value}>
+                              <FormControl>
+                                <SelectTrigger>
+                                  <SelectValue placeholder="Select collection" />
+                                </SelectTrigger>
+                              </FormControl>
+                              <SelectContent>
+                                <SelectItem value="RAMADAN">Ramadan Collection</SelectItem>
+                                <SelectItem value="SIGNATURE">Signature Collection</SelectItem>
+                                <SelectItem value="CELEBRITY">Celebrity Collection</SelectItem>
+                                <SelectItem value="MOST_LOVED">Most Loved</SelectItem>
+                                <SelectItem value="TRENDING">Trending Now</SelectItem>
+                                <SelectItem value="EXCLUSIVE">Exclusive</SelectItem>
+                              </SelectContent>
+                            </Select>
+                            <FormDescription>
+                              Which special collection does this belong to?
+                            </FormDescription>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </CardContent>
+                  </Card>
+                </TabsContent>
+
+                {/* Tab 7: Advanced */}
                 <TabsContent value="advanced">
                   <Card>
                     <CardHeader>

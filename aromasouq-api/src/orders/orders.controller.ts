@@ -8,9 +8,11 @@ import {
   Query,
   UseGuards,
   Req,
+  Res,
 } from '@nestjs/common';
-import type { Request } from 'express';
+import type { Request, Response } from 'express';
 import { OrdersService } from './orders.service';
+// import { InvoiceService } from './invoice.service';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { UpdateOrderStatusDto } from './dto/update-order-status.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
@@ -21,7 +23,10 @@ import { UserRole, OrderStatus } from '@prisma/client';
 @Controller('orders')
 @UseGuards(JwtAuthGuard)
 export class OrdersController {
-  constructor(private readonly ordersService: OrdersService) {}
+  constructor(
+    private readonly ordersService: OrdersService,
+    // private readonly invoiceService: InvoiceService,
+  ) {}
 
   @Get()
   findAll(
@@ -65,4 +70,29 @@ export class OrdersController {
     const userId = req.user!['sub'];
     return this.ordersService.cancel(userId, id);
   }
+
+  // Temporarily commented out until pdfkit is installed
+  // @Get(':id/invoice')
+  // async downloadInvoice(
+  //   @Req() req: Request,
+  //   @Param('id') orderId: string,
+  //   @Res() res: Response,
+  // ) {
+  //   const userId = req.user!['sub'];
+
+  //   // Get order with full details
+  //   const order = await this.ordersService.findOne(userId, orderId);
+
+  //   // Generate PDF
+  //   const pdfBuffer = await this.invoiceService.generateInvoicePDF(order);
+
+  //   // Set headers for PDF download
+  //   res.set({
+  //     'Content-Type': 'application/pdf',
+  //     'Content-Disposition': `attachment; filename=invoice-${order.orderNumber}.pdf`,
+  //     'Content-Length': pdfBuffer.length,
+  //   });
+
+  //   res.end(pdfBuffer);
+  // }
 }

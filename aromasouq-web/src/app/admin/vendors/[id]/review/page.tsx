@@ -76,7 +76,7 @@ export default function VendorReviewPage() {
           <h1 className="text-3xl font-heading font-bold text-deep-navy">
             Review Vendor Application
           </h1>
-          <p className="text-gray-600 mt-1">{vendor.businessName || `${vendor.firstName} ${vendor.lastName}`}</p>
+          <p className="text-gray-600 mt-1">{vendor.businessName || `${vendor.user?.firstName} ${vendor.user?.lastName}`}</p>
         </div>
         {vendor.status === 'PENDING' && (
           <div className="flex gap-2">
@@ -115,20 +115,32 @@ export default function VendorReviewPage() {
                   <p className="font-medium mt-1">{vendor.businessName || 'N/A'}</p>
                 </div>
                 <div>
-                  <Label className="text-muted-foreground">Business License</Label>
-                  <p className="font-medium mt-1">{vendor.businessLicense || 'N/A'}</p>
+                  <Label className="text-muted-foreground">Business Email</Label>
+                  <p className="font-medium mt-1">{vendor.businessEmail || 'N/A'}</p>
+                </div>
+                <div>
+                  <Label className="text-muted-foreground">Business Phone</Label>
+                  <p className="font-medium mt-1">{vendor.businessPhone || 'N/A'}</p>
+                </div>
+                <div>
+                  <Label className="text-muted-foreground">Trade License</Label>
+                  <p className="font-medium mt-1">{vendor.tradeLicense || 'N/A'}</p>
+                </div>
+                <div>
+                  <Label className="text-muted-foreground">Tax Number</Label>
+                  <p className="font-medium mt-1">{vendor.taxNumber || 'N/A'}</p>
                 </div>
                 <div>
                   <Label className="text-muted-foreground">Contact Person</Label>
-                  <p className="font-medium mt-1">{vendor.firstName} {vendor.lastName}</p>
+                  <p className="font-medium mt-1">{vendor.user?.firstName} {vendor.user?.lastName}</p>
                 </div>
                 <div>
                   <Label className="text-muted-foreground">Email</Label>
-                  <p className="font-medium mt-1">{vendor.email}</p>
+                  <p className="font-medium mt-1">{vendor.user?.email}</p>
                 </div>
                 <div>
                   <Label className="text-muted-foreground">Phone</Label>
-                  <p className="font-medium mt-1">{vendor.phone || 'N/A'}</p>
+                  <p className="font-medium mt-1">{vendor.user?.phone || 'N/A'}</p>
                 </div>
               </div>
             </CardContent>

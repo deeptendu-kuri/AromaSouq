@@ -14,8 +14,8 @@ export const FREE_SHIPPING_THRESHOLD = 300 // AED
 export const TAX_RATE = 0.05 // 5% VAT
 
 // Coins
-export const COINS_VALUE = 0.10 // 1 coin = 0.10 AED
-export const COINS_EARN_RATE = 0.01 // 1% of order value
+export const COINS_VALUE = 1.0 // 1 coin = 1 AED (FIXED in Phase 0)
+export const COINS_EARN_RATE = 0.10 // 10% of order value as coins
 export const COINS_MAX_REDEMPTION = 0.50 // Max 50% of subtotal
 export const COINS_PER_REVIEW = 20
 

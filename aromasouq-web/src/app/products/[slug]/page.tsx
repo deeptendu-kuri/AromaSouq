@@ -14,12 +14,17 @@ import { useProduct } from "@/hooks/useProducts"
 import { useCart } from "@/hooks/useCart"
 import { useWishlist } from "@/hooks/useWishlist"
 import { formatCurrency, calculateDiscount } from "@/lib/utils"
+import { ReviewStats } from "@/components/reviews/ReviewStats"
+import { ReviewList } from "@/components/reviews/ReviewList"
+import { useReviewStats } from "@/hooks/useReviews"
+import Link from "next/link"
 
 export default function ProductDetailPage() {
   const params = useParams()
   const { data: product, isLoading } = useProduct(params.slug as string)
   const { addToCart } = useCart()
   const { toggleWishlist, isWishlisted } = useWishlist()
+  const { data: reviewStats } = useReviewStats(product?.id || '')
 
   const [selectedImage, setSelectedImage] = useState(0)
   const [selectedVariant, setSelectedVariant] = useState<string | null>(null)
@@ -253,7 +258,19 @@ export default function ProductDetailPage() {
           </TabsContent>
 
           <TabsContent value="reviews" className="mt-6 space-y-6">
-            <p>Reviews section - Coming soon</p>
+            {/* Write Review Button */}
+            <div className="flex justify-between items-center">
+              <h2 className="text-2xl font-bold">Customer Reviews</h2>
+              <Link href={`/products/${params.slug}/write-review`}>
+                <Button variant="primary">Write a Review</Button>
+              </Link>
+            </div>
+
+            {/* Review Stats */}
+            {reviewStats && <ReviewStats stats={reviewStats} />}
+
+            {/* Review List */}
+            <ReviewList productId={product.id} />
           </TabsContent>
 
           <TabsContent value="shipping" className="mt-6">

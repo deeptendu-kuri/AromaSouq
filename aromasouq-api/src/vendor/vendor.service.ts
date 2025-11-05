@@ -16,8 +16,9 @@ export class VendorService {
   constructor(private readonly prisma: PrismaService) {}
 
   /**
-   * Create vendor profile for a user
+   * Create vendor profile for a user (or update if exists)
    * Called after user registration with role=VENDOR
+   * Uses upsert logic to handle multi-step registration
    */
   async create(userId: string, createVendorDto: CreateVendorDto) {
     // Check if user exists and has VENDOR role
@@ -34,11 +35,42 @@ export class VendorService {
       throw new ForbiddenException('User must have VENDOR role');
     }
 
+    // If vendor profile already exists, update it instead of throwing error
     if (user.vendorProfile) {
-      throw new ConflictException('Vendor profile already exists for this user');
+      return this.prisma.vendor.update({
+        where: { userId },
+        data: {
+          businessName: createVendorDto.businessName,
+          businessEmail: createVendorDto.businessEmail,
+          businessPhone: createVendorDto.businessPhone,
+          businessNameAr: createVendorDto.businessNameAr,
+          description: createVendorDto.description,
+          descriptionAr: createVendorDto.descriptionAr,
+          tradeLicense: createVendorDto.tradeLicense,
+          taxNumber: createVendorDto.taxNumber,
+          website: createVendorDto.website,
+          instagramUrl: createVendorDto.instagramUrl,
+          facebookUrl: createVendorDto.facebookUrl,
+          twitterUrl: createVendorDto.twitterUrl,
+          whatsappNumber: createVendorDto.whatsappNumber,
+          // Keep existing status if profile is being updated
+        },
+        include: {
+          user: {
+            select: {
+              id: true,
+              email: true,
+              firstName: true,
+              lastName: true,
+              phone: true,
+              role: true,
+            },
+          },
+        },
+      });
     }
 
-    // Create vendor profile
+    // Create new vendor profile
     const vendor = await this.prisma.vendor.create({
       data: {
         userId,
@@ -251,9 +283,62 @@ export class VendorService {
       createdAt: order.createdAt,
     }));
 
+    // Calculate sales growth (current month vs previous month)
+    // Get start of current month
+    const currentMonthStart = new Date();
+    currentMonthStart.setDate(1);
+    currentMonthStart.setHours(0, 0, 0, 0);
+
+    // Calculate current month sales
+    const currentMonthOrders = orders.filter(
+      (order) =>
+        order.createdAt >= currentMonthStart &&
+        order.orderStatus !== OrderStatus.CANCELLED,
+    );
+    const currentMonthSales = currentMonthOrders.reduce((sum, order) => {
+      const vendorItemsTotal = order.items.reduce(
+        (itemSum, item) => itemSum + item.price * item.quantity,
+        0,
+      );
+      return sum + vendorItemsTotal;
+    }, 0);
+
+    // Get start of previous month
+    const previousMonthStart = new Date();
+    previousMonthStart.setMonth(previousMonthStart.getMonth() - 1);
+    previousMonthStart.setDate(1);
+    previousMonthStart.setHours(0, 0, 0, 0);
+
+    // Get end of previous month (1 second before current month start)
+    const previousMonthEnd = new Date(currentMonthStart);
+    previousMonthEnd.setSeconds(previousMonthEnd.getSeconds() - 1);
+
+    // Calculate previous month sales
+    const previousMonthOrders = orders.filter(
+      (order) =>
+        order.createdAt >= previousMonthStart &&
+        order.createdAt <= previousMonthEnd &&
+        order.orderStatus !== OrderStatus.CANCELLED,
+    );
+    const previousMonthSales = previousMonthOrders.reduce((sum, order) => {
+      const vendorItemsTotal = order.items.reduce(
+        (itemSum, item) => itemSum + item.price * item.quantity,
+        0,
+      );
+      return sum + vendorItemsTotal;
+    }, 0);
+
+    // Calculate growth percentage
+    let salesGrowth = 0;
+    if (previousMonthSales > 0) {
+      salesGrowth =
+        ((currentMonthSales - previousMonthSales) / previousMonthSales) * 100;
+      salesGrowth = Math.round(salesGrowth * 100) / 100; // Round to 2 decimals
+    }
+
     return {
-      totalSales,
-      salesGrowth: 0, // TODO: Calculate vs last month
+      totalSales: currentMonthSales, // Current month sales
+      salesGrowth: salesGrowth, // Percentage growth
       productCount: totalProducts,
       activeProducts,
       orderCount: totalOrders,

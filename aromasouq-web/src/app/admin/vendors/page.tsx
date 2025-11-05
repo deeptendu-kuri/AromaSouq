@@ -40,6 +40,9 @@ export default function VendorsPage() {
     status: activeTab === 'ALL' ? undefined : activeTab as any,
   })
 
+  // Debug: Log vendors data
+  console.log('Vendors data:', vendors, 'isLoading:', isLoading)
+
   const handleApprove = (vendorId: string) => {
     if (confirm('Are you sure you want to approve this vendor?')) {
       approve(vendorId)
@@ -74,10 +77,11 @@ export default function VendorsPage() {
     }
   }
 
-  const pendingCount = vendors.filter((v: any) => v.status === 'PENDING').length
-  const approvedCount = vendors.filter((v: any) => v.status === 'APPROVED').length
-  const rejectedCount = vendors.filter((v: any) => v.status === 'REJECTED').length
-  const suspendedCount = vendors.filter((v: any) => v.status === 'SUSPENDED').length
+  const vendorsArray = Array.isArray(vendors) ? vendors : []
+  const pendingCount = vendorsArray.filter((v: any) => v.status === 'PENDING').length
+  const approvedCount = vendorsArray.filter((v: any) => v.status === 'APPROVED').length
+  const rejectedCount = vendorsArray.filter((v: any) => v.status === 'REJECTED').length
+  const suspendedCount = vendorsArray.filter((v: any) => v.status === 'SUSPENDED').length
 
   return (
     <div className="space-y-6">
@@ -117,12 +121,12 @@ export default function VendorsPage() {
         <TabsContent value={activeTab} className="mt-6">
           <Card>
             <CardHeader>
-              <CardTitle>Vendors ({vendors.length})</CardTitle>
+              <CardTitle>Vendors ({vendorsArray.length})</CardTitle>
             </CardHeader>
             <CardContent>
               {isLoading ? (
                 <div className="flex items-center justify-center py-8">Loading...</div>
-              ) : vendors.length === 0 ? (
+              ) : vendorsArray.length === 0 ? (
                 <div className="flex flex-col items-center justify-center py-12 text-center">
                   <p className="text-muted-foreground">No vendors found</p>
                 </div>
@@ -139,11 +143,11 @@ export default function VendorsPage() {
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {vendors.map((vendor: any) => (
+                      {vendorsArray.map((vendor: any) => (
                         <TableRow key={vendor.id}>
                           <TableCell>
                             <div>
-                              <p className="font-medium">{vendor.businessName || `${vendor.firstName} ${vendor.lastName}`}</p>
+                              <p className="font-medium">{vendor.businessName || `${vendor.user?.firstName} ${vendor.user?.lastName}`}</p>
                               {vendor.businessLicense && (
                                 <p className="text-xs text-muted-foreground">
                                   License: {vendor.businessLicense}
@@ -153,13 +157,13 @@ export default function VendorsPage() {
                           </TableCell>
                           <TableCell>
                             <div>
-                              <p className="text-sm">{vendor.firstName} {vendor.lastName}</p>
-                              <p className="text-xs text-muted-foreground">{vendor.email}</p>
+                              <p className="text-sm">{vendor.user?.firstName} {vendor.user?.lastName}</p>
+                              <p className="text-xs text-muted-foreground">{vendor.user?.email}</p>
                             </div>
                           </TableCell>
                           <TableCell>{getStatusBadge(vendor.status)}</TableCell>
                           <TableCell className="text-muted-foreground">
-                            {formatDate(vendor.appliedAt)}
+                            {formatDate(vendor.createdAt)}
                           </TableCell>
                           <TableCell className="text-right">
                             <div className="flex items-center justify-end gap-2">

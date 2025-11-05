@@ -22,14 +22,19 @@ import { Roles } from '../auth/decorators/roles.decorator';
 import { UserRole } from '@prisma/client';
 
 @Controller('reviews')
-@UseGuards(JwtAuthGuard)
 export class ReviewsController {
   constructor(private readonly reviewsService: ReviewsService) {}
 
   @Post()
+  @UseGuards(JwtAuthGuard)
   create(@Req() req: Request, @Body() createReviewDto: CreateReviewDto) {
     const userId = req.user!['sub'];
     return this.reviewsService.create(userId, createReviewDto);
+  }
+
+  @Get('stats/:productId')
+  getStats(@Param('productId') productId: string) {
+    return this.reviewsService.getStats(productId);
   }
 
   @Get()
@@ -53,6 +58,7 @@ export class ReviewsController {
   }
 
   @Patch(':id')
+  @UseGuards(JwtAuthGuard)
   update(
     @Req() req: Request,
     @Param('id') id: string,
@@ -63,12 +69,14 @@ export class ReviewsController {
   }
 
   @Delete(':id')
+  @UseGuards(JwtAuthGuard)
   remove(@Req() req: Request, @Param('id') id: string) {
     const userId = req.user!['sub'];
     return this.reviewsService.remove(userId, id);
   }
 
   @Post(':id/vote')
+  @UseGuards(JwtAuthGuard)
   vote(
     @Req() req: Request,
     @Param('id') id: string,

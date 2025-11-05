@@ -10,8 +10,9 @@ import { formatCurrency } from '@/lib/utils'
 import { format } from 'date-fns'
 import Link from 'next/link'
 import Image from 'next/image'
-import { Package, ArrowLeft, MapPin, CreditCard, Truck } from 'lucide-react'
+import { Package, ArrowLeft, MapPin, CreditCard, Truck, Download } from 'lucide-react'
 import toast from 'react-hot-toast'
+import { OrderTimeline } from '@/components/orders/OrderTimeline'
 
 const statusConfig = {
   PENDING: { label: 'Pending', color: 'bg-yellow-100 text-yellow-800' },
@@ -38,6 +39,30 @@ export default function OrderDetailPage() {
       } catch (error) {
         toast.error('Failed to cancel order')
       }
+    }
+  }
+
+  const handleDownloadInvoice = async () => {
+    try {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/orders/${orderId}/invoice`, {
+        credentials: 'include',
+      })
+
+      if (!res.ok) throw new Error('Failed to download invoice')
+
+      const blob = await res.blob()
+      const url = window.URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = `invoice-${order.orderNumber}.pdf`
+      document.body.appendChild(a)
+      a.click()
+      window.URL.revokeObjectURL(url)
+      document.body.removeChild(a)
+
+      toast.success('Invoice downloaded')
+    } catch (error) {
+      toast.error('Failed to download invoice')
     }
   }
 
@@ -207,20 +232,36 @@ export default function OrderDetailPage() {
             </CardContent>
           </Card>
 
-          {/* Tracking Information */}
-          {order.trackingNumber && (order.orderStatus === 'SHIPPED' || order.orderStatus === 'DELIVERED') && (
+          {/* Order Tracking Timeline */}
+          {order.orderStatus !== 'CANCELLED' && (
             <Card>
               <CardHeader>
                 <div className="flex items-center gap-2">
                   <Truck className="w-5 h-5" />
-                  <CardTitle>Tracking Information</CardTitle>
+                  <CardTitle>Order Tracking</CardTitle>
                 </div>
               </CardHeader>
               <CardContent>
-                <p className="text-sm text-muted-foreground">Tracking Number</p>
-                <p className="font-mono font-semibold text-lg">{order.trackingNumber}</p>
+                <OrderTimeline
+                  currentStatus={order.orderStatus}
+                  trackingNumber={order.trackingNumber}
+                  createdAt={order.createdAt}
+                  updatedAt={order.updatedAt}
+                />
               </CardContent>
             </Card>
+          )}
+
+          {/* Download Invoice Button */}
+          {order.orderStatus !== 'PENDING' && order.orderStatus !== 'CANCELLED' && (
+            <Button
+              variant="outline"
+              className="w-full flex items-center justify-center gap-2"
+              onClick={handleDownloadInvoice}
+            >
+              <Download className="w-4 h-4" />
+              Download Invoice
+            </Button>
           )}
 
           {/* Actions */}

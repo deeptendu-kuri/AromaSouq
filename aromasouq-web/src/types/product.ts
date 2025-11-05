@@ -67,10 +67,16 @@ export interface ProductVariant {
   id: string
   productId: string
   name: string
+  nameAr?: string
   sku: string
   price: number
-  stockQuantity: number
+  stock: number
+  image?: string
+  compareAtPrice?: number
   isActive: boolean
+  sortOrder: number
+  createdAt?: string
+  updatedAt?: string
 }
 
 export interface ScentProfile {

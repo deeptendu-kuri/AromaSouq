@@ -1,33 +1,42 @@
 export interface Review {
-  id: string
-  productId: string
-  userId: string
-  orderId?: string
-  rating: number
-  title?: string
-  comment: string
-  images: ReviewImage[]
-  isVerifiedPurchase: boolean
-  helpfulCount: number
-  notHelpfulCount: number
-  vendorReply?: {
-    text: string
-    repliedAt: Date
-  }
-  status: 'published' | 'hidden' | 'flagged'
-  createdAt: Date
-
-  // Relations
-  user?: {
-    firstName: string
-    lastName: string
-    avatar?: string
-  }
+  id: string;
+  userId: string;
+  productId: string;
+  rating: number;
+  title?: string;
+  comment?: string;
+  images: string[];
+  reviewImages?: ReviewImage[];
+  vendorReply?: string;
+  vendorRepliedAt?: string;
+  helpfulCount: number;
+  notHelpfulCount: number;
+  isVerifiedPurchase: boolean;
+  isPublished: boolean;
+  createdAt: string;
+  updatedAt: string;
+  user: {
+    id: string;
+    firstName: string;
+    lastName: string;
+    avatar?: string;
+  };
 }
 
 export interface ReviewImage {
-  id: string
-  reviewId: string
-  url: string
-  position: number
+  id: string;
+  url: string;
+  sortOrder: number;
+}
+
+export interface ReviewStats {
+  averageRating: number;
+  totalReviews: number;
+  ratingDistribution: {
+    1: number;
+    2: number;
+    3: number;
+    4: number;
+    5: number;
+  };
 }

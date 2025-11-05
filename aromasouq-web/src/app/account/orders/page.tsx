@@ -9,7 +9,8 @@ import { formatCurrency } from '@/lib/utils'
 import { format } from 'date-fns'
 import Link from 'next/link'
 import Image from 'next/image'
-import { Package, Clock, CheckCircle, XCircle, Truck } from 'lucide-react'
+import { Package, Clock, CheckCircle, XCircle, Truck, Download } from 'lucide-react'
+import toast from 'react-hot-toast'
 
 const statusConfig = {
   PENDING: { label: 'Pending', icon: Clock, color: 'bg-yellow-100 text-yellow-800' },
@@ -23,6 +24,30 @@ const statusConfig = {
 export default function OrdersPage() {
   const [page, setPage] = useState(1)
   const { data, isLoading } = useOrders(page, 10)
+
+  const handleDownloadInvoice = async (orderNumber: string, orderId: string) => {
+    try {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/orders/${orderId}/invoice`, {
+        credentials: 'include',
+      })
+
+      if (!res.ok) throw new Error('Failed to download invoice')
+
+      const blob = await res.blob()
+      const url = window.URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = `invoice-${orderNumber}.pdf`
+      document.body.appendChild(a)
+      a.click()
+      window.URL.revokeObjectURL(url)
+      document.body.removeChild(a)
+
+      toast.success('Invoice downloaded')
+    } catch (error) {
+      toast.error('Failed to download invoice')
+    }
+  }
 
   if (isLoading) {
     return (
@@ -129,6 +154,19 @@ export default function OrdersPage() {
                     <Button variant="outline" size="sm" asChild className="flex-1">
                       <Link href={`/orders/${order.id}`}>View Details</Link>
                     </Button>
+                    {order.orderStatus !== 'PENDING' && order.orderStatus !== 'CANCELLED' && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={(e) => {
+                          e.preventDefault()
+                          handleDownloadInvoice(order.orderNumber, order.id)
+                        }}
+                        title="Download Invoice"
+                      >
+                        <Download className="w-4 h-4" />
+                      </Button>
+                    )}
                     {order.orderStatus === 'PENDING' && (
                       <Button variant="destructive" size="sm" className="flex-1">
                         Cancel Order

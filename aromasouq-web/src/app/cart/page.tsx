@@ -3,7 +3,7 @@
 import { useState } from "react"
 import Link from "next/link"
 import Image from "next/image"
-import { Trash2, Plus, Minus, ShoppingBag, ArrowLeft } from "lucide-react"
+import { Trash2, Plus, Minus, ShoppingBag, ArrowLeft, Tag, X, Check } from "lucide-react"
 import { motion, AnimatePresence } from "framer-motion"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -12,10 +12,71 @@ import { Input } from "@/components/ui/input"
 import { useCart } from "@/hooks/useCart"
 import { formatCurrency } from "@/lib/utils"
 import toast from "react-hot-toast"
+import { useMutation } from "@tanstack/react-query"
+import { apiClient } from "@/lib/api-client"
+import { useRouter } from "next/navigation"
 
 export default function CartPage() {
+  const router = useRouter()
   const { cart, updateCartItem, removeFromCart, isLoading } = useCart()
   const [promoCode, setPromoCode] = useState("")
+  const [appliedCoupon, setAppliedCoupon] = useState<any>(null)
+  const [couponError, setCouponError] = useState("")
+
+  // Validate coupon mutation
+  const validateCoupon = useMutation({
+    mutationFn: async (code: string) => {
+      const subtotal = cart?.summary?.subtotal || 0
+      const res = await apiClient.post('/coupons/validate', {
+        code: code.toUpperCase(),
+        orderAmount: subtotal,
+      })
+      return res
+    },
+    onSuccess: (data) => {
+      setAppliedCoupon(data)
+      setCouponError('')
+      setPromoCode('')
+      toast.success(`Coupon "${data.coupon.code}" applied successfully!`)
+    },
+    onError: (error: any) => {
+      setCouponError(
+        error.response?.data?.message || 'Invalid or expired coupon code'
+      )
+      setAppliedCoupon(null)
+      toast.error(error.response?.data?.message || 'Invalid coupon code')
+    },
+  })
+
+  const handleApplyCoupon = () => {
+    if (!promoCode.trim()) {
+      setCouponError('Please enter a coupon code')
+      return
+    }
+    setCouponError('')
+    validateCoupon.mutate(promoCode.trim())
+  }
+
+  const handleRemoveCoupon = () => {
+    setAppliedCoupon(null)
+    setPromoCode('')
+    setCouponError('')
+    toast.success('Coupon removed')
+  }
+
+  const handleProceedToCheckout = () => {
+    if (appliedCoupon) {
+      sessionStorage.setItem('appliedCoupon', JSON.stringify(appliedCoupon))
+    }
+    router.push('/checkout')
+  }
+
+  // Calculate totals with discount
+  const subtotal = cart?.summary?.subtotal || 0
+  const discount = appliedCoupon?.discountAmount || 0
+  const shipping = cart?.summary?.shipping || 0
+  const tax = cart?.summary?.tax || 0
+  const total = subtotal - discount + shipping + tax
 
   if (isLoading) {
     return (
@@ -224,31 +285,41 @@ export default function CartPage() {
                 <div className="flex justify-between text-sm">
                   <span className="text-muted-foreground">Subtotal:</span>
                   <span className="font-semibold">
-                    {formatCurrency(cart.summary?.subtotal || 0)}
+                    {formatCurrency(subtotal)}
                   </span>
                 </div>
+
+                {/* Discount */}
+                {discount > 0 && (
+                  <div className="flex justify-between text-sm">
+                    <span className="text-green-600 font-medium">Discount:</span>
+                    <span className="font-semibold text-green-600">
+                      - {formatCurrency(discount)}
+                    </span>
+                  </div>
+                )}
 
                 <div className="flex justify-between text-sm">
                   <span className="text-muted-foreground">Shipping:</span>
                   <span className="font-semibold">
-                    {(cart.summary?.shipping || 0) === 0 ? (
+                    {shipping === 0 ? (
                       <span className="text-green-600">FREE ✓</span>
                     ) : (
-                      formatCurrency(cart.summary?.shipping || 0)
+                      formatCurrency(shipping)
                     )}
                   </span>
                 </div>
 
-                {(cart.summary?.subtotal || 0) < 300 && (
+                {subtotal < 300 && (
                   <p className="text-xs text-muted-foreground">
-                    Add {formatCurrency(300 - (cart.summary?.subtotal || 0))} more for free shipping
+                    Add {formatCurrency(300 - subtotal)} more for free shipping
                   </p>
                 )}
 
                 <div className="flex justify-between text-sm">
                   <span className="text-muted-foreground">Tax (5%):</span>
                   <span className="font-semibold">
-                    {formatCurrency(cart.summary?.tax || 0)}
+                    {formatCurrency(tax)}
                   </span>
                 </div>
               </div>
@@ -259,9 +330,18 @@ export default function CartPage() {
               <div className="flex justify-between items-baseline">
                 <span className="text-lg font-bold">Total:</span>
                 <span className="text-2xl font-bold text-oud-gold">
-                  {formatCurrency(cart.summary?.total || 0)}
+                  {formatCurrency(total)}
                 </span>
               </div>
+
+              {/* Savings Highlight */}
+              {discount > 0 && (
+                <div className="p-3 bg-green-50 rounded-lg border border-green-200">
+                  <p className="text-sm text-green-700 text-center font-medium">
+                    You're saving {formatCurrency(discount)}!
+                  </p>
+                </div>
+              )}
 
               {/* Coins Earning */}
               <div className="bg-gradient-to-r from-oud-gold/10 to-amber/10 p-3 rounded-lg">
@@ -275,24 +355,81 @@ export default function CartPage() {
 
               {/* Promo Code */}
               <div>
-                <label className="text-sm font-medium mb-2 block">Promo Code</label>
-                <div className="flex gap-2">
-                  <Input
-                    placeholder="Enter code"
-                    value={promoCode}
-                    onChange={(e) => setPromoCode(e.target.value)}
-                  />
-                  <Button variant="outline">Apply</Button>
-                </div>
+                <label className="text-sm font-medium mb-2 flex items-center gap-2">
+                  <Tag className="w-4 h-4" />
+                  Promo Code
+                </label>
+
+                {!appliedCoupon ? (
+                  <div className="space-y-2">
+                    <div className="flex gap-2">
+                      <Input
+                        placeholder="Enter code"
+                        value={promoCode}
+                        onChange={(e) => {
+                          setPromoCode(e.target.value.toUpperCase())
+                          setCouponError('')
+                        }}
+                        onKeyPress={(e) => {
+                          if (e.key === 'Enter') {
+                            handleApplyCoupon()
+                          }
+                        }}
+                        className="uppercase"
+                        disabled={validateCoupon.isPending}
+                      />
+                      <Button
+                        variant="outline"
+                        onClick={handleApplyCoupon}
+                        disabled={!promoCode.trim() || validateCoupon.isPending}
+                      >
+                        {validateCoupon.isPending ? 'Checking...' : 'Apply'}
+                      </Button>
+                    </div>
+
+                    {couponError && (
+                      <p className="text-xs text-red-600">{couponError}</p>
+                    )}
+                  </div>
+                ) : (
+                  <div className="p-3 bg-green-50 border border-green-200 rounded-lg">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <Check className="w-4 h-4 text-green-600" />
+                        <div>
+                          <p className="text-sm font-medium text-green-900">
+                            {appliedCoupon.coupon.code}
+                          </p>
+                          <p className="text-xs text-green-700">
+                            {appliedCoupon.coupon.discountType === 'PERCENTAGE'
+                              ? `${appliedCoupon.coupon.discountValue}% off`
+                              : `${formatCurrency(appliedCoupon.coupon.discountValue)} off`}
+                          </p>
+                        </div>
+                      </div>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={handleRemoveCoupon}
+                        className="text-green-600 hover:text-green-700 h-8 w-8"
+                      >
+                        <X className="w-4 h-4" />
+                      </Button>
+                    </div>
+                  </div>
+                )}
               </div>
 
               <Separator />
 
               {/* Checkout Button */}
-              <Button variant="primary" size="lg" className="w-full" asChild>
-                <Link href="/checkout">
-                  Proceed to Checkout
-                </Link>
+              <Button
+                variant="primary"
+                size="lg"
+                className="w-full"
+                onClick={handleProceedToCheckout}
+              >
+                Proceed to Checkout
               </Button>
 
               {/* Security Badge */}

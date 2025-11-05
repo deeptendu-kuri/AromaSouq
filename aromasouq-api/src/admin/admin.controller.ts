@@ -107,6 +107,11 @@ export class AdminController {
     });
   }
 
+  @Get('vendors/:id')
+  getVendorById(@Param('id') id: string) {
+    return this.adminService.getVendorById(id);
+  }
+
   @Patch('vendors/:id/status')
   updateVendorStatus(
     @Param('id') id: string,

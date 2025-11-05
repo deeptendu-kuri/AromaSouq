@@ -418,6 +418,36 @@ export class AdminService {
     };
   }
 
+  async getVendorById(vendorId: string) {
+    const vendor = await this.prisma.vendor.findUnique({
+      where: { id: vendorId },
+      include: {
+        user: {
+          select: {
+            id: true,
+            email: true,
+            firstName: true,
+            lastName: true,
+            phone: true,
+            status: true,
+            createdAt: true,
+          },
+        },
+        _count: {
+          select: {
+            products: true,
+          },
+        },
+      },
+    });
+
+    if (!vendor) {
+      throw new NotFoundException(`Vendor with ID ${vendorId} not found`);
+    }
+
+    return vendor;
+  }
+
   async updateVendorStatus(
     vendorId: string,
     updateVendorStatusDto: UpdateVendorStatusDto,

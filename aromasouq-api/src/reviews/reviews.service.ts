@@ -385,6 +385,49 @@ export class ReviewsService {
     return updatedReview;
   }
 
+  async getStats(productId: string) {
+    // Verify product exists
+    const product = await this.prisma.product.findUnique({
+      where: { id: productId },
+    });
+
+    if (!product) {
+      throw new NotFoundException(`Product with ID ${productId} not found`);
+    }
+
+    // Get all published reviews for this product
+    const reviews = await this.prisma.review.findMany({
+      where: {
+        productId,
+        isPublished: true,
+      },
+      select: {
+        rating: true,
+      },
+    });
+
+    const totalReviews = reviews.length;
+    const averageRating =
+      totalReviews > 0
+        ? reviews.reduce((sum, r) => sum + r.rating, 0) / totalReviews
+        : 0;
+
+    // Calculate rating distribution
+    const ratingDistribution = {
+      1: reviews.filter((r) => r.rating === 1).length,
+      2: reviews.filter((r) => r.rating === 2).length,
+      3: reviews.filter((r) => r.rating === 3).length,
+      4: reviews.filter((r) => r.rating === 4).length,
+      5: reviews.filter((r) => r.rating === 5).length,
+    };
+
+    return {
+      averageRating: Math.round(averageRating * 10) / 10,
+      totalReviews,
+      ratingDistribution,
+    };
+  }
+
   private async updateProductRating(productId: string) {
     // Calculate average rating from published reviews
     const reviews = await this.prisma.review.findMany({

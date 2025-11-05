@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { Search, Trash2, CheckCircle, Star } from 'lucide-react'
+import { Search, Trash2, CheckCircle, Star, Eye, EyeOff } from 'lucide-react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -30,13 +30,16 @@ export default function ReviewModerationPage() {
   const [reviewToDelete, setReviewToDelete] = useState<any | null>(null)
   const queryClient = useQueryClient()
 
-  const { data: reviews, isLoading } = useQuery<any[]>({
+  const { data, isLoading } = useQuery<any>({
     queryKey: ['admin-reviews', { search, flagged: activeTab === 'FLAGGED' }],
     queryFn: () => apiClient.get('/admin/reviews', {
       search: search || undefined,
       flagged: activeTab === 'FLAGGED' ? true : undefined
     }),
   })
+
+  // Extract reviews array from response - API returns { data: [...], meta: {...} }
+  const reviews = Array.isArray(data) ? data : (data?.data || [])
 
   const deleteReviewMutation = useMutation({
     mutationFn: (reviewId: string) => apiClient.delete(`/admin/reviews/${reviewId}`),
@@ -52,6 +55,14 @@ export default function ReviewModerationPage() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin-reviews'] })
       toast.success('Flag cleared')
+    },
+  })
+
+  const togglePublishMutation = useMutation({
+    mutationFn: (reviewId: string) => apiClient.patch(`/reviews/${reviewId}/publish`),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin-reviews'] })
+      toast.success('Review status updated')
     },
   })
 
@@ -115,19 +126,22 @@ export default function ReviewModerationPage() {
                             {review.flagged && (
                               <Badge variant="destructive">Flagged</Badge>
                             )}
+                            <Badge variant={review.isPublished ? 'default' : 'secondary'}>
+                              {review.isPublished ? 'Published' : 'Unpublished'}
+                            </Badge>
                           </div>
                           <Link
                             href={`/products/${review.product?.slug}`}
                             className="text-sm text-oud-gold hover:underline mb-2 block"
                           >
-                            {review.product?.nameEn}
+                            {review.product?.name}
                           </Link>
                           <p className="text-sm text-gray-700 mb-2">{review.comment}</p>
                           {review.images && review.images.length > 0 && (
                             <div className="flex gap-2 mb-2">
                               {review.images.map((img: any, idx: number) => (
                                 <div key={idx} className="relative w-20 h-20 rounded overflow-hidden">
-                                  <Image src={img.url} alt={`Review image ${idx + 1} for ${review.product?.nameEn}`} fill className="object-cover" />
+                                  <Image src={img.url} alt={`Review image ${idx + 1} for ${review.product?.name}`} fill className="object-cover" />
                                 </div>
                               ))}
                             </div>
@@ -146,6 +160,24 @@ export default function ReviewModerationPage() {
                               Clear Flag
                             </Button>
                           )}
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => togglePublishMutation.mutate(review.id)}
+                            disabled={togglePublishMutation.isPending}
+                          >
+                            {review.isPublished ? (
+                              <>
+                                <EyeOff className="h-4 w-4 mr-2" />
+                                Unpublish
+                              </>
+                            ) : (
+                              <>
+                                <Eye className="h-4 w-4 mr-2" />
+                                Publish
+                              </>
+                            )}
+                          </Button>
                           <Button
                             size="sm"
                             variant="destructive"

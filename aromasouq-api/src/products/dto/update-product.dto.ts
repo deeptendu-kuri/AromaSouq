@@ -9,6 +9,7 @@ import {
   IsArray,
   IsInt,
   Min,
+  IsIn,
 } from 'class-validator';
 
 export class UpdateProductDto extends PartialType(CreateProductDto) {
@@ -142,6 +143,30 @@ export class UpdateProductDto extends PartialType(CreateProductDto) {
   @IsInt()
   @Min(0)
   coinsToAward?: number;
+
+  @IsOptional()
+  @IsString()
+  @IsIn(['ORIGINAL', 'CLONE', 'SIMILAR_DNA', 'NICHE', 'ATTAR', 'BODY_SPRAY'])
+  productType?: string;
+
+  @IsOptional()
+  @IsString()
+  @IsIn(['UAE', 'SAUDI', 'KUWAIT', 'QATAR', 'OMAN', 'BAHRAIN', 'FRANCE', 'ITALY', 'UK', 'USA', 'INDIA', 'THAILAND'])
+  region?: string;
+
+  @IsOptional()
+  @IsString()
+  occasion?: string;
+
+  @IsOptional()
+  @IsString()
+  @IsIn(['CAMBODIAN', 'INDIAN', 'THAI', 'MALAYSIAN', 'LAOTIAN', 'MUKHALLAT'])
+  oudType?: string;
+
+  @IsOptional()
+  @IsString()
+  @IsIn(['RAMADAN', 'SIGNATURE', 'CELEBRITY', 'MOST_LOVED', 'TRENDING', 'EXCLUSIVE'])
+  collection?: string;
 
   @IsOptional()
   @IsString()

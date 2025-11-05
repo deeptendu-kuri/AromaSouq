@@ -7,6 +7,7 @@ import {
   IsArray,
   IsInt,
   Min,
+  IsIn,
 } from 'class-validator';
 
 export class CreateProductDto {
@@ -138,6 +139,31 @@ export class CreateProductDto {
   @IsInt()
   @Min(0)
   coinsToAward?: number;
+
+  // NEW: Enhanced Product Classification (Phase 2)
+  @IsOptional()
+  @IsString()
+  @IsIn(['ORIGINAL', 'CLONE', 'SIMILAR_DNA', 'NICHE', 'ATTAR', 'BODY_SPRAY'])
+  productType?: string;
+
+  @IsOptional()
+  @IsString()
+  @IsIn(['UAE', 'SAUDI', 'KUWAIT', 'QATAR', 'OMAN', 'BAHRAIN', 'FRANCE', 'ITALY', 'UK', 'USA', 'INDIA', 'THAILAND'])
+  region?: string;
+
+  @IsOptional()
+  @IsString()
+  occasion?: string; // Comma-separated: "OFFICE,DAILY,PARTY,WEDDING,RAMADAN,EID"
+
+  @IsOptional()
+  @IsString()
+  @IsIn(['CAMBODIAN', 'INDIAN', 'THAI', 'MALAYSIAN', 'LAOTIAN', 'MUKHALLAT'])
+  oudType?: string;
+
+  @IsOptional()
+  @IsString()
+  @IsIn(['RAMADAN', 'SIGNATURE', 'CELEBRITY', 'MOST_LOVED', 'TRENDING', 'EXCLUSIVE'])
+  collection?: string;
 
   // SEO
   @IsOptional()

@@ -28,6 +28,12 @@ export class ProductsService {
     concentration?: string;
     scentFamily?: string;
     season?: string;
+    // Phase 3: New classification filters
+    productType?: string;
+    region?: string;
+    occasion?: string;
+    oudType?: string;
+    collection?: string;
     isFeatured?: boolean;
     isActive?: boolean;
     sortBy?: 'price' | 'createdAt' | 'name';
@@ -47,6 +53,11 @@ export class ProductsService {
       concentration,
       scentFamily,
       season,
+      productType,
+      region,
+      occasion,
+      oudType,
+      collection,
       isFeatured,
       isActive = true,
       sortBy = 'createdAt',
@@ -79,6 +90,17 @@ export class ProductsService {
     if (concentration) where.concentration = concentration;
     if (scentFamily) where.scentFamily = scentFamily;
     if (season) where.season = season;
+
+    // Phase 3: New classification filters
+    if (productType) where.productType = productType;
+    if (region) where.region = region;
+    if (oudType) where.oudType = oudType;
+    if (collection) where.collection = collection;
+
+    // Special handling for occasion (comma-separated field)
+    if (occasion) {
+      where.occasion = { contains: occasion, mode: 'insensitive' };
+    }
 
     if (search) {
       where.OR = [

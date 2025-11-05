@@ -138,6 +138,24 @@ export class OrdersService {
       throw new BadRequestException('Cart is empty');
     }
 
+    // Validate stock availability for all cart items
+    for (const item of cart.items) {
+      const product = item.product;
+
+      if (product.stock < item.quantity) {
+        throw new BadRequestException(
+          `Insufficient stock for "${product.name}". Available: ${product.stock}, Requested: ${item.quantity}`,
+        );
+      }
+
+      // Also check if product is active
+      if (!product.isActive) {
+        throw new BadRequestException(
+          `Product "${product.name}" is no longer available`,
+        );
+      }
+    }
+
     // Calculate totals
     let subtotal = 0;
     const orderItems: { productId: string; quantity: number; price: number }[] = [];
@@ -237,6 +255,17 @@ export class OrdersService {
           coupon: true,
         },
       });
+
+      // Decrement stock and increment sales for each product
+      for (const item of cart.items) {
+        await tx.product.update({
+          where: { id: item.productId },
+          data: {
+            stock: { decrement: item.quantity },
+            salesCount: { increment: item.quantity },
+          },
+        });
+      }
 
       // Update user's coins if coins were used
       if (coinsUsed > 0) {
@@ -351,6 +380,9 @@ export class OrdersService {
   async cancel(userId: string, orderId: string) {
     const order = await this.prisma.order.findUnique({
       where: { id: orderId },
+      include: {
+        items: true,
+      },
     });
 
     if (!order) {
@@ -371,8 +403,65 @@ export class OrdersService {
       );
     }
 
-    return this.updateStatus(orderId, {
-      orderStatus: OrderStatus.CANCELLED,
+    // Use transaction to restore stock and refund coins
+    return this.prisma.$transaction(async (tx) => {
+      // Update order status
+      const cancelledOrder = await tx.order.update({
+        where: { id: orderId },
+        data: {
+          orderStatus: OrderStatus.CANCELLED,
+          cancelledAt: new Date(),
+          paymentStatus: PaymentStatus.REFUNDED,
+        },
+        include: {
+          items: {
+            include: {
+              product: true,
+            },
+          },
+          address: true,
+        },
+      });
+
+      // Restore stock and decrement sales
+      for (const item of cancelledOrder.items) {
+        await tx.product.update({
+          where: { id: item.productId },
+          data: {
+            stock: { increment: item.quantity },
+            salesCount: { decrement: item.quantity },
+          },
+        });
+      }
+
+      // Refund coins if used
+      if (cancelledOrder.coinsUsed > 0) {
+        await tx.user.update({
+          where: { id: userId },
+          data: {
+            coinsBalance: { increment: cancelledOrder.coinsUsed },
+          },
+        });
+      }
+
+      // Deduct awarded coins (if user still has them)
+      if (cancelledOrder.coinsEarned > 0) {
+        const user = await tx.user.findUnique({
+          where: { id: userId },
+        });
+
+        // Only deduct if user has enough coins
+        if (user && user.coinsBalance >= cancelledOrder.coinsEarned) {
+          await tx.user.update({
+            where: { id: userId },
+            data: {
+              coinsBalance: { decrement: cancelledOrder.coinsEarned },
+            },
+          });
+        }
+      }
+
+      return cancelledOrder;
     });
   }
 }

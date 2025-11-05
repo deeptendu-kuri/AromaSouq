@@ -29,8 +29,8 @@ interface VendorFilters {
 }
 
 interface VendorsResponse {
-  vendors: VendorApplication[]
-  pagination: {
+  data: VendorApplication[]
+  meta: {
     total: number
     page: number
     limit: number
@@ -48,7 +48,7 @@ export function useVendorApprovals(filters: VendorFilters = {}) {
 
   const approveMutation = useMutation({
     mutationFn: (vendorId: string) =>
-      apiClient.post(`/admin/vendors/${vendorId}/approve`),
+      apiClient.patch(`/admin/vendors/${vendorId}/status`, { status: 'APPROVED' }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin-vendor-approvals'] })
       queryClient.invalidateQueries({ queryKey: ['admin-stats'] })
@@ -61,7 +61,7 @@ export function useVendorApprovals(filters: VendorFilters = {}) {
 
   const rejectMutation = useMutation({
     mutationFn: ({ vendorId, reason }: { vendorId: string; reason: string }) =>
-      apiClient.post(`/admin/vendors/${vendorId}/reject`, { reason }),
+      apiClient.patch(`/admin/vendors/${vendorId}/status`, { status: 'REJECTED' }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin-vendor-approvals'] })
       queryClient.invalidateQueries({ queryKey: ['admin-stats'] })
@@ -74,7 +74,7 @@ export function useVendorApprovals(filters: VendorFilters = {}) {
 
   const suspendMutation = useMutation({
     mutationFn: ({ vendorId, reason }: { vendorId: string; reason: string }) =>
-      apiClient.post(`/admin/vendors/${vendorId}/suspend`, { reason }),
+      apiClient.patch(`/admin/vendors/${vendorId}/status`, { status: 'SUSPENDED' }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin-vendor-approvals'] })
       queryClient.invalidateQueries({ queryKey: ['admin-stats'] })
@@ -86,8 +86,8 @@ export function useVendorApprovals(filters: VendorFilters = {}) {
   })
 
   return {
-    vendors: vendorsQuery.data?.vendors || [],
-    pagination: vendorsQuery.data?.pagination,
+    vendors: vendorsQuery.data?.data || [],
+    pagination: vendorsQuery.data?.meta,
     isLoading: vendorsQuery.isLoading,
     approve: approveMutation.mutate,
     reject: rejectMutation.mutate,
