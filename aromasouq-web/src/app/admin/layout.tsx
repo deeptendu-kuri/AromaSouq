@@ -13,7 +13,8 @@ import {
   Settings,
   LogOut,
   Menu,
-  X
+  X,
+  Home
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
@@ -133,8 +134,18 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             </ul>
           </nav>
 
-          {/* Logout */}
-          <div className="p-4 border-t border-white/10">
+          {/* Actions */}
+          <div className="p-4 border-t border-white/10 space-y-2">
+            <Link href="/" className="block">
+              <Button
+                variant="ghost"
+                className="w-full justify-start text-gray-300 hover:text-white hover:bg-white/10"
+                onClick={() => setSidebarOpen(false)}
+              >
+                <Home className="h-5 w-5 mr-3" />
+                Back to Homepage
+              </Button>
+            </Link>
             <Button
               variant="ghost"
               className="w-full justify-start text-gray-300 hover:text-white hover:bg-white/10"

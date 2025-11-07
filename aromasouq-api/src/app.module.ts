@@ -19,8 +19,10 @@ import { UploadsModule } from './uploads/uploads.module';
 import { VendorModule } from './vendor/vendor.module';
 import { CouponsModule } from './coupons/coupons.module';
 import { CheckoutModule } from './checkout/checkout.module';
+import { WalletModule } from './wallet/wallet.module';
 
 // Phase 5: File uploads & media management modules loaded
+// Phase 6: Wallet & Coins system integrated
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -34,6 +36,7 @@ import { CheckoutModule } from './checkout/checkout.module';
     ProductsModule,
     CartModule,
     WishlistModule,
+    WalletModule,
     OrdersModule,
     ReviewsModule,
     AddressesModule,

@@ -90,8 +90,17 @@ export default function VendorLayout({
           </ul>
         </nav>
 
-        {/* Logout */}
-        <div className="p-4">
+        {/* Actions */}
+        <div className="p-4 space-y-2">
+          <Link href="/" className="block">
+            <Button
+              variant="ghost"
+              className="w-full justify-start text-white hover:bg-white/10"
+            >
+              <Home className="h-5 w-5 mr-3" />
+              Back to Homepage
+            </Button>
+          </Link>
           <Button
             variant="ghost"
             className="w-full justify-start text-white hover:bg-white/10"

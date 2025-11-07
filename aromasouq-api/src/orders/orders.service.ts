@@ -8,12 +8,15 @@ import { CreateOrderDto } from './dto/create-order.dto';
 import { UpdateOrderStatusDto } from './dto/update-order-status.dto';
 import { OrderStatus, PaymentStatus } from '@prisma/client';
 import { CouponsService } from '../coupons/coupons.service';
+import { WalletService } from '../wallet/wallet.service';
+import { CoinSource } from '../wallet/dto/award-coins.dto';
 
 @Injectable()
 export class OrdersService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly couponsService: CouponsService,
+    private readonly walletService: WalletService,
   ) {}
 
   async findAll(
@@ -267,8 +270,10 @@ export class OrdersService {
         });
       }
 
-      // Update user's coins if coins were used
+      // Update user's coins if coins were used - handled by wallet service after order creation
+      // This is now done outside the transaction to maintain consistency
       if (coinsUsed > 0) {
+        // Still update user.coinsBalance here for backward compatibility
         await tx.user.update({
           where: { id: userId },
           data: {
@@ -298,6 +303,20 @@ export class OrdersService {
 
       return newOrder;
     });
+
+    // Record coin spending in wallet transaction history (after order created)
+    if (coinsUsed > 0) {
+      try {
+        await this.walletService.spendCoins(userId, {
+          amount: coinsUsed,
+          orderId: order.id,
+          description: `Used ${coinsUsed} coins for order #${order.orderNumber}`,
+        });
+      } catch (error) {
+        // Log error but don't fail the order
+        console.error('Failed to record coin spending in wallet:', error);
+      }
+    }
 
     return order;
   }
@@ -334,29 +353,55 @@ export class OrdersService {
         break;
       case OrderStatus.DELIVERED:
         updateData.deliveredAt = new Date();
-        // Award coins to user when order is delivered
-        await this.prisma.user.update({
-          where: { id: order.userId },
-          data: {
-            coinsBalance: {
-              increment: order.coinsEarned,
-            },
-          },
-        });
+        // Award coins to user when order is delivered via wallet service
+        if (order.coinsEarned > 0) {
+          try {
+            await this.walletService.awardCoins(order.userId, {
+              amount: order.coinsEarned,
+              source: CoinSource.ORDER_PURCHASE,
+              description: `Earned ${order.coinsEarned} coins from order #${order.orderNumber}`,
+              orderId: order.id,
+            });
+          } catch (error) {
+            // Log error but don't fail the status update
+            console.error('Failed to award coins via wallet:', error);
+            // Fallback to old method
+            await this.prisma.user.update({
+              where: { id: order.userId },
+              data: {
+                coinsBalance: {
+                  increment: order.coinsEarned,
+                },
+              },
+            });
+          }
+        }
         break;
       case OrderStatus.CANCELLED:
         updateData.cancelledAt = new Date();
         updateData.paymentStatus = PaymentStatus.REFUNDED;
-        // Refund coins if used
+        // Refund coins if used via wallet service
         if (order.coinsUsed > 0) {
-          await this.prisma.user.update({
-            where: { id: order.userId },
-            data: {
-              coinsBalance: {
-                increment: order.coinsUsed,
+          try {
+            await this.walletService.refundCoins(
+              order.userId,
+              order.coinsUsed,
+              order.id,
+              `Refund of ${order.coinsUsed} coins for cancelled order #${order.orderNumber}`,
+            );
+          } catch (error) {
+            // Log error but don't fail the status update
+            console.error('Failed to refund coins via wallet:', error);
+            // Fallback to old method
+            await this.prisma.user.update({
+              where: { id: order.userId },
+              data: {
+                coinsBalance: {
+                  increment: order.coinsUsed,
+                },
               },
-            },
-          });
+            });
+          }
         }
         break;
     }

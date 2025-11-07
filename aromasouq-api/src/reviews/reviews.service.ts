@@ -42,7 +42,7 @@ export class ReviewsService {
       throw new ConflictException('You have already reviewed this product');
     }
 
-    // Check if user purchased this product
+    // Check if user purchased this product and order is delivered
     const hasPurchased = await this.prisma.orderItem.findFirst({
       where: {
         productId,
@@ -53,7 +53,14 @@ export class ReviewsService {
       },
     });
 
-    const isVerifiedPurchase = !!hasPurchased;
+    // Only allow reviews from users who have received the product
+    if (!hasPurchased) {
+      throw new BadRequestException(
+        'You can only review products after your order has been delivered',
+      );
+    }
+
+    const isVerifiedPurchase = true; // Always true since we enforce delivered order
 
     // Create review
     const review = await this.prisma.review.create({

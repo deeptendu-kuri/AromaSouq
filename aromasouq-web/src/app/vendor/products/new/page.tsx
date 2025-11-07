@@ -46,14 +46,20 @@ const createProductSchema = z.object({
   // Specifications
   size: z.string().optional(),
   concentration: z.string().optional(),
-  gender: z.string().optional(),
+  gender: z.enum(["men", "women", "unisex"], {
+    required_error: "Gender is required",
+    invalid_type_error: "Gender must be men, women, or unisex",
+  }),
 
   // Scent Profile
   topNotes: z.string().optional(),
   heartNotes: z.string().optional(),
   baseNotes: z.string().optional(),
   notes: z.string().optional(),
-  scentFamily: z.string().optional(),
+  scentFamily: z.enum(["floral", "oriental", "woody", "fresh", "citrus", "fruity", "spicy", "aquatic", "green", "gourmand"], {
+    required_error: "Scent family is required",
+    invalid_type_error: "Invalid scent family",
+  }),
   longevity: z.string().optional(),
   sillage: z.string().optional(),
   season: z.string().optional(),
@@ -634,20 +640,24 @@ export default function NewProductPage() {
                           name="scentFamily"
                           render={({ field }) => (
                             <FormItem>
-                              <FormLabel>Scent Family</FormLabel>
+                              <FormLabel>Scent Family <span className="text-red-500">*</span></FormLabel>
                               <Select onValueChange={field.onChange} value={field.value}>
                                 <FormControl>
                                   <SelectTrigger>
-                                    <SelectValue placeholder="Select family" />
+                                    <SelectValue placeholder="Select family (required)" />
                                   </SelectTrigger>
                                 </FormControl>
                                 <SelectContent>
-                                  <SelectItem value="woody">Woody</SelectItem>
                                   <SelectItem value="floral">Floral</SelectItem>
                                   <SelectItem value="oriental">Oriental</SelectItem>
+                                  <SelectItem value="woody">Woody</SelectItem>
                                   <SelectItem value="fresh">Fresh</SelectItem>
                                   <SelectItem value="citrus">Citrus</SelectItem>
+                                  <SelectItem value="fruity">Fruity</SelectItem>
                                   <SelectItem value="spicy">Spicy</SelectItem>
+                                  <SelectItem value="aquatic">Aquatic</SelectItem>
+                                  <SelectItem value="green">Green</SelectItem>
+                                  <SelectItem value="gourmand">Gourmand</SelectItem>
                                 </SelectContent>
                               </Select>
                               <FormMessage />
@@ -789,11 +799,11 @@ export default function NewProductPage() {
                         name="gender"
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel>Gender</FormLabel>
+                            <FormLabel>Gender <span className="text-red-500">*</span></FormLabel>
                             <Select onValueChange={field.onChange} value={field.value}>
                               <FormControl>
                                 <SelectTrigger>
-                                  <SelectValue placeholder="Select gender" />
+                                  <SelectValue placeholder="Select gender (required)" />
                                 </SelectTrigger>
                               </FormControl>
                               <SelectContent>

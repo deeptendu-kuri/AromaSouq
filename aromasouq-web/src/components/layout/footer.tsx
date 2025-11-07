@@ -32,10 +32,10 @@ export function Footer() {
             <h4 className="font-semibold mb-4">Shop</h4>
             <ul className="space-y-2 text-sm text-gray-300">
               <li><Link href="/products" className="hover:text-oud-gold transition-colors">All Products</Link></li>
-              <li><Link href="/products?category=perfumes" className="hover:text-oud-gold transition-colors">Perfumes</Link></li>
-              <li><Link href="/products?category=oud" className="hover:text-oud-gold transition-colors">Oud</Link></li>
-              <li><Link href="/products?category=attars" className="hover:text-oud-gold transition-colors">Attars</Link></li>
-              <li><Link href="/products?category=bakhoor" className="hover:text-oud-gold transition-colors">Bakhoor</Link></li>
+              <li><Link href="/products?categorySlug=perfumes" className="hover:text-oud-gold transition-colors">Perfumes</Link></li>
+              <li><Link href="/products?categorySlug=oud" className="hover:text-oud-gold transition-colors">Oud</Link></li>
+              <li><Link href="/products?categorySlug=attars" className="hover:text-oud-gold transition-colors">Attars</Link></li>
+              <li><Link href="/products?categorySlug=bakhoor" className="hover:text-oud-gold transition-colors">Bakhoor</Link></li>
             </ul>
           </div>
 

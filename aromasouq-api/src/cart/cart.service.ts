@@ -81,10 +81,22 @@ export class CartService {
       return sum + price * item.quantity;
     }, 0);
 
+    const itemCount = cart.items.reduce((sum, item) => sum + item.quantity, 0);
+    const tax = subtotal * 0.05; // 5% tax
+    const shipping = subtotal > 200 ? 0 : 25; // Free shipping over 200 AED
+    const total = subtotal + tax + shipping;
+    const coinsEarnable = Math.floor(total / 10); // 1 coin per 10 AED
+
     return {
       ...cart,
-      subtotal,
-      itemsCount: cart.items.reduce((sum, item) => sum + item.quantity, 0),
+      summary: {
+        subtotal,
+        shipping,
+        tax,
+        coinsEarnable,
+        total,
+        itemCount,
+      },
     };
   }
 

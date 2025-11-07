@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from "react"
 import Link from "next/link"
-import { usePathname, useRouter } from "next/navigation"
+import { usePathname, useRouter, useSearchParams } from "next/navigation"
 import { Search, ShoppingCart, Heart, User, Menu } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -26,6 +26,8 @@ export function Header() {
   const { cart, itemCount } = useCart()
   const pathname = usePathname()
   const router = useRouter()
+  const searchParams = useSearchParams()
+  const categorySlug = searchParams.get('categorySlug')
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -52,11 +54,51 @@ export function Header() {
             </SheetTrigger>
             <SheetContent side="left">
               <nav className="flex flex-col gap-4 mt-8">
-                <Link href="/products" className="text-lg font-medium">Products</Link>
-                <Link href="/products?category=perfumes" className="text-lg">Perfumes</Link>
-                <Link href="/products?category=oud" className="text-lg">Oud</Link>
-                <Link href="/products?category=attars" className="text-lg">Attars</Link>
-                <Link href="/products?category=bakhoor" className="text-lg">Bakhoor</Link>
+                <Link
+                  href="/products"
+                  className={cn(
+                    "text-lg font-medium",
+                    pathname === '/products' && !categorySlug ? "text-oud-gold" : ""
+                  )}
+                >
+                  Products
+                </Link>
+                <Link
+                  href="/products?categorySlug=perfumes"
+                  className={cn(
+                    "text-lg",
+                    categorySlug === 'perfumes' ? "text-oud-gold font-semibold" : ""
+                  )}
+                >
+                  Perfumes
+                </Link>
+                <Link
+                  href="/products?categorySlug=oud"
+                  className={cn(
+                    "text-lg",
+                    categorySlug === 'oud' ? "text-oud-gold font-semibold" : ""
+                  )}
+                >
+                  Oud
+                </Link>
+                <Link
+                  href="/products?categorySlug=attars"
+                  className={cn(
+                    "text-lg",
+                    categorySlug === 'attars' ? "text-oud-gold font-semibold" : ""
+                  )}
+                >
+                  Attars
+                </Link>
+                <Link
+                  href="/products?categorySlug=bakhoor"
+                  className={cn(
+                    "text-lg",
+                    categorySlug === 'bakhoor' ? "text-oud-gold font-semibold" : ""
+                  )}
+                >
+                  Bakhoor
+                </Link>
               </nav>
             </SheetContent>
           </Sheet>
@@ -72,7 +114,7 @@ export function Header() {
               href="/products"
               className={cn(
                 "text-sm font-medium transition-colors",
-                pathname === '/products'
+                pathname === '/products' && !categorySlug
                   ? "text-oud-gold border-b-2 border-oud-gold pb-1"
                   : "hover:text-oud-gold"
               )}
@@ -80,26 +122,46 @@ export function Header() {
               All Products
             </Link>
             <Link
-              href="/products?category=perfumes"
-              className="text-sm font-medium transition-colors hover:text-oud-gold"
+              href="/products?categorySlug=perfumes"
+              className={cn(
+                "text-sm font-medium transition-colors",
+                categorySlug === 'perfumes'
+                  ? "text-oud-gold border-b-2 border-oud-gold pb-1"
+                  : "hover:text-oud-gold"
+              )}
             >
               Perfumes
             </Link>
             <Link
-              href="/products?category=oud"
-              className="text-sm font-medium transition-colors hover:text-oud-gold"
+              href="/products?categorySlug=oud"
+              className={cn(
+                "text-sm font-medium transition-colors",
+                categorySlug === 'oud'
+                  ? "text-oud-gold border-b-2 border-oud-gold pb-1"
+                  : "hover:text-oud-gold"
+              )}
             >
               Oud
             </Link>
             <Link
-              href="/products?category=attars"
-              className="text-sm font-medium transition-colors hover:text-oud-gold"
+              href="/products?categorySlug=attars"
+              className={cn(
+                "text-sm font-medium transition-colors",
+                categorySlug === 'attars'
+                  ? "text-oud-gold border-b-2 border-oud-gold pb-1"
+                  : "hover:text-oud-gold"
+              )}
             >
               Attars
             </Link>
             <Link
-              href="/products?category=bakhoor"
-              className="text-sm font-medium transition-colors hover:text-oud-gold"
+              href="/products?categorySlug=bakhoor"
+              className={cn(
+                "text-sm font-medium transition-colors",
+                categorySlug === 'bakhoor'
+                  ? "text-oud-gold border-b-2 border-oud-gold pb-1"
+                  : "hover:text-oud-gold"
+              )}
             >
               Bakhoor
             </Link>

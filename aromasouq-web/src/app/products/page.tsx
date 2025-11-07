@@ -1,11 +1,401 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { apiClient } from '@/lib/api-client';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { ProductCard } from '@/components/ui/product-card';
-import { Filter, X, ChevronDown, ChevronUp } from 'lucide-react';
+import { Filter, X, ChevronDown, ChevronUp, Home, ChevronRight } from 'lucide-react';
+import Link from 'next/link';
+
+// Context data for dynamic page rendering
+const scentFamilyIcons: Record<string, string> = {
+  floral: "🌸",
+  fruity: "🍎",
+  fresh: "🌊",
+  aquatic: "🌊",
+  oriental: "🌟",
+  woody: "🌳",
+  citrus: "🍊",
+  spicy: "🌶️",
+  green: "🌿",
+  gourmand: "🍬"
+};
+
+const regionFlags: Record<string, string> = {
+  UAE: "🇦🇪",
+  SAUDI: "🇸🇦",
+  KUWAIT: "🇰🇼",
+  QATAR: "🇶🇦",
+  OMAN: "🇴🇲",
+  BAHRAIN: "🇧🇭",
+  FRANCE: "🇫🇷",
+  ITALY: "🇮🇹",
+  UK: "🇬🇧",
+  USA: "🇺🇸",
+  INDIA: "🇮🇳",
+  THAILAND: "🇹🇭"
+};
+
+const occasionIcons: Record<string, string> = {
+  OFFICE: "💼",
+  DAILY: "🌞",
+  PARTY: "🎉",
+  WEDDING: "💍",
+  RAMADAN: "🌙",
+  EID: "✨",
+  DATE: "💝"
+};
+
+const collectionIcons: Record<string, string> = {
+  RAMADAN: "🌙",
+  SIGNATURE: "⭐",
+  CELEBRITY: "👑",
+  MOST_LOVED: "❤️",
+  TRENDING: "🔥",
+  EXCLUSIVE: "💎"
+};
+
+const oudTypeIcons: Record<string, string> = {
+  CAMBODIAN: "🪔",
+  INDIAN: "💎",
+  THAI: "✨",
+  MALAYSIAN: "🌴",
+  LAOTIAN: "🏔️",
+  MUKHALLAT: "🎭"
+};
+
+interface PageContext {
+  title: string;
+  subtitle: string;
+  icon: string;
+  gradient: string;
+  description: string;
+  breadcrumbs: { label: string; href?: string }[];
+}
+
+function getPageContext(filters: any): PageContext {
+  // Priority order: Collection > Gender > Scent Family > Region > Occasion > Oud Type > Product Type
+
+  // Collection-specific contexts
+  if (filters.collection) {
+    const collectionNames: Record<string, string> = {
+      SIGNATURE: "Our Brand Signature Collection",
+      MOST_LOVED: "Most Loved Fragrances",
+      TRENDING: "Trending Now",
+      RAMADAN: "Ramadan Collection",
+      EXCLUSIVE: "Exclusive Collection",
+      CELEBRITY: "Celebrity Collection"
+    };
+
+    const collectionDescriptions: Record<string, string> = {
+      SIGNATURE: "Handcrafted with passion, exclusively by AromaSouq. Discover our finest creations that embody luxury and tradition.",
+      MOST_LOVED: "Customer favorites that have captured hearts. These are the fragrances our community can't get enough of.",
+      TRENDING: "The hottest scents of the season. Stay ahead with fragrances everyone is talking about.",
+      RAMADAN: "Sacred scents for the blessed month. Traditional and spiritual fragrances perfect for Ramadan.",
+      EXCLUSIVE: "Limited edition masterpieces. Rare and exquisite fragrances for the discerning collector.",
+      CELEBRITY: "Signature scents from your favorite celebrities. Experience the glamour and allure."
+    };
+
+    return {
+      title: collectionNames[filters.collection] || "Collection",
+      subtitle: "Curated with excellence",
+      icon: collectionIcons[filters.collection] || "✨",
+      gradient: "from-[#8B3A3A] via-[#1A1F2E] to-[#C9A86A]",
+      description: collectionDescriptions[filters.collection] || "Explore our curated collection of premium fragrances.",
+      breadcrumbs: [
+        { label: "Home", href: "/" },
+        { label: "Collections", href: "/products" },
+        { label: collectionNames[filters.collection] || "Collection" }
+      ]
+    };
+  }
+
+  // Gender-specific contexts
+  if (filters.gender) {
+    const genderData: Record<string, any> = {
+      men: {
+        title: "Men's Fragrances",
+        subtitle: "Bold & Sophisticated Scents",
+        icon: "👔",
+        gradient: "from-[#1A1F2E] via-[#2D2D2D] to-[#4A5568]",
+        description: "Explore our curated collection of masculine fragrances. From bold oud to fresh aquatic scents, find your signature scent that commands attention and leaves a lasting impression.",
+        breadcrumbs: [
+          { label: "Home", href: "/" },
+          { label: "Shop by Gender", href: "/products" },
+          { label: "Men's Fragrances" }
+        ]
+      },
+      women: {
+        title: "Women's Fragrances",
+        subtitle: "Elegant & Luxurious Scents",
+        icon: "👗",
+        gradient: "from-[#8B3A3A] via-[#C9A86A] to-[#E8C4A0]",
+        description: "Discover elegant and luxurious fragrances for women. From delicate florals to rich oriental blends, find the perfect scent that celebrates your femininity and grace.",
+        breadcrumbs: [
+          { label: "Home", href: "/" },
+          { label: "Shop by Gender", href: "/products" },
+          { label: "Women's Fragrances" }
+        ]
+      },
+      unisex: {
+        title: "Unisex Fragrances",
+        subtitle: "Scents for Everyone",
+        icon: "✨",
+        gradient: "from-[#C9A86A] via-[#D4A574] to-[#E8C4A0]",
+        description: "Explore versatile fragrances that transcend gender boundaries. Universal scents that celebrate individuality and personal expression.",
+        breadcrumbs: [
+          { label: "Home", href: "/" },
+          { label: "Shop by Gender", href: "/products" },
+          { label: "Unisex Fragrances" }
+        ]
+      }
+    };
+
+    const gender = filters.gender.toLowerCase();
+    return genderData[gender] || genderData.unisex;
+  }
+
+  // Scent Family contexts
+  if (filters.scentFamily) {
+    const scentDescriptions: Record<string, string> = {
+      floral: "Delicate and romantic, floral perfumes feature beautiful notes of roses, jasmine, and lily. Perfect for those who appreciate classic elegance.",
+      oriental: "Warm and exotic, oriental fragrances blend amber, vanilla, and spices. Experience the rich heritage of Middle Eastern perfumery.",
+      woody: "Earthy and sophisticated, woody scents feature sandalwood, cedar, and oud. Timeless fragrances that exude confidence.",
+      fresh: "Clean and invigorating, fresh fragrances bring crisp notes of citrus and green. Perfect for daily wear and active lifestyles.",
+      citrus: "Bright and energizing, citrus perfumes feature lemon, bergamot, and orange. Uplifting scents that refresh and revitalize.",
+      fruity: "Sweet and playful, fruity fragrances blend apple, peach, and berries. Fun and youthful scents for the vibrant spirit.",
+      spicy: "Bold and warm, spicy perfumes feature cinnamon, cardamom, and pepper. Captivating scents that leave an impression.",
+      aquatic: "Fresh and oceanic, aquatic fragrances evoke the sea breeze. Cool and modern scents for the contemporary individual.",
+      green: "Natural and crisp, green fragrances feature grass and herbal notes. Refreshing scents that connect with nature.",
+      gourmand: "Sweet and indulgent, gourmand perfumes feature vanilla, caramel, and chocolate. Delicious scents you'll want to wear."
+    };
+
+    const familyName = filters.scentFamily.charAt(0).toUpperCase() + filters.scentFamily.slice(1);
+
+    return {
+      title: `${familyName} Perfumes`,
+      subtitle: `Discover the Art of ${familyName} Fragrances`,
+      icon: scentFamilyIcons[filters.scentFamily] || "🌺",
+      gradient: "from-[#f9f9f9] via-[#e8e8e8] to-[#C9A86A]",
+      description: scentDescriptions[filters.scentFamily] || `Explore our collection of ${familyName.toLowerCase()} fragrances.`,
+      breadcrumbs: [
+        { label: "Home", href: "/" },
+        { label: "Shop by Scent", href: "/products" },
+        { label: `${familyName} Scents` }
+      ]
+    };
+  }
+
+  // Region contexts
+  if (filters.region) {
+    const regionNames: Record<string, string> = {
+      UAE: "United Arab Emirates",
+      SAUDI: "Saudi Arabia",
+      KUWAIT: "Kuwait",
+      QATAR: "Qatar",
+      OMAN: "Oman",
+      BAHRAIN: "Bahrain",
+      FRANCE: "France",
+      ITALY: "Italy",
+      UK: "United Kingdom",
+      USA: "United States",
+      INDIA: "India",
+      THAILAND: "Thailand"
+    };
+
+    const regionDescriptions: Record<string, string> = {
+      UAE: "Discover luxury fragrances from the United Arab Emirates. Experience the rich perfumery tradition of Dubai and Abu Dhabi.",
+      SAUDI: "Explore authentic Arabian perfumes from Saudi Arabia. Traditional oud and oriental scents from the heart of Arabia.",
+      KUWAIT: "Premium fragrances from Kuwait. Sophisticated blends that reflect Gulf heritage and modern luxury.",
+      FRANCE: "Classic French perfumery at its finest. Elegant and timeless scents from the perfume capital of the world.",
+      ITALY: "Italian luxury and craftsmanship. Refined fragrances that embody La Dolce Vita.",
+      INDIA: "Rich and diverse scents from India. Traditional attars and modern perfumes with exotic ingredients.",
+      THAILAND: "Exotic fragrances from Thailand. Sweet and tropical scents infused with Thai heritage."
+    };
+
+    const regionName = regionNames[filters.region] || filters.region;
+
+    return {
+      title: `Fragrances from ${regionName}`,
+      subtitle: "Authentic Regional Scents",
+      icon: regionFlags[filters.region] || "🌍",
+      gradient: "from-[#D4A574] via-[#C9A86A] to-[#8B3A3A]",
+      description: regionDescriptions[filters.region] || `Explore premium fragrances from ${regionName}.`,
+      breadcrumbs: [
+        { label: "Home", href: "/" },
+        { label: "Shop by Region", href: "/products" },
+        { label: regionName }
+      ]
+    };
+  }
+
+  // Occasion contexts
+  if (filters.occasion) {
+    const occasionData: Record<string, any> = {
+      OFFICE: {
+        title: "Office Fragrances",
+        subtitle: "Professional & Subtle",
+        description: "Sophisticated scents perfect for the workplace. Professional fragrances that make the right impression without overwhelming."
+      },
+      DAILY: {
+        title: "Daily Wear Fragrances",
+        subtitle: "Fresh & Comfortable",
+        description: "Versatile scents for everyday use. Light and fresh fragrances that become your signature scent."
+      },
+      PARTY: {
+        title: "Party Fragrances",
+        subtitle: "Bold & Captivating",
+        description: "Make an entrance with bold party scents. Fragrances that stand out in social settings and leave lasting impressions."
+      },
+      WEDDING: {
+        title: "Wedding Fragrances",
+        subtitle: "Luxurious & Memorable",
+        description: "Celebrate special moments with elegant scents. Luxurious fragrances perfect for weddings and formal events."
+      },
+      RAMADAN: {
+        title: "Ramadan Fragrances",
+        subtitle: "Traditional & Sacred",
+        description: "Spiritual scents for the blessed month. Traditional fragrances that enhance the sacred atmosphere of Ramadan."
+      },
+      EID: {
+        title: "Eid Fragrances",
+        subtitle: "Festive & Joyful",
+        description: "Celebrate Eid with special fragrances. Festive scents that mark the joyous occasion."
+      }
+    };
+
+    const occasion = occasionData[filters.occasion] || {
+      title: "Occasion Fragrances",
+      subtitle: "Perfect for Every Moment",
+      description: "Find the perfect scent for any occasion."
+    };
+
+    return {
+      ...occasion,
+      icon: occasionIcons[filters.occasion] || "✨",
+      gradient: "from-[#1A1F2E] via-[#8B3A3A] to-[#C9A86A]",
+      breadcrumbs: [
+        { label: "Home", href: "/" },
+        { label: "Shop by Occasion", href: "/products" },
+        { label: occasion.title }
+      ]
+    };
+  }
+
+  // Oud Type contexts
+  if (filters.oudType) {
+    const oudData: Record<string, any> = {
+      CAMBODIAN: {
+        title: "Cambodian Oud",
+        subtitle: "Rare & Exquisite",
+        description: "Experience the finest Cambodian oud. Rare and exquisite with deep woody notes and unmatched complexity."
+      },
+      INDIAN: {
+        title: "Indian Oud",
+        subtitle: "Rich & Bold",
+        description: "Discover authentic Indian oud. Rich, bold, and intensely aromatic with deep, resinous character."
+      },
+      THAI: {
+        title: "Thai Oud",
+        subtitle: "Sweet & Smooth",
+        description: "Explore premium Thai oud. Sweet and smooth with honey-like undertones and gentle warmth."
+      },
+      MALAYSIAN: {
+        title: "Malaysian Oud",
+        subtitle: "Balanced & Refined",
+        description: "Malaysian oud perfection. Balanced and refined with sophisticated depth."
+      }
+    };
+
+    const oud = oudData[filters.oudType] || {
+      title: "Premium Oud Collection",
+      subtitle: "Luxury Oud Fragrances",
+      description: "Discover our collection of premium oud fragrances."
+    };
+
+    return {
+      ...oud,
+      icon: oudTypeIcons[filters.oudType] || "🪵",
+      gradient: "from-[#D4A574] via-[#C9A86A] to-[#8B3A3A]",
+      breadcrumbs: [
+        { label: "Home", href: "/" },
+        { label: "Oud Collection", href: "/products" },
+        { label: oud.title }
+      ]
+    };
+  }
+
+  // Product Type contexts
+  if (filters.productType) {
+    const typeNames: Record<string, string> = {
+      ORIGINAL: "Original Fragrances",
+      CLONE: "Designer Clones",
+      SIMILAR_DNA: "Similar DNA Fragrances",
+      NICHE: "Niche Perfumes",
+      ATTAR: "Traditional Attars",
+      BODY_SPRAY: "Body Sprays"
+    };
+
+    return {
+      title: typeNames[filters.productType] || "Products",
+      subtitle: "Quality Guaranteed",
+      icon: "✨",
+      gradient: "from-[#C9A86A] to-[#D4A574]",
+      description: `Explore our collection of ${(typeNames[filters.productType] || "products").toLowerCase()}.`,
+      breadcrumbs: [
+        { label: "Home", href: "/" },
+        { label: "Shop by Type", href: "/products" },
+        { label: typeNames[filters.productType] || "Products" }
+      ]
+    };
+  }
+
+  // Category context
+  if (filters.categorySlug) {
+    return {
+      title: filters.categorySlug.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase()),
+      subtitle: "Premium Collection",
+      icon: "🌹",
+      gradient: "from-[#C9A86A] to-[#D4A574]",
+      description: "Discover our premium collection of authentic fragrances.",
+      breadcrumbs: [
+        { label: "Home", href: "/" },
+        { label: "Categories", href: "/products" },
+        { label: filters.categorySlug.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase()) }
+      ]
+    };
+  }
+
+  // Search results context
+  if (filters.search) {
+    return {
+      title: `Search Results for "${filters.search}"`,
+      subtitle: "Find Your Perfect Scent",
+      icon: "🔍",
+      gradient: "from-[#1A1F2E] to-[#2D2D2D]",
+      description: `Showing results for "${filters.search}". Refine your search using the filters below.`,
+      breadcrumbs: [
+        { label: "Home", href: "/" },
+        { label: "Search", href: "/products" },
+        { label: `"${filters.search}"` }
+      ]
+    };
+  }
+
+  // Default context
+  return {
+    title: "All Fragrances",
+    subtitle: "Discover Your Signature Scent",
+    icon: "🌹",
+    gradient: "from-[#C9A86A] via-[#D4A574] to-[#E8C4A0]",
+    description: "Explore our complete collection of authentic perfumes, oud, and attars from premium vendors across the UAE.",
+    breadcrumbs: [
+      { label: "Home", href: "/" },
+      { label: "All Products" }
+    ]
+  };
+}
 
 export default function ProductsPage() {
   const router = useRouter();
@@ -14,7 +404,7 @@ export default function ProductsPage() {
   // Initialize filters from URL params
   const [filters, setFilters] = useState({
     search: searchParams.get('search') || '',
-    category: searchParams.get('category') || '',
+    categorySlug: searchParams.get('categorySlug') || searchParams.get('category') || '',
     brand: searchParams.get('brand') || '',
     minPrice: searchParams.get('minPrice') || '',
     maxPrice: searchParams.get('maxPrice') || '',
@@ -22,7 +412,6 @@ export default function ProductsPage() {
     concentration: searchParams.get('concentration') || '',
     scentFamily: searchParams.get('scentFamily') || '',
     season: searchParams.get('season') || '',
-    // Phase 3: New classification filters
     productType: searchParams.get('productType') || '',
     region: searchParams.get('region') || '',
     occasion: searchParams.get('occasion') || '',
@@ -32,6 +421,28 @@ export default function ProductsPage() {
   });
 
   const [page, setPage] = useState(1);
+
+  // Sync filters with URL params whenever they change
+  useEffect(() => {
+    setFilters({
+      search: searchParams.get('search') || '',
+      categorySlug: searchParams.get('categorySlug') || searchParams.get('category') || '',
+      brand: searchParams.get('brand') || '',
+      minPrice: searchParams.get('minPrice') || '',
+      maxPrice: searchParams.get('maxPrice') || '',
+      gender: searchParams.get('gender') || '',
+      concentration: searchParams.get('concentration') || '',
+      scentFamily: searchParams.get('scentFamily') || '',
+      season: searchParams.get('season') || '',
+      productType: searchParams.get('productType') || '',
+      region: searchParams.get('region') || '',
+      occasion: searchParams.get('occasion') || '',
+      oudType: searchParams.get('oudType') || '',
+      collection: searchParams.get('collection') || '',
+      sort: searchParams.get('sort') || 'createdAt_desc',
+    });
+    setPage(1); // Reset to page 1 when filters change
+  }, [searchParams]);
   const [showFilters, setShowFilters] = useState(true);
   const [expandedSections, setExpandedSections] = useState({
     price: true,
@@ -39,13 +450,15 @@ export default function ProductsPage() {
     concentration: true,
     scent: true,
     season: true,
-    // Phase 3: New sections
     productType: true,
     region: true,
     occasion: true,
     oudType: true,
     collection: true,
   });
+
+  // Get dynamic page context
+  const pageContext = useMemo(() => getPageContext(filters), [filters]);
 
   const limit = 20;
 
@@ -87,7 +500,7 @@ export default function ProductsPage() {
   const handleFilterChange = (key: string, value: string) => {
     const newFilters = { ...filters, [key]: value };
     setFilters(newFilters);
-    setPage(1); // Reset to page 1 when filters change
+    setPage(1);
 
     // Update URL params
     const params = new URLSearchParams();
@@ -100,7 +513,7 @@ export default function ProductsPage() {
   const clearFilters = () => {
     const clearedFilters = {
       search: '',
-      category: '',
+      categorySlug: '',
       brand: '',
       minPrice: '',
       maxPrice: '',
@@ -133,15 +546,46 @@ export default function ProductsPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <div className="container mx-auto py-8 px-4">
-        {/* Header */}
-        <div className="mb-6">
-          <h1 className="text-3xl font-bold mb-2">Fragrances</h1>
-          <p className="text-gray-600">
-            Discover our collection of authentic perfumes
-          </p>
-        </div>
+      {/* Dynamic Hero Section */}
+      <div className={`bg-gradient-to-r ${pageContext.gradient} text-white py-16 mb-8`}>
+        <div className="container mx-auto px-4">
+          {/* Breadcrumbs */}
+          <nav className="flex items-center gap-2 text-sm mb-6 text-white/80">
+            {pageContext.breadcrumbs.map((crumb, index) => (
+              <div key={index} className="flex items-center gap-2">
+                {crumb.href ? (
+                  <Link href={crumb.href} className="hover:text-white transition-colors">
+                    {crumb.label}
+                  </Link>
+                ) : (
+                  <span className="text-white font-medium">{crumb.label}</span>
+                )}
+                {index < pageContext.breadcrumbs.length - 1 && (
+                  <ChevronRight className="w-4 h-4" />
+                )}
+              </div>
+            ))}
+          </nav>
 
+          {/* Hero Content */}
+          <div className="max-w-3xl">
+            <div className="flex items-center gap-4 mb-4">
+              <span className="text-5xl">{pageContext.icon}</span>
+              <div>
+                <h1 className="text-4xl md:text-5xl font-bold mb-2">
+                  {pageContext.title}
+                </h1>
+                <p className="text-xl text-white/90">{pageContext.subtitle}</p>
+              </div>
+            </div>
+            <p className="text-base text-white/80 leading-relaxed max-w-2xl">
+              {pageContext.description}
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <div className="container mx-auto py-8 px-4">
         <div className="flex gap-6">
           {/* Filters Sidebar */}
           <aside
@@ -175,7 +619,7 @@ export default function ProductsPage() {
                     value={filters.search}
                     onChange={(e) => handleFilterChange('search', e.target.value)}
                     placeholder="Search products..."
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#C9A86A] focus:border-transparent"
                   />
                 </div>
 
@@ -183,13 +627,13 @@ export default function ProductsPage() {
                 <div>
                   <label className="block text-sm font-medium mb-2">Category</label>
                   <select
-                    value={filters.category}
-                    onChange={(e) => handleFilterChange('category', e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                    value={filters.categorySlug}
+                    onChange={(e) => handleFilterChange('categorySlug', e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#C9A86A] focus:border-transparent"
                   >
                     <option value="">All Categories</option>
                     {categories?.map((cat: any) => (
-                      <option key={cat.id} value={cat.id}>
+                      <option key={cat.id} value={cat.slug}>
                         {cat.name}
                       </option>
                     ))}
@@ -202,7 +646,7 @@ export default function ProductsPage() {
                   <select
                     value={filters.brand}
                     onChange={(e) => handleFilterChange('brand', e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#C9A86A] focus:border-transparent"
                   >
                     <option value="">All Brands</option>
                     {brands?.map((brand: any) => (
@@ -213,7 +657,7 @@ export default function ProductsPage() {
                   </select>
                 </div>
 
-                {/* Price Range - Collapsible */}
+                {/* Price Range */}
                 <div>
                   <button
                     onClick={() => toggleSection('price')}
@@ -233,20 +677,20 @@ export default function ProductsPage() {
                         value={filters.minPrice}
                         onChange={(e) => handleFilterChange('minPrice', e.target.value)}
                         placeholder="Min"
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#C9A86A] focus:border-transparent"
                       />
                       <input
                         type="number"
                         value={filters.maxPrice}
                         onChange={(e) => handleFilterChange('maxPrice', e.target.value)}
                         placeholder="Max"
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#C9A86A] focus:border-transparent"
                       />
                     </div>
                   )}
                 </div>
 
-                {/* Gender - Collapsible */}
+                {/* Gender */}
                 <div>
                   <button
                     onClick={() => toggleSection('gender')}
@@ -263,17 +707,17 @@ export default function ProductsPage() {
                     <select
                       value={filters.gender}
                       onChange={(e) => handleFilterChange('gender', e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#C9A86A] focus:border-transparent"
                     >
                       <option value="">All</option>
-                      <option value="MALE">Men</option>
-                      <option value="FEMALE">Women</option>
-                      <option value="UNISEX">Unisex</option>
+                      <option value="men">Men</option>
+                      <option value="women">Women</option>
+                      <option value="unisex">Unisex</option>
                     </select>
                   )}
                 </div>
 
-                {/* Concentration - Collapsible */}
+                {/* Concentration */}
                 <div>
                   <button
                     onClick={() => toggleSection('concentration')}
@@ -290,7 +734,7 @@ export default function ProductsPage() {
                     <select
                       value={filters.concentration}
                       onChange={(e) => handleFilterChange('concentration', e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#C9A86A] focus:border-transparent"
                     >
                       <option value="">All</option>
                       <option value="EDP">Eau de Parfum (EDP)</option>
@@ -302,7 +746,7 @@ export default function ProductsPage() {
                   )}
                 </div>
 
-                {/* Scent Family - Collapsible */}
+                {/* Scent Family */}
                 <div>
                   <button
                     onClick={() => toggleSection('scent')}
@@ -319,51 +763,24 @@ export default function ProductsPage() {
                     <select
                       value={filters.scentFamily}
                       onChange={(e) => handleFilterChange('scentFamily', e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#C9A86A] focus:border-transparent"
                     >
                       <option value="">All</option>
-                      <option value="Floral">Floral</option>
-                      <option value="Oriental">Oriental/Amber</option>
-                      <option value="Woody">Woody</option>
-                      <option value="Fresh">Fresh/Aquatic</option>
-                      <option value="Citrus">Citrus</option>
-                      <option value="Fruity">Fruity</option>
-                      <option value="Spicy">Spicy</option>
-                      <option value="Gourmand">Gourmand</option>
+                      <option value="floral">Floral</option>
+                      <option value="oriental">Oriental</option>
+                      <option value="woody">Woody</option>
+                      <option value="fresh">Fresh</option>
+                      <option value="citrus">Citrus</option>
+                      <option value="fruity">Fruity</option>
+                      <option value="spicy">Spicy</option>
+                      <option value="aquatic">Aquatic</option>
+                      <option value="green">Green</option>
+                      <option value="gourmand">Gourmand</option>
                     </select>
                   )}
                 </div>
 
-                {/* Season - Collapsible */}
-                <div>
-                  <button
-                    onClick={() => toggleSection('season')}
-                    className="w-full flex items-center justify-between text-sm font-medium mb-2"
-                  >
-                    <span>Season</span>
-                    {expandedSections.season ? (
-                      <ChevronUp className="w-4 h-4" />
-                    ) : (
-                      <ChevronDown className="w-4 h-4" />
-                    )}
-                  </button>
-                  {expandedSections.season && (
-                    <select
-                      value={filters.season}
-                      onChange={(e) => handleFilterChange('season', e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                    >
-                      <option value="">All Seasons</option>
-                      <option value="Spring">Spring</option>
-                      <option value="Summer">Summer</option>
-                      <option value="Fall">Fall/Autumn</option>
-                      <option value="Winter">Winter</option>
-                      <option value="Year-round">Year-round</option>
-                    </select>
-                  )}
-                </div>
-
-                {/* Product Type - Collapsible (Phase 3) */}
+                {/* Product Type */}
                 <div>
                   <button
                     onClick={() => toggleSection('productType')}
@@ -380,7 +797,7 @@ export default function ProductsPage() {
                     <select
                       value={filters.productType}
                       onChange={(e) => handleFilterChange('productType', e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#C9A86A] focus:border-transparent"
                     >
                       <option value="">All Types</option>
                       <option value="ORIGINAL">Original</option>
@@ -393,7 +810,7 @@ export default function ProductsPage() {
                   )}
                 </div>
 
-                {/* Region - Collapsible (Phase 3) */}
+                {/* Region */}
                 <div>
                   <button
                     onClick={() => toggleSection('region')}
@@ -410,7 +827,7 @@ export default function ProductsPage() {
                     <select
                       value={filters.region}
                       onChange={(e) => handleFilterChange('region', e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#C9A86A] focus:border-transparent"
                     >
                       <option value="">All Regions</option>
                       <option value="UAE">UAE</option>
@@ -429,7 +846,7 @@ export default function ProductsPage() {
                   )}
                 </div>
 
-                {/* Occasion - Collapsible (Phase 3) */}
+                {/* Occasion */}
                 <div>
                   <button
                     onClick={() => toggleSection('occasion')}
@@ -446,7 +863,7 @@ export default function ProductsPage() {
                     <select
                       value={filters.occasion}
                       onChange={(e) => handleFilterChange('occasion', e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#C9A86A] focus:border-transparent"
                     >
                       <option value="">All Occasions</option>
                       <option value="OFFICE">Office</option>
@@ -459,7 +876,7 @@ export default function ProductsPage() {
                   )}
                 </div>
 
-                {/* Oud Type - Collapsible (Phase 3) */}
+                {/* Oud Type */}
                 <div>
                   <button
                     onClick={() => toggleSection('oudType')}
@@ -476,7 +893,7 @@ export default function ProductsPage() {
                     <select
                       value={filters.oudType}
                       onChange={(e) => handleFilterChange('oudType', e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#C9A86A] focus:border-transparent"
                     >
                       <option value="">All Oud Types</option>
                       <option value="CAMBODIAN">Cambodian Oud</option>
@@ -489,7 +906,7 @@ export default function ProductsPage() {
                   )}
                 </div>
 
-                {/* Collection - Collapsible (Phase 3) */}
+                {/* Collection */}
                 <div>
                   <button
                     onClick={() => toggleSection('collection')}
@@ -506,7 +923,7 @@ export default function ProductsPage() {
                     <select
                       value={filters.collection}
                       onChange={(e) => handleFilterChange('collection', e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#C9A86A] focus:border-transparent"
                     >
                       <option value="">All Collections</option>
                       <option value="RAMADAN">Ramadan Collection</option>
@@ -538,7 +955,7 @@ export default function ProductsPage() {
                 <p className="text-gray-600">
                   {data?.pagination?.total || 0} product{data?.pagination?.total !== 1 ? 's' : ''} found
                   {hasActiveFilters && (
-                    <span className="text-purple-600 ml-2">
+                    <span className="text-[#C9A86A] ml-2 font-medium">
                       (filtered)
                     </span>
                   )}
@@ -548,7 +965,7 @@ export default function ProductsPage() {
               <select
                 value={filters.sort}
                 onChange={(e) => handleFilterChange('sort', e.target.value)}
-                className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#C9A86A] focus:border-transparent"
               >
                 <option value="createdAt_desc">Newest First</option>
                 <option value="createdAt_asc">Oldest First</option>
@@ -592,7 +1009,7 @@ export default function ProductsPage() {
                 {hasActiveFilters && (
                   <button
                     onClick={clearFilters}
-                    className="px-6 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700"
+                    className="px-6 py-2 bg-[#C9A86A] text-white rounded-lg hover:bg-[#D4A574]"
                   >
                     Clear Filters
                   </button>
@@ -623,7 +1040,6 @@ export default function ProductsPage() {
                     <div className="flex gap-1">
                       {[...Array(data.pagination.totalPages)].map((_, i) => {
                         const pageNum = i + 1;
-                        // Show first, last, current, and adjacent pages
                         if (
                           pageNum === 1 ||
                           pageNum === data.pagination.totalPages ||
@@ -635,7 +1051,7 @@ export default function ProductsPage() {
                               onClick={() => setPage(pageNum)}
                               className={`px-4 py-2 border rounded-lg ${
                                 page === pageNum
-                                  ? 'bg-purple-600 text-white border-purple-600'
+                                  ? 'bg-[#C9A86A] text-white border-[#C9A86A]'
                                   : 'border-gray-300 hover:bg-gray-50'
                               }`}
                             >

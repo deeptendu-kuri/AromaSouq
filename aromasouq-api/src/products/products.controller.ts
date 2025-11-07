@@ -28,7 +28,8 @@ export class ProductsController {
   @Get()
   findAll(
     @Query('categoryId') categoryId?: string,
-    @Query('category') categorySlug?: string,
+    @Query('category') category?: string,
+    @Query('categorySlug') categorySlug?: string,
     @Query('brandId') brandId?: string,
     @Query('vendorId') vendorId?: string,
     @Query('search') search?: string,
@@ -53,7 +54,7 @@ export class ProductsController {
   ) {
     return this.productsService.findAll({
       categoryId,
-      categorySlug,
+      categorySlug: categorySlug || category, // Support both parameters, prioritize categorySlug
       brandId,
       vendorId,
       search,
@@ -82,6 +83,67 @@ export class ProductsController {
     return this.productsService.getFeaturedProducts(
       limit ? parseInt(limit, 10) : undefined,
     );
+  }
+
+  // NEW: Homepage Aggregation Endpoints
+  @Get('scent-families')
+  getScentFamilies() {
+    return this.productsService.getScentFamilyAggregation();
+  }
+
+  @Get('occasions')
+  getOccasions() {
+    return this.productsService.getOccasionAggregation();
+  }
+
+  @Get('regions')
+  getRegions() {
+    return this.productsService.getRegionAggregation();
+  }
+
+  @Get('oud-types')
+  getOudTypes() {
+    return this.productsService.getOudTypeAggregation();
+  }
+
+  @Get('product-types')
+  getProductTypes() {
+    return this.productsService.getProductTypeAggregation();
+  }
+
+  @Get('collections')
+  getCollections() {
+    return this.productsService.getCollectionAggregation();
+  }
+
+  @Get('flash-sale')
+  getFlashSale(@Query('limit') limit?: string) {
+    return this.productsService.getFlashSaleProducts(
+      limit ? parseInt(limit, 10) : 10,
+    );
+  }
+
+  @Get('collection/:collection')
+  getByCollection(
+    @Param('collection') collection: string,
+    @Query('limit') limit?: string,
+  ) {
+    return this.productsService.getProductsByCollection(
+      collection,
+      limit ? parseInt(limit, 10) : 10,
+    );
+  }
+
+  @Get('new-arrivals')
+  getNewArrivals(@Query('limit') limit?: string) {
+    return this.productsService.getNewArrivals(
+      limit ? parseInt(limit, 10) : 10,
+    );
+  }
+
+  @Get('gender-banners')
+  getGenderBanners() {
+    return this.productsService.getGenderBanners();
   }
 
   @Get('slug/:slug')

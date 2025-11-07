@@ -8,6 +8,7 @@ import {
   IsInt,
   Min,
   IsIn,
+  IsNotEmpty,
 } from 'class-validator';
 
 export class CreateProductDto {
@@ -88,9 +89,11 @@ export class CreateProductDto {
   @IsString()
   concentration?: string;
 
-  @IsOptional()
+  // TIER 1 MANDATORY
+  @IsNotEmpty({ message: 'Gender is required' })
   @IsString()
-  gender?: string;
+  @IsIn(['men', 'women', 'unisex'], { message: 'Gender must be men, women, or unisex' })
+  gender: string;
 
   @IsOptional()
   @IsString()
@@ -109,9 +112,11 @@ export class CreateProductDto {
   @IsString()
   baseNotes?: string;
 
-  @IsOptional()
+  // TIER 1 MANDATORY
+  @IsNotEmpty({ message: 'Scent family is required' })
   @IsString()
-  scentFamily?: string;
+  @IsIn(['floral', 'oriental', 'woody', 'fresh', 'citrus', 'fruity', 'spicy', 'aquatic', 'green', 'gourmand'], { message: 'Invalid scent family' })
+  scentFamily: string;
 
   @IsOptional()
   @IsString()
@@ -181,4 +186,23 @@ export class CreateProductDto {
   @IsOptional()
   @IsBoolean()
   isFeatured?: boolean;
+
+  // Flash Sale Fields
+  @IsOptional()
+  @IsBoolean()
+  isOnSale?: boolean;
+
+  @IsOptional()
+  @IsNumber()
+  @Min(0)
+  salePrice?: number;
+
+  @IsOptional()
+  saleEndDate?: Date;
+
+  @IsOptional()
+  @IsInt()
+  @Min(0)
+  @Min(0)
+  discountPercent?: number;
 }

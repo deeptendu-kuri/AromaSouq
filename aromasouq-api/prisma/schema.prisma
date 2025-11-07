@@ -130,7 +130,7 @@ model Product {
   vendorId        String           @map("vendor_id")
   size            String?
   concentration   String?
-  gender          String?
+  gender          String           // TIER 1 MANDATORY
   notes           String?
   metaTitle       String?          @map("meta_title")
   metaDescription String?          @map("meta_description")
@@ -146,7 +146,7 @@ model Product {
   heartNotes      String?          @map("heart_notes")
   longevity       String?
   salesCount      Int              @default(0) @map("sales_count")
-  scentFamily     String?          @map("scent_family")
+  scentFamily     String           @map("scent_family") // TIER 1 MANDATORY
   season          String?
   sillage         String?
   topNotes        String?          @map("top_notes")
@@ -157,6 +157,11 @@ model Product {
   oudType         String?          @map("oud_type")
   productType     String?          @map("product_type")
   region          String?          @map("region")
+  // Flash Sale Fields
+  isOnSale        Boolean          @default(false) @map("is_on_sale")
+  salePrice       Float?           @map("sale_price")
+  saleEndDate     DateTime?        @map("sale_end_date")
+  discountPercent Int?             @map("discount_percent")
   cartItems       CartItem[]
   orderItems      OrderItem[]
   variants        ProductVariant[]

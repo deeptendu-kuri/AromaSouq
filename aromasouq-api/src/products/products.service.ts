@@ -744,4 +744,154 @@ export class ProductsService {
       data: { isActive: false },
     });
   }
+
+  // NEW: Homepage Aggregation Endpoints
+
+  async getScentFamilyAggregation() {
+    const aggregation = await this.prisma.product.groupBy({
+      by: ['scentFamily'],
+      where: { isActive: true },
+      _count: { id: true },
+    });
+
+    return aggregation.map((item) => ({
+      scentFamily: item.scentFamily,
+      count: item._count.id,
+    }));
+  }
+
+  async getOccasionAggregation() {
+    const products = await this.prisma.product.findMany({
+      where: { isActive: true, occasion: { not: null } },
+      select: { occasion: true },
+    });
+
+    const occasionCounts = new Map<string, number>();
+    products.forEach((product) => {
+      if (product.occasion) {
+        const occasions = product.occasion.split(',').map((o) => o.trim());
+        occasions.forEach((occasion) => {
+          occasionCounts.set(occasion, (occasionCounts.get(occasion) || 0) + 1);
+        });
+      }
+    });
+
+    return Array.from(occasionCounts.entries()).map(([occasion, count]) => ({
+      occasion,
+      count,
+    }));
+  }
+
+  async getRegionAggregation() {
+    const aggregation = await this.prisma.product.groupBy({
+      by: ['region'],
+      where: { isActive: true, region: { not: null } },
+      _count: { id: true },
+    });
+
+    return aggregation.map((item) => ({
+      region: item.region,
+      count: item._count.id,
+    }));
+  }
+
+  async getOudTypeAggregation() {
+    const aggregation = await this.prisma.product.groupBy({
+      by: ['oudType'],
+      where: { isActive: true, oudType: { not: null } },
+      _count: { id: true },
+    });
+
+    return aggregation.map((item) => ({
+      oudType: item.oudType,
+      count: item._count.id,
+    }));
+  }
+
+  async getProductTypeAggregation() {
+    const aggregation = await this.prisma.product.groupBy({
+      by: ['productType'],
+      where: { isActive: true, productType: { not: null } },
+      _count: { id: true },
+    });
+
+    return aggregation.map((item) => ({
+      productType: item.productType,
+      count: item._count.id,
+    }));
+  }
+
+  async getCollectionAggregation() {
+    const aggregation = await this.prisma.product.groupBy({
+      by: ['collection'],
+      where: { isActive: true, collection: { not: null } },
+      _count: { id: true },
+    });
+
+    return aggregation.map((item) => ({
+      collection: item.collection,
+      count: item._count.id,
+    }));
+  }
+
+  async getFlashSaleProducts(limit: number = 10) {
+    return this.prisma.product.findMany({
+      where: {
+        isActive: true,
+        isOnSale: true,
+        saleEndDate: { gt: new Date() },
+      },
+      include: {
+        brand: { select: { id: true, name: true, nameAr: true, logo: true } },
+        category: { select: { id: true, name: true, nameAr: true } },
+      },
+      orderBy: { discountPercent: 'desc' },
+      take: limit,
+    });
+  }
+
+  async getProductsByCollection(collection: string, limit: number = 10) {
+    return this.prisma.product.findMany({
+      where: {
+        isActive: true,
+        collection,
+      },
+      include: {
+        brand: { select: { id: true, name: true, nameAr: true, logo: true } },
+        category: { select: { id: true, name: true, nameAr: true } },
+      },
+      orderBy: { salesCount: 'desc' },
+      take: limit,
+    });
+  }
+
+  async getNewArrivals(limit: number = 10) {
+    return this.prisma.product.findMany({
+      where: { isActive: true },
+      include: {
+        brand: { select: { id: true, name: true, nameAr: true, logo: true } },
+        category: { select: { id: true, name: true, nameAr: true } },
+      },
+      orderBy: { createdAt: 'desc' },
+      take: limit,
+    });
+  }
+
+  async getGenderBanners() {
+    const menCount = await this.prisma.product.count({
+      where: { isActive: true, gender: 'men' },
+    });
+    const womenCount = await this.prisma.product.count({
+      where: { isActive: true, gender: 'women' },
+    });
+    const unisexCount = await this.prisma.product.count({
+      where: { isActive: true, gender: 'unisex' },
+    });
+
+    return {
+      men: menCount,
+      women: womenCount,
+      unisex: unisexCount,
+    };
+  }
 }
