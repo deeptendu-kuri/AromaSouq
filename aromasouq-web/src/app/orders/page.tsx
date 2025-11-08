@@ -53,8 +53,8 @@ export default function OrdersPage() {
 
       <div className="space-y-6">
         {data.data.map((order) => {
-          const StatusIcon = statusConfig[order.status as keyof typeof statusConfig]?.icon || Package
-          const statusClass = statusConfig[order.status as keyof typeof statusConfig]?.color || 'bg-gray-100 text-gray-800'
+          const StatusIcon = statusConfig[order.orderStatus as keyof typeof statusConfig]?.icon || Package
+          const statusClass = statusConfig[order.orderStatus as keyof typeof statusConfig]?.color || 'bg-gray-100 text-gray-800'
 
           return (
             <Card key={order.id}>
@@ -68,7 +68,7 @@ export default function OrdersPage() {
                   </div>
                   <Badge className={statusClass} variant="secondary">
                     <StatusIcon className="w-4 h-4 mr-1" />
-                    {statusConfig[order.status as keyof typeof statusConfig]?.label || order.status}
+                    {statusConfig[order.orderStatus as keyof typeof statusConfig]?.label || order.orderStatus}
                   </Badge>
                 </div>
               </CardHeader>
@@ -129,7 +129,7 @@ export default function OrdersPage() {
                     <Button variant="outline" size="sm" asChild className="flex-1">
                       <Link href={`/orders/${order.id}`}>View Details</Link>
                     </Button>
-                    {order.status === 'PENDING' && (
+                    {order.orderStatus === 'PENDING' && (
                       <Button variant="destructive" size="sm" className="flex-1">
                         Cancel Order
                       </Button>

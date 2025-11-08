@@ -16,6 +16,7 @@ import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 import { CreateVariantDto } from './dto/create-variant.dto';
 import { UpdateVariantDto } from './dto/update-variant.dto';
+import { BulkFlashSaleDto, RemoveFlashSaleDto, SetDiscountPercentDto } from './dto/flash-sale.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
@@ -242,5 +243,54 @@ export class ProductsController {
     const userId = req.user!['sub'];
     const userRole = req.user!['role'] as UserRole;
     return this.productsService.deleteVariant(userId, userRole, variantId);
+  }
+
+  // ============================================================================
+  // FLASH SALE MANAGEMENT
+  // ============================================================================
+
+  @Post('flash-sale/bulk-add')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.ADMIN, UserRole.VENDOR)
+  bulkAddFlashSale(
+    @Req() req: Request,
+    @Body() bulkFlashSaleDto: BulkFlashSaleDto,
+  ) {
+    const userId = req.user!['sub'];
+    const userRole = req.user!['role'] as UserRole;
+    return this.productsService.bulkAddFlashSale(userId, userRole, bulkFlashSaleDto);
+  }
+
+  @Post('flash-sale/bulk-remove')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.ADMIN, UserRole.VENDOR)
+  bulkRemoveFlashSale(
+    @Req() req: Request,
+    @Body() removeFlashSaleDto: RemoveFlashSaleDto,
+  ) {
+    const userId = req.user!['sub'];
+    const userRole = req.user!['role'] as UserRole;
+    return this.productsService.bulkRemoveFlashSale(userId, userRole, removeFlashSaleDto);
+  }
+
+  @Post('flash-sale/set-discount')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.ADMIN, UserRole.VENDOR)
+  setFlashSaleDiscount(
+    @Req() req: Request,
+    @Body() setDiscountDto: SetDiscountPercentDto,
+  ) {
+    const userId = req.user!['sub'];
+    const userRole = req.user!['role'] as UserRole;
+    return this.productsService.setFlashSaleDiscount(userId, userRole, setDiscountDto);
+  }
+
+  @Get('flash-sale/active')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.ADMIN, UserRole.VENDOR)
+  getMyFlashSaleProducts(@Req() req: Request) {
+    const userId = req.user!['sub'];
+    const userRole = req.user!['role'] as UserRole;
+    return this.productsService.getMyFlashSaleProducts(userId, userRole);
   }
 }

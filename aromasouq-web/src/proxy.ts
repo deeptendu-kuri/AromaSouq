@@ -31,7 +31,6 @@ export function proxy(request: NextRequest) {
   const requiresAuth = protectedRoutes.some(route => pathname.startsWith(route))
   const isVendorRoute = vendorRoutes.some(route => pathname.startsWith(route))
   const isAdminRoute = adminRoutes.some(route => pathname.startsWith(route))
-  const isAuthRoute = authRoutes.some(route => pathname.startsWith(route))
 
   // Redirect to login if trying to access protected routes without auth
   if ((requiresAuth || isVendorRoute || isAdminRoute) && !isAuthenticated) {
@@ -40,10 +39,9 @@ export function proxy(request: NextRequest) {
     return NextResponse.redirect(loginUrl)
   }
 
-  // Redirect to home if already authenticated and trying to access auth routes
-  if (isAuthRoute && isAuthenticated) {
-    return NextResponse.redirect(new URL('/', request.url))
-  }
+  // NOTE: Removed redirect from login/register when authenticated
+  // Let the login/register pages handle their own redirect logic client-side
+  // This prevents issues with stale cookies blocking access to login page
 
   // Note: Role-based authorization (vendor/admin) should be handled
   // client-side or with proper JWT validation for production

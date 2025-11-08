@@ -16,8 +16,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Checkbox } from "@/components/ui/checkbox"
 import { apiClient } from "@/lib/api-client"
 import toast from "react-hot-toast"
-import { ArrowLeft, Package } from "lucide-react"
+import { ArrowLeft, Package, Upload, X, ImagePlus } from "lucide-react"
 import Link from "next/link"
+import imageCompression from 'browser-image-compression'
 
 // Comprehensive product validation schema
 const createProductSchema = z.object({
@@ -73,8 +74,12 @@ const createProductSchema = z.object({
   occasion: z.string().optional(),
   oudType: z.string().optional(),
   collection: z.string().optional(),
-  format: z.string().optional(),
-  priceSegment: z.string().optional(),
+  format: z.enum(["SPRAY", "OIL", "ROLLON", "SAMPLE", "GIFT_SET"], {
+    required_error: "Format is required",
+  }),
+  priceSegment: z.enum(["BUDGET", "MID", "PREMIUM", "LUXURY", "ULTRA_LUXURY"], {
+    required_error: "Price segment is required",
+  }),
 
   // Advanced
   enableWhatsapp: z.boolean().optional(),
@@ -84,6 +89,12 @@ const createProductSchema = z.object({
   metaDescription: z.string().optional(),
   isActive: z.boolean().optional(),
   isFeatured: z.boolean().optional(),
+
+  // Flash Sale
+  isOnSale: z.boolean().optional(),
+  salePrice: z.number().optional(),
+  saleEndDate: z.date().optional(),
+  discountPercent: z.number().optional(),
 })
 
 type CreateProductInput = z.infer<typeof createProductSchema>
@@ -92,6 +103,9 @@ export default function NewProductPage() {
   const router = useRouter()
   const [isLoading, setIsLoading] = useState(false)
   const [activeTab, setActiveTab] = useState("basic")
+  const [selectedImages, setSelectedImages] = useState<File[]>([])
+  const [imagePreviews, setImagePreviews] = useState<string[]>([])
+  const [isCompressing, setIsCompressing] = useState(false)
 
   const form = useForm<CreateProductInput>({
     resolver: zodResolver(createProductSchema),
@@ -137,6 +151,10 @@ export default function NewProductPage() {
       metaDescription: "",
       isActive: true,
       isFeatured: false,
+      isOnSale: false,
+      salePrice: 0,
+      saleEndDate: undefined,
+      discountPercent: 0,
     },
   })
 
@@ -162,12 +180,89 @@ export default function NewProductPage() {
     form.setValue('slug', slug)
   }
 
+  // Handle image selection and compression
+  const handleImageSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || [])
+    if (files.length === 0) return
+
+    // Check total number of images (existing + new)
+    if (selectedImages.length + files.length > 10) {
+      toast.error('Maximum 10 images allowed')
+      return
+    }
+
+    setIsCompressing(true)
+    try {
+      const compressedFiles: File[] = []
+      const previews: string[] = []
+
+      for (const file of files) {
+        // Validate file type
+        if (!file.type.startsWith('image/')) {
+          toast.error(`${file.name} is not an image file`)
+          continue
+        }
+
+        // Compress image
+        const options = {
+          maxSizeMB: 1, // Max file size 1MB
+          maxWidthOrHeight: 1920, // Max dimension
+          useWebWorker: true,
+        }
+
+        const compressedFile = await imageCompression(file, options)
+        compressedFiles.push(compressedFile)
+
+        // Create preview
+        const previewUrl = URL.createObjectURL(compressedFile)
+        previews.push(previewUrl)
+      }
+
+      setSelectedImages(prev => [...prev, ...compressedFiles])
+      setImagePreviews(prev => [...prev, ...previews])
+      toast.success(`${compressedFiles.length} image(s) compressed and ready`)
+    } catch (error) {
+      console.error('Image compression error:', error)
+      toast.error('Failed to compress images')
+    } finally {
+      setIsCompressing(false)
+    }
+  }
+
+  // Remove image from selection
+  const removeImage = (index: number) => {
+    setSelectedImages(prev => prev.filter((_, i) => i !== index))
+    setImagePreviews(prev => {
+      const newPreviews = prev.filter((_, i) => i !== index)
+      // Revoke the URL to free memory
+      URL.revokeObjectURL(prev[index])
+      return newPreviews
+    })
+  }
+
   const onSubmit = async (data: CreateProductInput) => {
     console.log('Form submitted with data:', data)
     setIsLoading(true)
     try {
+      // Step 1: Create the product
       const response = await apiClient.post<any>('/products', data)
-      toast.success("Product created successfully!")
+      const productId = response.id
+
+      // Step 2: Upload images if any
+      if (selectedImages.length > 0) {
+        toast.loading(`Uploading ${selectedImages.length} image(s)...`, { id: 'upload-images' })
+
+        try {
+          await apiClient.uploadFiles(`/uploads/products/${productId}/images`, selectedImages, 'files')
+          toast.success(`Product created with ${selectedImages.length} image(s)!`, { id: 'upload-images' })
+        } catch (uploadError: any) {
+          console.error('Image upload error:', uploadError)
+          toast.error('Product created, but some images failed to upload', { id: 'upload-images' })
+        }
+      } else {
+        toast.success("Product created successfully!")
+      }
+
       router.push('/vendor/products')
     } catch (error: any) {
       console.error('Create product error:', error)
@@ -231,7 +326,7 @@ export default function NewProductPage() {
                         name="name"
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel>Product Name (English) *</FormLabel>
+                            <FormLabel>Product Name (English) <span className="text-red-500">*</span></FormLabel>
                             <FormControl>
                               <Input
                                 placeholder="e.g., Oud Royale 100ml"
@@ -263,7 +358,7 @@ export default function NewProductPage() {
                         name="slug"
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel>URL Slug *</FormLabel>
+                            <FormLabel>URL Slug <span className="text-red-500">*</span></FormLabel>
                             <FormControl>
                               <Input placeholder="oud-royale-100ml" {...field} />
                             </FormControl>
@@ -280,7 +375,7 @@ export default function NewProductPage() {
                         name="description"
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel>Description (English) *</FormLabel>
+                            <FormLabel>Description (English) <span className="text-red-500">*</span></FormLabel>
                             <FormControl>
                               <Textarea
                                 placeholder="Describe the product..."
@@ -317,7 +412,7 @@ export default function NewProductPage() {
                           name="categoryId"
                           render={({ field }) => (
                             <FormItem>
-                              <FormLabel>Category *</FormLabel>
+                              <FormLabel>Category <span className="text-red-500">*</span></FormLabel>
                               <Select onValueChange={field.onChange} value={field.value}>
                                 <FormControl>
                                   <SelectTrigger>
@@ -376,14 +471,81 @@ export default function NewProductPage() {
                       </CardDescription>
                     </CardHeader>
                     <CardContent className="space-y-4">
-                      <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center">
-                        <Package className="h-12 w-12 mx-auto text-gray-400 mb-4" />
-                        <p className="text-sm text-muted-foreground mb-4">
-                          Image upload feature coming soon
-                        </p>
-                        <p className="text-xs text-muted-foreground">
-                          For now, you can add image URLs manually after creating the product
-                        </p>
+                      {/* Image Upload Section */}
+                      <div className="space-y-4">
+                        <div className="flex items-center justify-between">
+                          <p className="text-sm font-medium">Product Images</p>
+                          <p className="text-xs text-muted-foreground">
+                            {selectedImages.length}/10 images
+                          </p>
+                        </div>
+
+                        {/* Upload Button */}
+                        <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-oud-gold transition-colors">
+                          <input
+                            type="file"
+                            accept="image/*"
+                            multiple
+                            onChange={handleImageSelect}
+                            className="hidden"
+                            id="image-upload"
+                            disabled={isCompressing || selectedImages.length >= 10}
+                          />
+                          <label
+                            htmlFor="image-upload"
+                            className="cursor-pointer flex flex-col items-center"
+                          >
+                            {isCompressing ? (
+                              <>
+                                <Package className="h-12 w-12 mx-auto text-oud-gold mb-4 animate-pulse" />
+                                <p className="text-sm text-muted-foreground">
+                                  Compressing images...
+                                </p>
+                              </>
+                            ) : (
+                              <>
+                                <ImagePlus className="h-12 w-12 mx-auto text-gray-400 mb-4" />
+                                <p className="text-sm font-medium text-oud-gold mb-2">
+                                  Click to upload images
+                                </p>
+                                <p className="text-xs text-muted-foreground">
+                                  PNG, JPG, WebP up to 5MB (will be compressed to 1MB)
+                                </p>
+                                <p className="text-xs text-muted-foreground mt-1">
+                                  Select multiple images at once (max 10)
+                                </p>
+                              </>
+                            )}
+                          </label>
+                        </div>
+
+                        {/* Image Previews */}
+                        {imagePreviews.length > 0 && (
+                          <div className="grid grid-cols-3 gap-4">
+                            {imagePreviews.map((preview, index) => (
+                              <div
+                                key={index}
+                                className="relative group aspect-square border rounded-lg overflow-hidden"
+                              >
+                                <img
+                                  src={preview}
+                                  alt={`Preview ${index + 1}`}
+                                  className="w-full h-full object-cover"
+                                />
+                                <button
+                                  type="button"
+                                  onClick={() => removeImage(index)}
+                                  className="absolute top-2 right-2 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                                >
+                                  <X className="h-4 w-4" />
+                                </button>
+                                <div className="absolute bottom-0 left-0 right-0 bg-black/50 text-white text-xs p-1 text-center">
+                                  {(selectedImages[index].size / 1024).toFixed(1)} KB
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        )}
                       </div>
 
                       <FormField
@@ -425,7 +587,7 @@ export default function NewProductPage() {
                           name="price"
                           render={({ field }) => (
                             <FormItem>
-                              <FormLabel>Price (AED) *</FormLabel>
+                              <FormLabel>Price (AED) <span className="text-red-500">*</span></FormLabel>
                               <FormControl>
                                 <Input
                                   type="number"
@@ -496,7 +658,7 @@ export default function NewProductPage() {
                           name="sku"
                           render={({ field }) => (
                             <FormItem>
-                              <FormLabel>SKU *</FormLabel>
+                              <FormLabel>SKU <span className="text-red-500">*</span></FormLabel>
                               <FormControl>
                                 <Input placeholder="OUD-ROY-100" {...field} />
                               </FormControl>
@@ -529,7 +691,7 @@ export default function NewProductPage() {
                           name="stock"
                           render={({ field }) => (
                             <FormItem>
-                              <FormLabel>Stock Quantity *</FormLabel>
+                              <FormLabel>Stock Quantity <span className="text-red-500">*</span></FormLabel>
                               <FormControl>
                                 <Input
                                   type="number"
@@ -987,6 +1149,64 @@ export default function NewProductPage() {
                           </FormItem>
                         )}
                       />
+
+                      {/* Format - NOW MANDATORY */}
+                      <FormField
+                        control={form.control}
+                        name="format"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Format <span className="text-red-500">*</span></FormLabel>
+                            <Select onValueChange={field.onChange} value={field.value}>
+                              <FormControl>
+                                <SelectTrigger>
+                                  <SelectValue placeholder="Select format (required)" />
+                                </SelectTrigger>
+                              </FormControl>
+                              <SelectContent>
+                                <SelectItem value="SPRAY">Spray</SelectItem>
+                                <SelectItem value="OIL">Oil</SelectItem>
+                                <SelectItem value="ROLLON">Roll-On</SelectItem>
+                                <SelectItem value="SAMPLE">Sample</SelectItem>
+                                <SelectItem value="GIFT_SET">Gift Set</SelectItem>
+                              </SelectContent>
+                            </Select>
+                            <FormDescription>
+                              What format is this product? (Required)
+                            </FormDescription>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+
+                      {/* Price Segment - NOW MANDATORY */}
+                      <FormField
+                        control={form.control}
+                        name="priceSegment"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Price Segment <span className="text-red-500">*</span></FormLabel>
+                            <Select onValueChange={field.onChange} value={field.value}>
+                              <FormControl>
+                                <SelectTrigger>
+                                  <SelectValue placeholder="Select price range (required)" />
+                                </SelectTrigger>
+                              </FormControl>
+                              <SelectContent>
+                                <SelectItem value="BUDGET">Budget (Under 100 AED)</SelectItem>
+                                <SelectItem value="MID">Mid-Range (100-300 AED)</SelectItem>
+                                <SelectItem value="PREMIUM">Premium (300-800 AED)</SelectItem>
+                                <SelectItem value="LUXURY">Luxury (800-2000 AED)</SelectItem>
+                                <SelectItem value="ULTRA_LUXURY">Ultra Luxury (2000+ AED)</SelectItem>
+                              </SelectContent>
+                            </Select>
+                            <FormDescription>
+                              What price segment does this product belong to? (Required)
+                            </FormDescription>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
                     </CardContent>
                   </Card>
                 </TabsContent>
@@ -1152,6 +1372,108 @@ export default function NewProductPage() {
                             </FormItem>
                           )}
                         />
+                      </div>
+
+                      {/* Flash Sale */}
+                      <div className="space-y-4 border-t pt-6">
+                        <h3 className="font-semibold">Flash Sale (Optional)</h3>
+                        <FormField
+                          control={form.control}
+                          name="isOnSale"
+                          render={({ field }) => (
+                            <FormItem className="flex flex-row items-start space-x-3 space-y-0">
+                              <FormControl>
+                                <Checkbox
+                                  checked={field.value}
+                                  onCheckedChange={field.onChange}
+                                />
+                              </FormControl>
+                              <div className="space-y-1 leading-none">
+                                <FormLabel>Put on Sale</FormLabel>
+                                <FormDescription>
+                                  Mark this product as on sale
+                                </FormDescription>
+                              </div>
+                            </FormItem>
+                          )}
+                        />
+
+                        {form.watch('isOnSale') && (
+                          <div className="space-y-4 pl-6 border-l-2 border-oud-gold/30">
+                            <div className="grid grid-cols-2 gap-4">
+                              <FormField
+                                control={form.control}
+                                name="salePrice"
+                                render={({ field }) => (
+                                  <FormItem>
+                                    <FormLabel>Sale Price (AED)</FormLabel>
+                                    <FormControl>
+                                      <Input
+                                        type="number"
+                                        step="0.01"
+                                        placeholder="79.99"
+                                        {...field}
+                                        value={field.value || ''}
+                                        onChange={(e) => field.onChange(e.target.value ? parseFloat(e.target.value) : 0)}
+                                      />
+                                    </FormControl>
+                                    <FormDescription>
+                                      Discounted price for this sale
+                                    </FormDescription>
+                                    <FormMessage />
+                                  </FormItem>
+                                )}
+                              />
+
+                              <FormField
+                                control={form.control}
+                                name="discountPercent"
+                                render={({ field }) => (
+                                  <FormItem>
+                                    <FormLabel>Discount %</FormLabel>
+                                    <FormControl>
+                                      <Input
+                                        type="number"
+                                        min="0"
+                                        max="100"
+                                        placeholder="30"
+                                        {...field}
+                                        value={field.value || ''}
+                                        onChange={(e) => field.onChange(e.target.value ? parseInt(e.target.value) : 0)}
+                                      />
+                                    </FormControl>
+                                    <FormDescription>
+                                      Discount percentage (0-100)
+                                    </FormDescription>
+                                    <FormMessage />
+                                  </FormItem>
+                                )}
+                              />
+                            </div>
+
+                            <FormField
+                              control={form.control}
+                              name="saleEndDate"
+                              render={({ field }) => (
+                                <FormItem>
+                                  <FormLabel>Sale End Date</FormLabel>
+                                  <FormControl>
+                                    <Input
+                                      type="datetime-local"
+                                      {...field}
+                                      value={field.value ? new Date(field.value).toISOString().slice(0, 16) : ''}
+                                      onChange={(e) => field.onChange(e.target.value ? new Date(e.target.value) : undefined)}
+                                    />
+                                  </FormControl>
+                                  <FormDescription>
+                                    When should this sale end?
+                                  </FormDescription>
+                                  <FormMessage />
+                                </FormItem>
+                              )}
+                            />
+                          </div>
+                        )}
                       </div>
                     </CardContent>
                   </Card>

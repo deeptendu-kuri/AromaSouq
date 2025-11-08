@@ -6,6 +6,7 @@ interface Order {
   orderNumber: string
   orderStatus: string
   paymentStatus: string
+  paymentMethod: string
   subtotal: number
   tax: number
   shippingFee: number
@@ -17,10 +18,17 @@ interface Order {
     id: string
     quantity: number
     price: number
+    hasReviewed?: boolean
+    review?: {
+      id: string
+      rating: number
+      createdAt: string
+    }
     product: {
       id: string
       name: string
       nameAr: string
+      slug?: string
       images: { url: string }[]
     }
   }[]

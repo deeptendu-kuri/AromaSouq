@@ -105,7 +105,35 @@ export class OrdersService {
       throw new BadRequestException('Order does not belong to user');
     }
 
-    return order;
+    // Add review status for each item
+    const itemsWithReviewStatus = await Promise.all(
+      order.items.map(async (item) => {
+        const review = await this.prisma.review.findUnique({
+          where: {
+            userId_productId: {
+              userId,
+              productId: item.productId,
+            },
+          },
+          select: {
+            id: true,
+            rating: true,
+            createdAt: true,
+          },
+        });
+
+        return {
+          ...item,
+          review: review || null,
+          hasReviewed: !!review,
+        };
+      }),
+    );
+
+    return {
+      ...order,
+      items: itemsWithReviewStatus,
+    };
   }
 
   async create(userId: string, createOrderDto: CreateOrderDto) {

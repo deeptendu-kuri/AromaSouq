@@ -2,17 +2,18 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { apiClient } from '@/lib/api-client'
 import { Cart } from '@/types'
 import toast from 'react-hot-toast'
+import { useAuthStore } from '@/stores/authStore'
 
+// Hook for cart management
 export function useCart() {
   const queryClient = useQueryClient()
+  const isAuthenticated = useAuthStore((state) => state.isAuthenticated)
 
   const { data: cart, isLoading } = useQuery({
     queryKey: ['cart'],
     queryFn: () => apiClient.get<Cart>('/cart'),
+    enabled: isAuthenticated,
     refetchOnWindowFocus: false,
-    refetchOnMount: false,
-    refetchOnReconnect: false,
-    staleTime: 5 * 60 * 1000, // Consider data fresh for 5 minutes
   })
 
   const addToCart = useMutation({

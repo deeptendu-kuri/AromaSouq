@@ -138,7 +138,7 @@ export default function QuickCheckoutPage() {
               <div className="flex gap-4">
                 <div className="relative w-20 h-20 rounded-lg overflow-hidden bg-gray-100">
                   <Image
-                    src={product.images?.[0]?.url || 'https://images.unsplash.com/photo-1541643600914-78b084683601?w=400'}
+                    src={getFirstProductImage(product) || '/placeholder.png'}
                     alt={product.nameEn}
                     fill
                     className="object-cover"

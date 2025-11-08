@@ -62,7 +62,7 @@ export default function ComparePage() {
                   </button>
                   <div className="relative w-48 h-48 mx-auto rounded-lg overflow-hidden mb-3">
                     <Image
-                      src={product.images?.[0]?.url || 'https://images.unsplash.com/photo-1541643600914-78b084683601?w=400'}
+                      src={getFirstProductImage(product) || '/placeholder.png'}
                       alt={product.nameEn}
                       fill
                       className="object-cover"

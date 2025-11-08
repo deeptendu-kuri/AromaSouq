@@ -12,6 +12,14 @@ import { toast } from 'sonner';
 import Link from 'next/link';
 import Image from 'next/image';
 
+// Helper function to get first product image
+const getFirstProductImage = (product: any) => {
+  if (product?.images && product.images.length > 0) {
+    return product.images[0].url;
+  }
+  return null;
+};
+
 export default function WriteReviewPage() {
   const params = useParams();
   const router = useRouter();
@@ -134,7 +142,7 @@ export default function WriteReviewPage() {
           <div className="flex items-center gap-4 mb-6 pb-6 border-b">
             <div className="relative w-20 h-20 rounded-lg overflow-hidden bg-gray-100">
               <Image
-                src={product.images?.[0]?.url || 'https://images.unsplash.com/photo-1541643600914-78b084683601?w=800'}
+                src={getFirstProductImage(product) || '/placeholder.png'}
                 alt={product.nameEn}
                 fill
                 className="object-cover"

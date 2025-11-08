@@ -6,6 +6,8 @@ import {
   ConflictException,
 } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
+import { WalletService } from '../wallet/wallet.service';
+import { CoinSource } from '../wallet/dto/award-coins.dto';
 import { CreateReviewDto } from './dto/create-review.dto';
 import { UpdateReviewDto } from './dto/update-review.dto';
 import { VoteReviewDto } from './dto/vote-review.dto';
@@ -14,7 +16,10 @@ import { VoteType } from '@prisma/client';
 
 @Injectable()
 export class ReviewsService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly walletService: WalletService,
+  ) {}
 
   async create(userId: string, createReviewDto: CreateReviewDto) {
     const { productId, rating, title, comment, images } = createReviewDto;
@@ -95,6 +100,20 @@ export class ReviewsService {
 
     // Update product average rating
     await this.updateProductRating(productId);
+
+    // Award coins for writing review
+    try {
+      await this.walletService.awardCoins(userId, {
+        amount: 10, // 10 coins per review
+        source: CoinSource.PRODUCT_REVIEW,
+        description: `Earned 10 coins for reviewing "${product.name}"`,
+        productId: product.id,
+        reviewId: review.id,
+      });
+    } catch (error) {
+      // Log error but don't fail the review creation
+      console.error('Failed to award coins for review:', error);
+    }
 
     return review;
   }

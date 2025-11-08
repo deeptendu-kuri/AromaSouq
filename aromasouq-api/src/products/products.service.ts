@@ -10,6 +10,7 @@ import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 import { CreateVariantDto } from './dto/create-variant.dto';
 import { UpdateVariantDto } from './dto/update-variant.dto';
+import { BulkFlashSaleDto, RemoveFlashSaleDto, SetDiscountPercentDto } from './dto/flash-sale.dto';
 import { UserRole } from '@prisma/client';
 
 @Injectable()
@@ -387,25 +388,36 @@ export class ProductsService {
     // Remove vendorId from DTO to prevent client manipulation
     const { vendorId: _, ...productData } = createProductDto;
 
-    return this.prisma.product.create({
-      data: {
-        ...productData,
-        vendorId, // Use the auto-injected/validated vendorId
-      },
-      include: {
-        category: true,
-        brand: true,
-        vendor: {
-          select: {
-            id: true,
-            businessName: true,
-            businessNameAr: true,
-            businessEmail: true,
-            businessPhone: true,
+    try {
+      return await this.prisma.product.create({
+        data: {
+          ...productData,
+          vendorId, // Use the auto-injected/validated vendorId
+        },
+        include: {
+          category: true,
+          brand: true,
+          vendor: {
+            select: {
+              id: true,
+              businessName: true,
+              businessNameAr: true,
+              businessEmail: true,
+              businessPhone: true,
+            },
           },
         },
-      },
-    });
+      });
+    } catch (error) {
+      // Handle Prisma unique constraint violations
+      if (error.code === 'P2002') {
+        const field = error.meta?.target?.[0] || 'field';
+        throw new BadRequestException(
+          `A product with this ${field.toUpperCase()} already exists. Please use a different ${field}.`,
+        );
+      }
+      throw error;
+    }
   }
 
   async update(
@@ -892,6 +904,244 @@ export class ProductsService {
       men: menCount,
       women: womenCount,
       unisex: unisexCount,
+    };
+  }
+
+  // ============================================================================
+  // FLASH SALE MANAGEMENT
+  // ============================================================================
+
+  async bulkAddFlashSale(
+    userId: string,
+    userRole: UserRole,
+    bulkFlashSaleDto: BulkFlashSaleDto,
+  ) {
+    const { productIds, salePrice, discountPercent, saleEndDate } = bulkFlashSaleDto;
+
+    // Verify ownership for vendors
+    if (userRole === UserRole.VENDOR) {
+      const vendor = await this.prisma.vendor.findUnique({
+        where: { userId },
+      });
+
+      if (!vendor) {
+        throw new ForbiddenException('Vendor profile not found');
+      }
+
+      // Check that all products belong to this vendor
+      const products = await this.prisma.product.findMany({
+        where: {
+          id: { in: productIds },
+          vendorId: vendor.id,
+        },
+      });
+
+      if (products.length !== productIds.length) {
+        throw new ForbiddenException(
+          'You can only manage flash sales for your own products',
+        );
+      }
+    }
+
+    // Calculate sale price and discount percent for each product
+    const updatePromises = productIds.map(async (productId) => {
+      const product = await this.prisma.product.findUnique({
+        where: { id: productId },
+        select: { price: true },
+      });
+
+      if (!product) return null;
+
+      let finalSalePrice = salePrice;
+      let finalDiscountPercent = discountPercent;
+
+      // If discount percent is provided but sale price isn't, calculate sale price
+      if (discountPercent && !salePrice) {
+        finalSalePrice = Math.round(
+          product.price * (1 - discountPercent / 100),
+        );
+      }
+
+      // If sale price is provided but discount percent isn't, calculate discount
+      if (salePrice && !discountPercent) {
+        finalDiscountPercent = Math.round(
+          ((product.price - salePrice) / product.price) * 100,
+        );
+      }
+
+      return this.prisma.product.update({
+        where: { id: productId },
+        data: {
+          isOnSale: true,
+          salePrice: finalSalePrice,
+          discountPercent: finalDiscountPercent,
+          saleEndDate: saleEndDate || null,
+        },
+      });
+    });
+
+    const results = await Promise.all(updatePromises);
+    const successCount = results.filter((r) => r !== null).length;
+
+    return {
+      success: true,
+      message: `Added ${successCount} products to flash sale`,
+      updatedCount: successCount,
+    };
+  }
+
+  async bulkRemoveFlashSale(
+    userId: string,
+    userRole: UserRole,
+    removeFlashSaleDto: RemoveFlashSaleDto,
+  ) {
+    const { productIds } = removeFlashSaleDto;
+
+    // Verify ownership for vendors
+    if (userRole === UserRole.VENDOR) {
+      const vendor = await this.prisma.vendor.findUnique({
+        where: { userId },
+      });
+
+      if (!vendor) {
+        throw new ForbiddenException('Vendor profile not found');
+      }
+
+      const products = await this.prisma.product.findMany({
+        where: {
+          id: { in: productIds },
+          vendorId: vendor.id,
+        },
+      });
+
+      if (products.length !== productIds.length) {
+        throw new ForbiddenException(
+          'You can only manage flash sales for your own products',
+        );
+      }
+    }
+
+    await this.prisma.product.updateMany({
+      where: { id: { in: productIds } },
+      data: {
+        isOnSale: false,
+        salePrice: null,
+        discountPercent: null,
+        saleEndDate: null,
+      },
+    });
+
+    return {
+      success: true,
+      message: `Removed ${productIds.length} products from flash sale`,
+      removedCount: productIds.length,
+    };
+  }
+
+  async setFlashSaleDiscount(
+    userId: string,
+    userRole: UserRole,
+    setDiscountDto: SetDiscountPercentDto,
+  ) {
+    const { productIds, discountPercent, saleEndDate } = setDiscountDto;
+
+    // Verify ownership for vendors
+    if (userRole === UserRole.VENDOR) {
+      const vendor = await this.prisma.vendor.findUnique({
+        where: { userId },
+      });
+
+      if (!vendor) {
+        throw new ForbiddenException('Vendor profile not found');
+      }
+
+      const products = await this.prisma.product.findMany({
+        where: {
+          id: { in: productIds },
+          vendorId: vendor.id,
+        },
+      });
+
+      if (products.length !== productIds.length) {
+        throw new ForbiddenException(
+          'You can only manage flash sales for your own products',
+        );
+      }
+    }
+
+    // Calculate sale price for each product based on discount percent
+    const updatePromises = productIds.map(async (productId) => {
+      const product = await this.prisma.product.findUnique({
+        where: { id: productId },
+        select: { price: true },
+      });
+
+      if (!product) return null;
+
+      const salePrice = Math.round(product.price * (1 - discountPercent / 100));
+
+      return this.prisma.product.update({
+        where: { id: productId },
+        data: {
+          isOnSale: true,
+          salePrice,
+          discountPercent,
+          saleEndDate: saleEndDate || null,
+        },
+      });
+    });
+
+    const results = await Promise.all(updatePromises);
+    const successCount = results.filter((r) => r !== null).length;
+
+    return {
+      success: true,
+      message: `Set ${discountPercent}% discount on ${successCount} products`,
+      updatedCount: successCount,
+    };
+  }
+
+  async getMyFlashSaleProducts(userId: string, userRole: UserRole) {
+    const where: any = {
+      isActive: true,
+      isOnSale: true,
+    };
+
+    // For vendors, only show their own flash sale products
+    if (userRole === UserRole.VENDOR) {
+      const vendor = await this.prisma.vendor.findUnique({
+        where: { userId },
+      });
+
+      if (!vendor) {
+        throw new ForbiddenException('Vendor profile not found');
+      }
+
+      where.vendorId = vendor.id;
+    }
+
+    const products = await this.prisma.product.findMany({
+      where,
+      include: {
+        brand: { select: { id: true, name: true, nameAr: true, logo: true } },
+        category: { select: { id: true, name: true, nameAr: true } },
+        vendor: { select: { id: true, businessName: true } },
+      },
+      orderBy: [
+        { saleEndDate: 'asc' },
+        { discountPercent: 'desc' },
+      ],
+    });
+
+    // Group products by status
+    const now = new Date();
+    const active = products.filter((p) => !p.saleEndDate || p.saleEndDate > now);
+    const expired = products.filter((p) => p.saleEndDate && p.saleEndDate <= now);
+
+    return {
+      active,
+      expired,
+      total: products.length,
     };
   }
 }

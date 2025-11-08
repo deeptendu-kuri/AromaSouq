@@ -34,12 +34,15 @@ export class UploadsController {
   async uploadProductImages(
     @Param('id') productId: string,
     @UploadedFiles() files: Express.Multer.File[],
+    @Req() req: Request,
   ) {
     if (!files || files.length === 0) {
       throw new BadRequestException('No files provided');
     }
 
-    return this.uploadsService.uploadProductImages(productId, files);
+    const userId = req.user?.['sub'];
+    const userRole = req.user?.['role'];
+    return this.uploadsService.uploadProductImages(productId, files, userId, userRole);
   }
 
   /**

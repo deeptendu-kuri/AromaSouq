@@ -27,8 +27,10 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
+import { ProductImagePlaceholder } from "@/components/ui/product-image-placeholder"
 import { apiClient } from "@/lib/api-client"
 import { formatCurrency } from "@/lib/utils"
+import { getFirstProductImage } from "@/lib/image-utils"
 import toast from "react-hot-toast"
 
 export default function VendorProductsPage() {
@@ -139,12 +141,16 @@ export default function VendorProductsPage() {
                   <TableCell>
                     <div className="flex items-center gap-3">
                       <div className="relative w-12 h-12 rounded-lg overflow-hidden bg-gray-100">
-                        <Image
-                          src={product.images?.[0]?.url || 'https://images.unsplash.com/photo-1541643600914-78b084683601?w=400'}
-                          alt={product.name || product.nameEn || 'Product image'}
-                          fill
-                          className="object-cover"
-                        />
+                        {getFirstProductImage(product) ? (
+                          <Image
+                            src={getFirstProductImage(product)!}
+                            alt={product.name || product.nameEn || 'Product image'}
+                            fill
+                            className="object-cover"
+                          />
+                        ) : (
+                          <ProductImagePlaceholder className="w-full h-full" size="sm" />
+                        )}
                       </div>
                       <div>
                         <p className="font-medium">{product.nameEn}</p>
@@ -189,7 +195,7 @@ export default function VendorProductsPage() {
                           </Link>
                         </DropdownMenuItem>
                         <DropdownMenuItem asChild>
-                          <Link href={`/vendor/products/${product.id}/edit`}>
+                          <Link href={`/vendor/products/${product.id}`}>
                             <Edit className="h-4 w-4 mr-2" />
                             Edit
                           </Link>

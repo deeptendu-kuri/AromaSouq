@@ -2,17 +2,17 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { apiClient } from '@/lib/api-client'
 import { Product } from '@/types'
 import toast from 'react-hot-toast'
+import { useAuthStore } from '@/stores/authStore'
 
 export function useWishlist() {
   const queryClient = useQueryClient()
+  const isAuthenticated = useAuthStore((state) => state.isAuthenticated)
 
   const { data: wishlist, isLoading } = useQuery({
     queryKey: ['wishlist'],
     queryFn: () => apiClient.get<Product[]>('/wishlist'),
+    enabled: isAuthenticated,
     refetchOnWindowFocus: false,
-    refetchOnMount: false,
-    refetchOnReconnect: false,
-    staleTime: 5 * 60 * 1000, // Consider data fresh for 5 minutes
   })
 
   const addToWishlist = useMutation({

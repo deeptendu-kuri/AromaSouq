@@ -9,7 +9,9 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { GlareCard } from "@/components/aceternity/glare-card"
+import { ProductImagePlaceholder } from "@/components/ui/product-image-placeholder"
 import { cn, formatCurrency, calculateDiscount } from "@/lib/utils"
+import { getFirstProductImage } from "@/lib/image-utils"
 import { Product } from "@/types"
 
 interface ProductCardProps {
@@ -41,12 +43,8 @@ export function ProductCard({
   const stockQuantity = (product as any).stockQuantity || (product as any).stock || 0
   const isLowStock = stockQuantity > 0 && stockQuantity < 5
 
-  // Handle image - check if images is array of objects or array of strings
-  let productImage = 'https://images.unsplash.com/photo-1541643600914-78b084683601?w=800'
-  if (product.images && product.images.length > 0) {
-    const firstImage = product.images[0]
-    productImage = typeof firstImage === 'string' ? firstImage : firstImage.url
-  }
+  // Get product image (null if no image available)
+  const productImage = getFirstProductImage(product)
 
   const brandName = product.brand?.name || (product as any).vendor?.businessName || 'Premium Brand'
   const productName = product.name || product.nameEn || 'Product'
@@ -65,12 +63,16 @@ export function ProductCard({
           {/* Image Container - Reduced aspect ratio */}
           <div className="relative aspect-[4/5] overflow-hidden bg-gradient-to-br from-[#f8f8f8] via-[#f0f0f0] to-[#e8e8e8]">
             <Link href={`/products/${product.slug}`}>
-              <Image
-                src={productImage}
-                alt={productName}
-                fill
-                className="object-cover transition-transform duration-500 hover:scale-110"
-              />
+              {productImage ? (
+                <Image
+                  src={productImage}
+                  alt={productName}
+                  fill
+                  className="object-cover transition-transform duration-500 hover:scale-110"
+                />
+              ) : (
+                <ProductImagePlaceholder className="w-full h-full" size="lg" />
+              )}
             </Link>
 
             {/* Badges - More compact */}

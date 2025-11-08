@@ -17,9 +17,11 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
+import { ProductImagePlaceholder } from '@/components/ui/product-image-placeholder'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { apiClient } from '@/lib/api-client'
 import { formatCurrency } from '@/lib/utils'
+import { getFirstProductImage } from '@/lib/image-utils'
 import toast from 'react-hot-toast'
 
 export default function ProductModerationPage() {
@@ -125,12 +127,16 @@ export default function ProductModerationPage() {
                           <TableCell>
                             <div className="flex items-center gap-3">
                               <div className="relative w-12 h-12 rounded-lg overflow-hidden bg-gray-100">
-                                <Image
-                                  src={product.images?.[0]?.url || 'https://images.unsplash.com/photo-1541643600914-78b084683601?w=400'}
-                                  alt={product.nameEn}
-                                  fill
-                                  className="object-cover"
-                                />
+{getFirstProductImage(product) ? (
+                                  <Image
+                                    src={getFirstProductImage(product)!}
+                                    alt={product.nameEn}
+                                    fill
+                                    className="object-cover"
+                                  />
+                                ) : (
+                                  <ProductImagePlaceholder className="w-full h-full" size="sm" />
+                                )}
                               </div>
                               <div>
                                 <p className="font-medium">{product.name}</p>

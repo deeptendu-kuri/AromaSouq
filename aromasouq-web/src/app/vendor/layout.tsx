@@ -3,7 +3,7 @@
 import { useEffect } from "react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
-import { Home, Package, ShoppingBag, Star, BarChart3, Settings, LogOut } from "lucide-react"
+import { Home, Package, ShoppingBag, Star, BarChart3, Settings, LogOut, Flame } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Separator } from "@/components/ui/separator"
@@ -12,6 +12,7 @@ import { useAuth } from "@/hooks/useAuth"
 const navigation = [
   { name: 'Dashboard', href: '/vendor', icon: Home },
   { name: 'Products', href: '/vendor/products', icon: Package },
+  { name: 'Flash Sales', href: '/vendor/flash-sales', icon: Flame },
   { name: 'Orders', href: '/vendor/orders', icon: ShoppingBag },
   { name: 'Reviews', href: '/vendor/reviews', icon: Star },
   { name: 'Analytics', href: '/vendor/analytics', icon: BarChart3 },

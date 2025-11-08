@@ -101,14 +101,25 @@ export class UploadsService {
   async uploadProductImages(
     productId: string,
     files: Express.Multer.File[],
+    userId?: string,
+    userRole?: string,
   ) {
-    // Verify product exists
+    // Verify product exists and get vendor info
     const product = await this.prisma.product.findUnique({
       where: { id: productId },
+      include: { vendor: true },
     });
 
     if (!product) {
       throw new NotFoundException(`Product with ID ${productId} not found`);
+    }
+
+    // Verify vendor ownership (unless user is admin)
+    // product.vendor.userId is the User ID who owns this vendor profile
+    if (userRole !== 'ADMIN' && product.vendor.userId !== userId) {
+      throw new BadRequestException(
+        'You can only upload images to your own products',
+      );
     }
 
     // Validate files

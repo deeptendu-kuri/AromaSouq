@@ -39,8 +39,14 @@ export function useCreateReview() {
       const res = await apiClient.post('/reviews', data);
       return res;
     },
-    onSuccess: () => {
+    onSuccess: (data, variables) => {
+      // Invalidate reviews list
       queryClient.invalidateQueries({ queryKey: ['reviews'] });
+      // Invalidate review stats for this product
+      queryClient.invalidateQueries({ queryKey: ['reviewStats', variables.productId] });
+      // Invalidate product data to update review count and average rating
+      queryClient.invalidateQueries({ queryKey: ['products'] });
+      queryClient.invalidateQueries({ queryKey: ['product'] });
     },
   });
 }
@@ -65,6 +71,9 @@ export function useUpdateReview() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['reviews'] });
+      queryClient.invalidateQueries({ queryKey: ['reviewStats'] });
+      queryClient.invalidateQueries({ queryKey: ['products'] });
+      queryClient.invalidateQueries({ queryKey: ['product'] });
     },
   });
 }
@@ -78,6 +87,9 @@ export function useDeleteReview() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['reviews'] });
+      queryClient.invalidateQueries({ queryKey: ['reviewStats'] });
+      queryClient.invalidateQueries({ queryKey: ['products'] });
+      queryClient.invalidateQueries({ queryKey: ['product'] });
     },
   });
 }

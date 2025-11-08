@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Separator } from "@/components/ui/separator"
 import { Input } from "@/components/ui/input"
+import { ProductImagePlaceholder } from "@/components/ui/product-image-placeholder"
 import { useCart } from "@/hooks/useCart"
 import { formatCurrency } from "@/lib/utils"
 import toast from "react-hot-toast"
@@ -114,7 +115,9 @@ export default function CartPage() {
   }
 
   const productImage = (item: any) => {
-    return item.product?.images?.[0]?.url || 'https://images.unsplash.com/photo-1541643600914-78b084683601?w=400'
+    const firstImage = item.product?.images?.[0]
+    if (!firstImage) return null
+    return typeof firstImage === 'string' ? firstImage : firstImage.url
   }
 
   const productName = (item: any) => {
@@ -163,14 +166,18 @@ export default function CartPage() {
                       {/* Product Image */}
                       <Link
                         href={`/products/${productSlug(item)}`}
-                        className="relative w-24 h-24 rounded-lg overflow-hidden flex-shrink-0 group"
+                        className="relative w-24 h-24 rounded-lg overflow-hidden flex-shrink-0 group bg-gray-100"
                       >
-                        <Image
-                          src={productImage(item)}
-                          alt={productName(item)}
-                          fill
-                          className="object-cover group-hover:scale-105 transition-transform"
-                        />
+                        {productImage(item) ? (
+                          <Image
+                            src={productImage(item)!}
+                            alt={productName(item)}
+                            fill
+                            className="object-cover group-hover:scale-105 transition-transform"
+                          />
+                        ) : (
+                          <ProductImagePlaceholder className="w-full h-full" size="sm" />
+                        )}
                       </Link>
 
                       {/* Product Details */}

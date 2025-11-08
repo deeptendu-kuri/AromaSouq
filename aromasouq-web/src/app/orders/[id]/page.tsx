@@ -10,7 +10,7 @@ import { formatCurrency } from '@/lib/utils'
 import { format } from 'date-fns'
 import Link from 'next/link'
 import Image from 'next/image'
-import { Package, ArrowLeft, MapPin, CreditCard, Truck } from 'lucide-react'
+import { Package, ArrowLeft, MapPin, CreditCard, Truck, Star, MessageSquare } from 'lucide-react'
 import toast from 'react-hot-toast'
 
 const statusConfig = {
@@ -62,7 +62,7 @@ export default function OrderDetailPage() {
     )
   }
 
-  const statusClass = statusConfig[order.status as keyof typeof statusConfig]?.color || 'bg-gray-100 text-gray-800'
+  const statusClass = statusConfig[order.orderStatus as keyof typeof statusConfig]?.color || 'bg-gray-100 text-gray-800'
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -81,7 +81,7 @@ export default function OrderDetailPage() {
           </p>
         </div>
         <Badge className={statusClass} variant="secondary">
-          {statusConfig[order.status as keyof typeof statusConfig]?.label || order.status}
+          {statusConfig[order.orderStatus as keyof typeof statusConfig]?.label || order.orderStatus}
         </Badge>
       </div>
 
@@ -156,6 +156,89 @@ export default function OrderDetailPage() {
               </div>
             </CardContent>
           </Card>
+
+          {/* Product Reviews Section - Only for DELIVERED orders */}
+          {order.orderStatus === 'DELIVERED' && (
+            <Card>
+              <CardHeader>
+                <div className="flex items-center gap-2">
+                  <Star className="w-5 h-5 text-oud-gold" />
+                  <CardTitle>Product Reviews</CardTitle>
+                </div>
+                <p className="text-sm text-muted-foreground mt-1">
+                  Share your experience with the products you received
+                </p>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  {order.items.map((item) => (
+                    <div key={item.id} className="flex items-center justify-between pb-4 border-b last:border-0 last:pb-0">
+                      <div className="flex gap-4 flex-1">
+                        <div className="relative w-16 h-16 rounded-md overflow-hidden bg-gray-100 flex-shrink-0">
+                          {item.product.images?.[0]?.url ? (
+                            <Image
+                              src={item.product.images[0].url}
+                              alt={item.product.name}
+                              fill
+                              className="object-cover"
+                            />
+                          ) : (
+                            <div className="w-full h-full flex items-center justify-center">
+                              <Package className="w-8 h-8 text-gray-400" />
+                            </div>
+                          )}
+                        </div>
+                        <div className="flex-1">
+                          <p className="font-medium text-sm">{item.product.name}</p>
+                          <div className="mt-2">
+                            {item.hasReviewed ? (
+                              <div className="flex items-center gap-2">
+                                <Badge className="bg-green-100 text-green-800 border-green-200">
+                                  <Star className="w-3 h-3 mr-1" />
+                                  Reviewed
+                                </Badge>
+                                <span className="text-xs text-muted-foreground">
+                                  {item.review?.rating}/5 stars
+                                </span>
+                              </div>
+                            ) : (
+                              <Badge variant="secondary" className="text-xs">
+                                <MessageSquare className="w-3 h-3 mr-1" />
+                                Not Reviewed
+                              </Badge>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                      <div className="flex-shrink-0">
+                        {item.hasReviewed ? (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            asChild
+                          >
+                            <Link href={`/products/${item.product.slug || item.product.id}#reviews`}>
+                              View Review
+                            </Link>
+                          </Button>
+                        ) : (
+                          <Button
+                            size="sm"
+                            className="bg-oud-gold hover:bg-oud-gold/90"
+                            asChild
+                          >
+                            <Link href={`/products/${item.product.slug || item.product.id}/write-review?orderId=${order.id}`}>
+                              Write Review
+                            </Link>
+                          </Button>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          )}
         </div>
 
         {/* Sidebar */}
@@ -208,7 +291,7 @@ export default function OrderDetailPage() {
           </Card>
 
           {/* Actions */}
-          {order.status === 'PENDING' && (
+          {order.orderStatus === 'PENDING' && (
             <Button
               variant="destructive"
               className="w-full"

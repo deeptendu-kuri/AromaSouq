@@ -9,7 +9,9 @@ import { Dialog, DialogContent } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { ProductImagePlaceholder } from '@/components/ui/product-image-placeholder'
 import { formatCurrency } from '@/lib/utils'
+import { getProductImageUrl } from '@/lib/image-utils'
 import { useCart } from '@/hooks/useCart'
 import { useWishlist } from '@/hooks/useWishlist'
 import { ScentPyramid } from './scent-pyramid'
@@ -89,12 +91,16 @@ export function QuickViewModal({ product, open, onClose }: QuickViewModalProps) 
               <div className="space-y-4">
                 {/* Main Image */}
                 <div className="relative aspect-[3/4] rounded-lg overflow-hidden bg-gray-100">
-                  <Image
-                    src={product.images?.[selectedImage]?.url || 'https://images.unsplash.com/photo-1541643600914-78b084683601?w=400'}
-                    alt={product.nameEn}
-                    fill
-                    className="object-cover"
-                  />
+                  {getProductImageUrl(product, selectedImage) ? (
+                    <Image
+                      src={getProductImageUrl(product, selectedImage)!}
+                      alt={product.nameEn}
+                      fill
+                      className="object-cover"
+                    />
+                  ) : (
+                    <ProductImagePlaceholder className="w-full h-full" size="lg" />
+                  )}
 
                   {/* Wishlist Heart */}
                   <button

@@ -1,9 +1,9 @@
 "use client"
 
-import React, { useState, useEffect } from "react"
+import React from "react"
 import Link from "next/link"
-import { usePathname, useRouter, useSearchParams } from "next/navigation"
-import { Search, ShoppingCart, Heart, User, Menu } from "lucide-react"
+import { usePathname, useSearchParams } from "next/navigation"
+import { Search, ShoppingCart, Heart, User, Menu, Coins } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
@@ -14,7 +14,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
+import { Sheet, SheetContent, SheetTrigger, SheetTitle } from "@/components/ui/sheet"
 import { useAuth } from "@/hooks/useAuth"
 import { useCart } from "@/hooks/useCart"
 import { cn } from "@/lib/utils"
@@ -22,16 +22,9 @@ import { cn } from "@/lib/utils"
 // import { CoinsWidget } from "@/components/layout/CoinsWidget"
 
 export function Header() {
-  // TEMPORARILY DISABLED - Testing reload issue
-  // const { user, isAuthenticated, logout } = useAuth()
-  // const { cart, itemCount } = useCart()
-  const user = null
-  const isAuthenticated = false
-  const logout = () => {}
-  const itemCount = 0
-
+  const { user, isAuthenticated, logout } = useAuth()
+  const { cart, itemCount } = useCart()
   const pathname = usePathname()
-  const router = useRouter()
   const searchParams = useSearchParams()
   const categorySlug = searchParams.get('categorySlug')
 
@@ -59,6 +52,7 @@ export function Header() {
               </Button>
             </SheetTrigger>
             <SheetContent side="left">
+              <SheetTitle className="sr-only">Navigation Menu</SheetTitle>
               <nav className="flex flex-col gap-4 mt-8">
                 <Link
                   href="/products"
@@ -201,7 +195,14 @@ export function Header() {
           {/* Actions */}
           <div className="flex items-center gap-2">
             {/* Coins Widget */}
-            {/* <CoinsWidget /> */}
+            {isAuthenticated && user?.coinsBalance !== undefined && (
+              <Button variant="ghost" size="sm" asChild className="hidden md:flex gap-2">
+                <Link href="/account/wallet" className="hover:text-oud-gold">
+                  <Coins className="h-4 w-4 text-oud-gold" />
+                  <span className="font-semibold text-oud-gold">{user.coinsBalance}</span>
+                </Link>
+              </Button>
+            )}
 
             {/* Wishlist */}
             <Button variant="ghost" size="icon" asChild>
