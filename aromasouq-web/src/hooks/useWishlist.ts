@@ -9,6 +9,10 @@ export function useWishlist() {
   const { data: wishlist, isLoading } = useQuery({
     queryKey: ['wishlist'],
     queryFn: () => apiClient.get<Product[]>('/wishlist'),
+    refetchOnWindowFocus: false,
+    refetchOnMount: false,
+    refetchOnReconnect: false,
+    staleTime: 5 * 60 * 1000, // Consider data fresh for 5 minutes
   })
 
   const addToWishlist = useMutation({

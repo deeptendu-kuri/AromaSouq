@@ -56,7 +56,7 @@ const createProductSchema = z.object({
   heartNotes: z.string().optional(),
   baseNotes: z.string().optional(),
   notes: z.string().optional(),
-  scentFamily: z.enum(["floral", "oriental", "woody", "fresh", "citrus", "fruity", "spicy", "aquatic", "green", "gourmand"], {
+  scentFamily: z.enum(["floral", "oriental", "woody", "fresh", "citrus", "fruity", "spicy", "aquatic", "green", "gourmand", "musky", "leather"], {
     required_error: "Scent family is required",
     invalid_type_error: "Invalid scent family",
   }),
@@ -64,12 +64,17 @@ const createProductSchema = z.object({
   sillage: z.string().optional(),
   season: z.string().optional(),
 
-  // Classification (Phase 2)
-  productType: z.string().optional(),
+  // Classification (NOW MANDATORY)
+  productType: z.enum(["ORIGINAL", "CLONE", "SIMILAR_DNA", "NICHE", "ATTAR", "BODY_SPRAY", "BAKHOOR", "HOME_FRAGRANCE", "GIFT_SET", "OUR_BRAND"], {
+    required_error: "Product type is required",
+    invalid_type_error: "Invalid product type",
+  }),
   region: z.string().optional(),
   occasion: z.string().optional(),
   oudType: z.string().optional(),
   collection: z.string().optional(),
+  format: z.string().optional(),
+  priceSegment: z.string().optional(),
 
   // Advanced
   enableWhatsapp: z.boolean().optional(),
@@ -118,11 +123,13 @@ export default function NewProductPage() {
       longevity: "",
       sillage: "",
       season: "",
-      productType: "",
+      productType: undefined,
       region: "",
       occasion: "",
       oudType: "",
       collection: "",
+      format: "",
+      priceSegment: "",
       enableWhatsapp: false,
       whatsappNumber: "",
       coinsToAward: 0,
@@ -830,17 +837,17 @@ export default function NewProductPage() {
                       </CardDescription>
                     </CardHeader>
                     <CardContent className="space-y-6">
-                      {/* Product Type */}
+                      {/* Product Type - NOW MANDATORY */}
                       <FormField
                         control={form.control}
                         name="productType"
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel>Product Type</FormLabel>
+                            <FormLabel>Product Type <span className="text-red-500">*</span></FormLabel>
                             <Select onValueChange={field.onChange} value={field.value}>
                               <FormControl>
                                 <SelectTrigger>
-                                  <SelectValue placeholder="Select product type" />
+                                  <SelectValue placeholder="Select product type (required)" />
                                 </SelectTrigger>
                               </FormControl>
                               <SelectContent>
@@ -850,10 +857,14 @@ export default function NewProductPage() {
                                 <SelectItem value="NICHE">Niche</SelectItem>
                                 <SelectItem value="ATTAR">Attar</SelectItem>
                                 <SelectItem value="BODY_SPRAY">Body Spray</SelectItem>
+                                <SelectItem value="BAKHOOR">Bakhoor</SelectItem>
+                                <SelectItem value="HOME_FRAGRANCE">Home Fragrance</SelectItem>
+                                <SelectItem value="GIFT_SET">Gift Set</SelectItem>
+                                <SelectItem value="OUR_BRAND">Our Brand</SelectItem>
                               </SelectContent>
                             </Select>
                             <FormDescription>
-                              What type of fragrance is this?
+                              What type of fragrance is this? (Required)
                             </FormDescription>
                             <FormMessage />
                           </FormItem>

@@ -811,13 +811,13 @@ export class ProductsService {
   async getProductTypeAggregation() {
     const aggregation = await this.prisma.product.groupBy({
       by: ['productType'],
-      where: { isActive: true, productType: { not: null } },
+      where: { isActive: true },
       _count: { id: true },
     });
 
     return aggregation.map((item) => ({
       productType: item.productType,
-      count: item._count.id,
+      count: item._count?.id || 0,
     }));
   }
 

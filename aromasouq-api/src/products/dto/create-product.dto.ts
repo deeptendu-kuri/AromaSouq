@@ -115,7 +115,7 @@ export class CreateProductDto {
   // TIER 1 MANDATORY
   @IsNotEmpty({ message: 'Scent family is required' })
   @IsString()
-  @IsIn(['floral', 'oriental', 'woody', 'fresh', 'citrus', 'fruity', 'spicy', 'aquatic', 'green', 'gourmand'], { message: 'Invalid scent family' })
+  @IsIn(['floral', 'oriental', 'woody', 'fresh', 'citrus', 'fruity', 'spicy', 'aquatic', 'green', 'gourmand', 'musky', 'leather'], { message: 'Invalid scent family' })
   scentFamily: string;
 
   @IsOptional()
@@ -145,11 +145,11 @@ export class CreateProductDto {
   @Min(0)
   coinsToAward?: number;
 
-  // NEW: Enhanced Product Classification (Phase 2)
-  @IsOptional()
+  // NEW: Enhanced Product Classification (Phase 2) - NOW MANDATORY
+  @IsNotEmpty({ message: 'Product type is required' })
   @IsString()
-  @IsIn(['ORIGINAL', 'CLONE', 'SIMILAR_DNA', 'NICHE', 'ATTAR', 'BODY_SPRAY'])
-  productType?: string;
+  @IsIn(['ORIGINAL', 'CLONE', 'SIMILAR_DNA', 'NICHE', 'ATTAR', 'BODY_SPRAY', 'BAKHOOR', 'HOME_FRAGRANCE', 'GIFT_SET', 'OUR_BRAND'], { message: 'Invalid product type' })
+  productType: string;
 
   @IsOptional()
   @IsString()
@@ -162,13 +162,24 @@ export class CreateProductDto {
 
   @IsOptional()
   @IsString()
-  @IsIn(['CAMBODIAN', 'INDIAN', 'THAI', 'MALAYSIAN', 'LAOTIAN', 'MUKHALLAT'])
+  @IsIn(['CAMBODIAN', 'INDIAN', 'THAI', 'MALAYSIAN', 'LAOTIAN', 'MUKHALLAT', 'DEHN_AL_OUD'])
   oudType?: string;
 
   @IsOptional()
   @IsString()
-  @IsIn(['RAMADAN', 'SIGNATURE', 'CELEBRITY', 'MOST_LOVED', 'TRENDING', 'EXCLUSIVE'])
+  @IsIn(['RAMADAN', 'SIGNATURE', 'CELEBRITY', 'MOST_LOVED', 'TRENDING', 'EXCLUSIVE', 'OUD_ROYALE', 'DISCOVERY_BOX', 'INSPIRED_BY'])
   collection?: string;
+
+  // NEW FIELDS
+  @IsOptional()
+  @IsString()
+  @IsIn(['SPRAY', 'OIL', 'ROLLON', 'SAMPLE', 'GIFT_SET'])
+  format?: string;
+
+  @IsOptional()
+  @IsString()
+  @IsIn(['BUDGET', 'MID', 'PREMIUM', 'LUXURY', 'ULTRA_LUXURY'])
+  priceSegment?: string;
 
   // SEO
   @IsOptional()

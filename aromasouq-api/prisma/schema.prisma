@@ -155,8 +155,11 @@ model Product {
   collection      String?          @map("collection")
   occasion        String?          @map("occasion")
   oudType         String?          @map("oud_type")
-  productType     String?          @map("product_type")
+  productType     String           @map("product_type") // NOW MANDATORY
   region          String?          @map("region")
+  // NEW FIELDS
+  format          String?          @map("format") // SPRAY, OIL, ROLLON, SAMPLE, GIFT_SET
+  priceSegment    String?          @map("price_segment") // BUDGET, MID, PREMIUM, LUXURY, ULTRA_LUXURY
   // Flash Sale Fields
   isOnSale        Boolean          @default(false) @map("is_on_sale")
   salePrice       Float?           @map("sale_price")

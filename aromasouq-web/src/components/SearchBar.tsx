@@ -47,6 +47,10 @@ export function SearchBar() {
       return res;
     },
     enabled: debouncedQuery.length >= 2,
+    refetchOnWindowFocus: false,
+    refetchOnMount: false,
+    refetchOnReconnect: false,
+    staleTime: 2 * 60 * 1000, // Consider search results fresh for 2 minutes
   });
 
   const handleSearch = (e: React.FormEvent) => {

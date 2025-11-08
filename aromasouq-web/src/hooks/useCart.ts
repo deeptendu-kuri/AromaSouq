@@ -9,6 +9,10 @@ export function useCart() {
   const { data: cart, isLoading } = useQuery({
     queryKey: ['cart'],
     queryFn: () => apiClient.get<Cart>('/cart'),
+    refetchOnWindowFocus: false,
+    refetchOnMount: false,
+    refetchOnReconnect: false,
+    staleTime: 5 * 60 * 1000, // Consider data fresh for 5 minutes
   })
 
   const addToCart = useMutation({

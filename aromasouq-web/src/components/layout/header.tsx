@@ -22,8 +22,14 @@ import { cn } from "@/lib/utils"
 // import { CoinsWidget } from "@/components/layout/CoinsWidget"
 
 export function Header() {
-  const { user, isAuthenticated, logout } = useAuth()
-  const { cart, itemCount } = useCart()
+  // TEMPORARILY DISABLED - Testing reload issue
+  // const { user, isAuthenticated, logout } = useAuth()
+  // const { cart, itemCount } = useCart()
+  const user = null
+  const isAuthenticated = false
+  const logout = () => {}
+  const itemCount = 0
+
   const pathname = usePathname()
   const router = useRouter()
   const searchParams = useSearchParams()
@@ -99,6 +105,15 @@ export function Header() {
                 >
                   Bakhoor
                 </Link>
+                <Link
+                  href="/products?categorySlug=gift-sets"
+                  className={cn(
+                    "text-lg",
+                    categorySlug === 'gift-sets' ? "text-oud-gold font-semibold" : ""
+                  )}
+                >
+                  Gift Sets
+                </Link>
               </nav>
             </SheetContent>
           </Sheet>
@@ -164,6 +179,17 @@ export function Header() {
               )}
             >
               Bakhoor
+            </Link>
+            <Link
+              href="/products?categorySlug=gift-sets"
+              className={cn(
+                "text-sm font-medium transition-colors",
+                categorySlug === 'gift-sets'
+                  ? "text-oud-gold border-b-2 border-oud-gold pb-1"
+                  : "hover:text-oud-gold"
+              )}
+            >
+              Gift Sets
             </Link>
           </nav>
 
