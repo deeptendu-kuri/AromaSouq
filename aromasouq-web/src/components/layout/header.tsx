@@ -29,103 +29,119 @@ export function Header() {
   const categorySlug = searchParams.get('categorySlug')
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      {/* Top Bar */}
-      <div className="bg-deep-navy text-white">
-        <div className="container mx-auto px-4 py-2 flex justify-between items-center text-sm">
-          <p>Free shipping on orders over 300 AED</p>
-          <div className="flex gap-4">
-            <Link href="/about" className="hover:text-oud-gold transition-colors">About</Link>
-            <Link href="/contact" className="hover:text-oud-gold transition-colors">Contact</Link>
+    <header className="sticky top-0 z-50 w-full bg-white shadow-md">
+      {/* Top Bar - Promotional */}
+      <div className="bg-gradient-to-r from-[#1a1a2e] via-[#16213e] to-[#0f3460] text-white">
+        <div className="container mx-auto px-4 py-2.5 flex justify-between items-center text-xs md:text-sm">
+          <p className="font-semibold">✨ Free shipping on orders over 300 AED</p>
+          <div className="hidden md:flex gap-4 font-medium">
+            <Link href="/about" className="hover:text-[var(--color-oud-gold)] transition-colors">About</Link>
+            <Link href="/contact" className="hover:text-[var(--color-oud-gold)] transition-colors">Contact</Link>
           </div>
         </div>
       </div>
 
       {/* Main Header */}
-      <div className="container mx-auto px-4 py-4">
-        <div className="flex items-center justify-between gap-4">
-          {/* Mobile Menu */}
-          <Sheet>
-            <SheetTrigger asChild className="lg:hidden">
-              <Button variant="ghost" size="icon">
-                <Menu className="h-6 w-6" />
-              </Button>
-            </SheetTrigger>
-            <SheetContent side="left">
-              <SheetTitle className="sr-only">Navigation Menu</SheetTitle>
-              <nav className="flex flex-col gap-4 mt-8">
-                <Link
-                  href="/products"
-                  className={cn(
-                    "text-lg font-medium",
-                    pathname === '/products' && !categorySlug ? "text-oud-gold" : ""
-                  )}
-                >
-                  Products
-                </Link>
-                <Link
-                  href="/products?categorySlug=perfumes"
-                  className={cn(
-                    "text-lg",
-                    categorySlug === 'perfumes' ? "text-oud-gold font-semibold" : ""
-                  )}
-                >
-                  Perfumes
-                </Link>
-                <Link
-                  href="/products?categorySlug=oud"
-                  className={cn(
-                    "text-lg",
-                    categorySlug === 'oud' ? "text-oud-gold font-semibold" : ""
-                  )}
-                >
-                  Oud
-                </Link>
-                <Link
-                  href="/products?categorySlug=attars"
-                  className={cn(
-                    "text-lg",
-                    categorySlug === 'attars' ? "text-oud-gold font-semibold" : ""
-                  )}
-                >
-                  Attars
-                </Link>
-                <Link
-                  href="/products?categorySlug=bakhoor"
-                  className={cn(
-                    "text-lg",
-                    categorySlug === 'bakhoor' ? "text-oud-gold font-semibold" : ""
-                  )}
-                >
-                  Bakhoor
-                </Link>
-                <Link
-                  href="/products?categorySlug=gift-sets"
-                  className={cn(
-                    "text-lg",
-                    categorySlug === 'gift-sets' ? "text-oud-gold font-semibold" : ""
-                  )}
-                >
-                  Gift Sets
-                </Link>
-              </nav>
-            </SheetContent>
-          </Sheet>
+      <div className="container mx-auto px-4 py-5">
+        <div className="flex items-center justify-between gap-8">
+          {/* Logo - Left */}
+          <div className="flex items-center gap-4">
+            {/* Mobile Menu */}
+            <Sheet>
+              <SheetTrigger asChild className="lg:hidden">
+                <Button variant="ghost" size="icon" className="hover:bg-amber-50">
+                  <Menu className="h-5 w-5 text-gray-700" />
+                </Button>
+              </SheetTrigger>
+              <SheetContent side="left" className="w-[280px]">
+                <SheetTitle className="sr-only">Navigation Menu</SheetTitle>
+                <nav className="flex flex-col gap-4 mt-8">
+                  <Link
+                    href="/products"
+                    className={cn(
+                      "text-base font-semibold py-2 px-4 rounded-lg transition-colors",
+                      pathname === '/products' && !categorySlug
+                        ? "bg-gradient-to-r from-amber-50 to-orange-50 text-[var(--color-oud-gold)]"
+                        : "hover:bg-gray-50"
+                    )}
+                  >
+                    All Products
+                  </Link>
+                  <Link
+                    href="/products?categorySlug=perfumes"
+                    className={cn(
+                      "text-base font-semibold py-2 px-4 rounded-lg transition-colors",
+                      categorySlug === 'perfumes'
+                        ? "bg-gradient-to-r from-amber-50 to-orange-50 text-[var(--color-oud-gold)]"
+                        : "hover:bg-gray-50"
+                    )}
+                  >
+                    Perfumes
+                  </Link>
+                  <Link
+                    href="/products?categorySlug=oud"
+                    className={cn(
+                      "text-base font-semibold py-2 px-4 rounded-lg transition-colors",
+                      categorySlug === 'oud'
+                        ? "bg-gradient-to-r from-amber-50 to-orange-50 text-[var(--color-oud-gold)]"
+                        : "hover:bg-gray-50"
+                    )}
+                  >
+                    Oud
+                  </Link>
+                  <Link
+                    href="/products?categorySlug=attars"
+                    className={cn(
+                      "text-base font-semibold py-2 px-4 rounded-lg transition-colors",
+                      categorySlug === 'attars'
+                        ? "bg-gradient-to-r from-amber-50 to-orange-50 text-[var(--color-oud-gold)]"
+                        : "hover:bg-gray-50"
+                    )}
+                  >
+                    Attars
+                  </Link>
+                  <Link
+                    href="/products?categorySlug=bakhoor"
+                    className={cn(
+                      "text-base font-semibold py-2 px-4 rounded-lg transition-colors",
+                      categorySlug === 'bakhoor'
+                        ? "bg-gradient-to-r from-amber-50 to-orange-50 text-[var(--color-oud-gold)]"
+                        : "hover:bg-gray-50"
+                    )}
+                  >
+                    Bakhoor
+                  </Link>
+                  <Link
+                    href="/products?categorySlug=gift-sets"
+                    className={cn(
+                      "text-base font-semibold py-2 px-4 rounded-lg transition-colors",
+                      categorySlug === 'gift-sets'
+                        ? "bg-gradient-to-r from-amber-50 to-orange-50 text-[var(--color-oud-gold)]"
+                        : "hover:bg-gray-50"
+                    )}
+                  >
+                    Gift Sets
+                  </Link>
+                </nav>
+              </SheetContent>
+            </Sheet>
 
-          {/* Logo */}
-          <Link href="/" className="flex items-center gap-2">
-            <h1 className="font-heading text-2xl lg:text-3xl text-oud-gold">AromaSouq</h1>
-          </Link>
+            <Link href="/" className="flex items-center gap-2">
+              <h1 className="font-heading text-2xl lg:text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-[var(--color-oud-gold)] to-amber-600">
+                AromaSouq
+              </h1>
+            </Link>
+          </div>
 
-          {/* Desktop Navigation */}
-          <nav className="hidden lg:flex items-center gap-6">
+          {/* Desktop Navigation - Centered */}
+          <nav className="hidden lg:flex items-center justify-center gap-1 flex-1">
             <Link
               href="/products"
               className={cn(
-                "text-sm font-medium transition-colors",
+                "px-4 py-2 text-sm font-bold transition-all rounded-lg",
                 pathname === '/products' && !categorySlug
-                  ? "text-oud-gold border-b-2 border-oud-gold pb-1"
-                  : "hover:text-oud-gold"
+                  ? "bg-gradient-to-r from-amber-500 to-orange-500 text-white shadow-md"
+                  : "text-gray-700 hover:bg-amber-50 hover:text-[var(--color-oud-gold)]"
               )}
             >
               All Products
@@ -133,10 +149,10 @@ export function Header() {
             <Link
               href="/products?categorySlug=perfumes"
               className={cn(
-                "text-sm font-medium transition-colors",
+                "px-4 py-2 text-sm font-bold transition-all rounded-lg",
                 categorySlug === 'perfumes'
-                  ? "text-oud-gold border-b-2 border-oud-gold pb-1"
-                  : "hover:text-oud-gold"
+                  ? "bg-gradient-to-r from-amber-500 to-orange-500 text-white shadow-md"
+                  : "text-gray-700 hover:bg-amber-50 hover:text-[var(--color-oud-gold)]"
               )}
             >
               Perfumes
@@ -144,10 +160,10 @@ export function Header() {
             <Link
               href="/products?categorySlug=oud"
               className={cn(
-                "text-sm font-medium transition-colors",
+                "px-4 py-2 text-sm font-bold transition-all rounded-lg",
                 categorySlug === 'oud'
-                  ? "text-oud-gold border-b-2 border-oud-gold pb-1"
-                  : "hover:text-oud-gold"
+                  ? "bg-gradient-to-r from-amber-500 to-orange-500 text-white shadow-md"
+                  : "text-gray-700 hover:bg-amber-50 hover:text-[var(--color-oud-gold)]"
               )}
             >
               Oud
@@ -155,10 +171,10 @@ export function Header() {
             <Link
               href="/products?categorySlug=attars"
               className={cn(
-                "text-sm font-medium transition-colors",
+                "px-4 py-2 text-sm font-bold transition-all rounded-lg",
                 categorySlug === 'attars'
-                  ? "text-oud-gold border-b-2 border-oud-gold pb-1"
-                  : "hover:text-oud-gold"
+                  ? "bg-gradient-to-r from-amber-500 to-orange-500 text-white shadow-md"
+                  : "text-gray-700 hover:bg-amber-50 hover:text-[var(--color-oud-gold)]"
               )}
             >
               Attars
@@ -166,10 +182,10 @@ export function Header() {
             <Link
               href="/products?categorySlug=bakhoor"
               className={cn(
-                "text-sm font-medium transition-colors",
+                "px-4 py-2 text-sm font-bold transition-all rounded-lg",
                 categorySlug === 'bakhoor'
-                  ? "text-oud-gold border-b-2 border-oud-gold pb-1"
-                  : "hover:text-oud-gold"
+                  ? "bg-gradient-to-r from-amber-500 to-orange-500 text-white shadow-md"
+                  : "text-gray-700 hover:bg-amber-50 hover:text-[var(--color-oud-gold)]"
               )}
             >
               Bakhoor
@@ -177,80 +193,78 @@ export function Header() {
             <Link
               href="/products?categorySlug=gift-sets"
               className={cn(
-                "text-sm font-medium transition-colors",
+                "px-4 py-2 text-sm font-bold transition-all rounded-lg",
                 categorySlug === 'gift-sets'
-                  ? "text-oud-gold border-b-2 border-oud-gold pb-1"
-                  : "hover:text-oud-gold"
+                  ? "bg-gradient-to-r from-amber-500 to-orange-500 text-white shadow-md"
+                  : "text-gray-700 hover:bg-amber-50 hover:text-[var(--color-oud-gold)]"
               )}
             >
               Gift Sets
             </Link>
           </nav>
 
-          {/* Search Bar */}
-          <div className="hidden md:flex flex-1 max-w-md">
-            {/* <SearchBar /> */}
-          </div>
-
-          {/* Actions */}
-          <div className="flex items-center gap-2">
+          {/* Actions - Right */}
+          <div className="flex items-center gap-3">
             {/* Coins Widget */}
             {isAuthenticated && user?.coinsBalance !== undefined && (
-              <Button variant="ghost" size="sm" asChild className="hidden md:flex gap-2">
-                <Link href="/account/wallet" className="hover:text-oud-gold">
-                  <Coins className="h-4 w-4 text-oud-gold" />
-                  <span className="font-semibold text-oud-gold">{user.coinsBalance}</span>
-                </Link>
-              </Button>
+              <Link
+                href="/account/wallet"
+                className="hidden md:flex items-center gap-2 px-3 py-2 bg-gradient-to-r from-amber-50 to-orange-50 rounded-full hover:shadow-md transition-all border border-amber-200"
+              >
+                <Coins className="h-4 w-4 text-[var(--color-oud-gold)]" />
+                <span className="font-black text-[var(--color-oud-gold)] text-sm">{user.coinsBalance}</span>
+              </Link>
             )}
 
             {/* Wishlist */}
-            <Button variant="ghost" size="icon" asChild>
-              <Link href="/wishlist">
-                <Heart className="h-5 w-5" />
-              </Link>
-            </Button>
+            <Link
+              href="/wishlist"
+              className="p-2.5 hover:bg-amber-50 rounded-full transition-colors"
+            >
+              <Heart className="h-5 w-5 text-gray-700 hover:text-red-500 transition-colors" />
+            </Link>
 
             {/* Cart */}
-            <Button variant="ghost" size="icon" asChild className="relative">
-              <Link href="/cart">
-                <ShoppingCart className="h-5 w-5" />
-                {itemCount > 0 && (
-                  <Badge className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 text-xs bg-oud-gold">
-                    {itemCount}
-                  </Badge>
-                )}
-              </Link>
-            </Button>
+            <Link
+              href="/cart"
+              className="relative p-2.5 hover:bg-amber-50 rounded-full transition-colors"
+            >
+              <ShoppingCart className="h-5 w-5 text-gray-700" />
+              {itemCount > 0 && (
+                <span className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center rounded-full text-xs font-black bg-gradient-to-r from-amber-500 to-orange-500 text-white border-2 border-white shadow-md">
+                  {itemCount}
+                </span>
+              )}
+            </Link>
 
             {/* User Menu */}
             {isAuthenticated ? (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" size="icon">
-                    <User className="h-5 w-5" />
-                  </Button>
+                  <button className="p-2.5 hover:bg-amber-50 rounded-full transition-colors">
+                    <User className="h-5 w-5 text-gray-700" />
+                  </button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-56">
-                  <div className="px-2 py-2">
-                    <p className="text-sm font-medium">{user?.firstName} {user?.lastName}</p>
-                    <p className="text-xs text-muted-foreground">{user?.email}</p>
+                <DropdownMenuContent align="end" className="w-64 shadow-xl border-gray-200">
+                  <div className="px-4 py-3 bg-gradient-to-r from-amber-50 to-orange-50">
+                    <p className="text-sm font-bold text-gray-800">{user?.firstName} {user?.lastName}</p>
+                    <p className="text-xs text-gray-600 font-medium">{user?.email}</p>
                   </div>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem asChild>
-                    <Link href="/account">My Account</Link>
+                    <Link href="/account" className="font-semibold">My Account</Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem asChild>
-                    <Link href="/account/orders">Orders</Link>
+                    <Link href="/account/orders" className="font-semibold">Orders</Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem asChild>
-                    <Link href="/account/wallet">Wallet & Coins</Link>
+                    <Link href="/account/wallet" className="font-semibold">Wallet & Coins</Link>
                   </DropdownMenuItem>
                   {user?.role === 'VENDOR' && (
                     <>
                       <DropdownMenuSeparator />
                       <DropdownMenuItem asChild>
-                        <Link href="/vendor">Vendor Dashboard</Link>
+                        <Link href="/vendor" className="font-semibold text-purple-600">Vendor Dashboard</Link>
                       </DropdownMenuItem>
                     </>
                   )}
@@ -258,27 +272,25 @@ export function Header() {
                     <>
                       <DropdownMenuSeparator />
                       <DropdownMenuItem asChild>
-                        <Link href="/admin">Admin Dashboard</Link>
+                        <Link href="/admin" className="font-semibold text-blue-600">Admin Dashboard</Link>
                       </DropdownMenuItem>
                     </>
                   )}
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={logout}>
+                  <DropdownMenuItem onClick={logout} className="font-semibold text-red-600">
                     Logout
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
             ) : (
-              <Button variant="primary" size="sm" asChild>
-                <Link href="/login">Login</Link>
-              </Button>
+              <Link
+                href="/login"
+                className="px-5 py-2 bg-gradient-to-r from-amber-500 to-orange-500 text-white font-bold rounded-full hover:shadow-lg transition-all text-sm hover:scale-105"
+              >
+                Login
+              </Link>
             )}
           </div>
-        </div>
-
-        {/* Mobile Search */}
-        <div className="md:hidden mt-4">
-          {/* <SearchBar /> */}
         </div>
       </div>
     </header>

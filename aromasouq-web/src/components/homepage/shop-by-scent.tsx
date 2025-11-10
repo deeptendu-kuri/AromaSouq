@@ -47,53 +47,62 @@ export function ShopByScent({ scentFamilies }: ShopByScentProps) {
   };
 
   return (
-    <div className="bg-[#f9f9f9] py-12 mb-16">
-      <div className="container mx-auto px-[5%]">
-        <div className="flex justify-between items-center mb-8">
+    <div className="relative overflow-hidden bg-gradient-to-br from-emerald-50 via-teal-50 to-cyan-50 py-20 mb-0">
+      {/* Decorative elements */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-10 right-20 w-80 h-80 bg-gradient-to-br from-emerald-300/20 to-transparent rounded-full blur-3xl"></div>
+        <div className="absolute bottom-10 left-20 w-80 h-80 bg-gradient-to-tr from-cyan-300/20 to-transparent rounded-full blur-3xl"></div>
+      </div>
+
+      <div className="container mx-auto px-[5%] relative z-10">
+        <div className="flex justify-between items-center mb-12">
           <div>
-            <h2 className="text-[32px] text-[var(--color-deep-navy)] font-bold mb-2.5">
+            <div className="inline-flex items-center gap-2 bg-gradient-to-r from-emerald-500 to-teal-500 text-white px-5 py-1.5 rounded-full mb-3 shadow-lg text-xs font-bold tracking-wide">
+              🌿 DISCOVER YOUR SIGNATURE
+            </div>
+            <h2 className="text-5xl text-[var(--color-deep-navy)] font-bold mb-3 bg-clip-text text-transparent bg-gradient-to-r from-emerald-700 to-teal-600">
               Shop by Scent Family
             </h2>
-            <p className="text-[15px] text-gray-600">
+            <p className="text-lg text-gray-700">
               Find your perfect fragrance DNA
             </p>
           </div>
-          <div className="flex gap-2.5">
+          <div className="flex gap-3">
             <button
               onClick={() => scroll('left')}
-              className="w-10 h-10 rounded-full border-2 border-gray-200 bg-white flex items-center justify-center transition-all duration-300 hover:bg-[var(--color-oud-gold)] hover:border-[var(--color-oud-gold)] hover:text-white"
+              className="w-12 h-12 rounded-full border-2 border-emerald-200 bg-white/80 backdrop-blur-sm flex items-center justify-center transition-all duration-300 hover:bg-emerald-500 hover:border-emerald-500 hover:text-white shadow-lg hover:scale-110"
               aria-label="Previous"
             >
-              <ChevronLeft className="w-5 h-5" />
+              <ChevronLeft className="w-6 h-6" />
             </button>
             <button
               onClick={() => scroll('right')}
-              className="w-10 h-10 rounded-full border-2 border-gray-200 bg-white flex items-center justify-center transition-all duration-300 hover:bg-[var(--color-oud-gold)] hover:border-[var(--color-oud-gold)] hover:text-white"
+              className="w-12 h-12 rounded-full border-2 border-emerald-200 bg-white/80 backdrop-blur-sm flex items-center justify-center transition-all duration-300 hover:bg-emerald-500 hover:border-emerald-500 hover:text-white shadow-lg hover:scale-110"
               aria-label="Next"
             >
-              <ChevronRight className="w-5 h-5" />
+              <ChevronRight className="w-6 h-6" />
             </button>
           </div>
         </div>
 
         <div
           ref={trackRef}
-          className="flex gap-6 overflow-x-auto scrollbar-hide scroll-smooth"
+          className="flex gap-6 overflow-x-auto scrollbar-hide scroll-smooth pb-4"
         >
           {scentFamilies.filter(scent => scent.scentFamily).map((scent, index) => (
             <Link
               key={scent.scentFamily || `scent-${index}`}
               href={`/products?scentFamily=${encodeURIComponent(scent.scentFamily)}`}
-              className="flex-shrink-0 w-[220px] bg-white rounded-xl overflow-hidden shadow-[var(--shadow-card)] transition-all duration-300 hover:-translate-y-1.5 hover:shadow-[var(--shadow-card-hover)] cursor-pointer text-center"
+              className="flex-shrink-0 w-[240px] bg-white/80 backdrop-blur-sm rounded-2xl overflow-hidden shadow-xl transition-all duration-300 hover:-translate-y-2 hover:shadow-2xl cursor-pointer text-center border border-white/50 group"
             >
-              <div className="text-[56px] pt-8 pb-5 bg-gradient-to-br from-[#f9f9f9] to-[#f0f0f0]">
+              <div className="text-7xl pt-10 pb-6 bg-gradient-to-br from-emerald-100 via-teal-50 to-cyan-100 group-hover:from-emerald-200 group-hover:via-teal-100 group-hover:to-cyan-200 transition-all duration-300">
                 {getScentIcon(scent.scentFamily)}
               </div>
-              <div className="p-5">
-                <div className="text-base font-bold text-[var(--color-charcoal)] mb-1.5">
+              <div className="p-6 bg-gradient-to-br from-white to-emerald-50/50">
+                <div className="text-lg font-bold text-[var(--color-deep-navy)] mb-2">
                   {scent.scentFamily}
                 </div>
-                <div className="text-xs text-[var(--color-oud-gold)] font-semibold">
+                <div className="text-sm text-emerald-600 font-bold bg-emerald-100 px-4 py-1 rounded-full inline-block">
                   {scent.count} Products
                 </div>
               </div>
@@ -101,6 +110,9 @@ export function ShopByScent({ scentFamilies }: ShopByScentProps) {
           ))}
         </div>
       </div>
+
+      {/* Bottom decoration */}
+      <div className="absolute bottom-0 left-0 right-0 h-16 bg-gradient-to-b from-transparent to-white"></div>
     </div>
   );
 }

@@ -52,48 +52,107 @@ export function FlashSale({ products }: FlashSaleProps) {
   }, []);
 
   return (
-    <div className="bg-gradient-to-r from-[var(--color-deep-navy)] to-[var(--color-charcoal)] py-12 mb-16">
-      <div className="container mx-auto px-[5%]">
-        <div className="text-center mb-10">
-          <h2 className="text-[32px] text-[var(--color-ivory)] font-bold mb-2.5">
-            ⚡ Flash Sale
-          </h2>
-          <p className="text-[15px] text-[var(--color-rose-gold)]">
-            Hurry! Limited time offers
-          </p>
-        </div>
+    <div className="relative overflow-hidden bg-gradient-to-br from-purple-900 via-red-800 to-orange-700 py-20 mb-0">
+      {/* Lightning bolt artwork with glowing edges */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        {/* Animated lightning bolts */}
+        <svg className="absolute top-10 left-[15%] w-32 h-48 opacity-20 animate-pulse" viewBox="0 0 100 200" fill="none">
+          <path d="M50 0L30 80H60L40 200L90 80H60L80 0Z" fill="url(#lightning-gradient)" className="drop-shadow-[0_0_15px_rgba(255,215,0,0.8)]"/>
+          <defs>
+            <linearGradient id="lightning-gradient" x1="0%" y1="0%" x2="0%" y2="100%">
+              <stop offset="0%" stopColor="#FFD700" />
+              <stop offset="100%" stopColor="#FFA500" />
+            </linearGradient>
+          </defs>
+        </svg>
 
-        <div className="flex justify-center gap-5 mb-8">
-          <div className="text-center bg-white/10 backdrop-blur-sm px-5 py-3 rounded-[10px]">
-            <div className="text-[32px] font-bold text-[var(--color-oud-gold)] leading-none">
-              {String(timeLeft.hours).padStart(2, '0')}
-            </div>
-            <div className="text-[11px] text-[var(--color-ivory)] uppercase tracking-wide mt-1">
-              Hours
-            </div>
-          </div>
+        <svg className="absolute top-32 right-[10%] w-24 h-36 opacity-15 animate-pulse" style={{ animationDelay: '0.5s' }} viewBox="0 0 100 200" fill="none">
+          <path d="M50 0L30 80H60L40 200L90 80H60L80 0Z" fill="url(#lightning-gradient-2)" className="drop-shadow-[0_0_12px_rgba(255,215,0,0.6)]"/>
+          <defs>
+            <linearGradient id="lightning-gradient-2" x1="0%" y1="0%" x2="0%" y2="100%">
+              <stop offset="0%" stopColor="#FFED4E" />
+              <stop offset="100%" stopColor="#FFD700" />
+            </linearGradient>
+          </defs>
+        </svg>
 
-          <div className="text-center bg-white/10 backdrop-blur-sm px-5 py-3 rounded-[10px]">
-            <div className="text-[32px] font-bold text-[var(--color-oud-gold)] leading-none">
-              {String(timeLeft.minutes).padStart(2, '0')}
-            </div>
-            <div className="text-[11px] text-[var(--color-ivory)] uppercase tracking-wide mt-1">
-              Minutes
-            </div>
-          </div>
+        {/* Glowing orbs and energy effects */}
+        <div className="absolute top-20 right-[25%] w-64 h-64 bg-yellow-400/20 rounded-full blur-3xl animate-pulse"></div>
+        <div className="absolute bottom-40 left-[20%] w-80 h-80 bg-orange-500/20 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }}></div>
+        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-red-500/15 rounded-full blur-3xl"></div>
 
-          <div className="text-center bg-white/10 backdrop-blur-sm px-5 py-3 rounded-[10px]">
-            <div className="text-[32px] font-bold text-[var(--color-oud-gold)] leading-none">
-              {String(timeLeft.seconds).padStart(2, '0')}
-            </div>
-            <div className="text-[11px] text-[var(--color-ivory)] uppercase tracking-wide mt-1">
-              Seconds
-            </div>
-          </div>
-        </div>
-
-        <ProductCarousel products={products} />
+        {/* Sparkle effects */}
+        <div className="absolute top-24 left-[40%] w-2 h-2 bg-yellow-300 rounded-full shadow-[0_0_20px_8px_rgba(253,224,71,0.6)] animate-pulse"></div>
+        <div className="absolute top-48 right-[35%] w-2 h-2 bg-orange-300 rounded-full shadow-[0_0_20px_8px_rgba(251,146,60,0.6)] animate-pulse" style={{ animationDelay: '0.3s' }}></div>
+        <div className="absolute bottom-32 left-[30%] w-2 h-2 bg-yellow-400 rounded-full shadow-[0_0_20px_8px_rgba(250,204,21,0.6)] animate-pulse" style={{ animationDelay: '0.7s' }}></div>
       </div>
+
+      <div className="container mx-auto px-[5%] relative z-10">
+        {/* Header with centered countdown */}
+        <div className="text-center mb-12">
+          <div className="inline-flex items-center gap-2 bg-gradient-to-r from-yellow-400 via-orange-500 to-red-600 text-white px-5 py-2 rounded-full mb-4 shadow-2xl text-sm font-black tracking-wider border-2 border-yellow-300/30">
+            <span className="text-xl animate-pulse">⚡</span>
+            <span>FLASH SALE</span>
+            <span className="text-xl animate-pulse">⚡</span>
+          </div>
+
+          <h2 className="text-5xl md:text-6xl text-white font-black mb-3 drop-shadow-[0_4px_12px_rgba(0,0,0,0.5)]">
+            Lightning Deals
+          </h2>
+
+          <p className="text-lg text-yellow-100 mb-6 font-semibold">
+            ⏰ Hurry! Limited Time • Limited Stock
+          </p>
+
+          {/* Elegant countdown timer */}
+          <div className="flex justify-center gap-4 mb-2">
+            <div className="relative">
+              <div className="absolute inset-0 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-2xl blur-lg opacity-60"></div>
+              <div className="relative text-center bg-gradient-to-br from-white to-yellow-50 px-6 py-4 rounded-2xl border-4 border-yellow-400/50 shadow-2xl transform hover:scale-105 transition-transform">
+                <div className="text-5xl font-black text-transparent bg-clip-text bg-gradient-to-br from-orange-600 to-red-600 leading-none">
+                  {String(timeLeft.hours).padStart(2, '0')}
+                </div>
+                <div className="text-xs text-gray-600 uppercase tracking-widest font-bold mt-2">
+                  Hours
+                </div>
+              </div>
+            </div>
+
+            <div className="flex items-center text-5xl font-black text-yellow-300 drop-shadow-lg">:</div>
+
+            <div className="relative">
+              <div className="absolute inset-0 bg-gradient-to-br from-orange-400 to-red-500 rounded-2xl blur-lg opacity-60"></div>
+              <div className="relative text-center bg-gradient-to-br from-white to-orange-50 px-6 py-4 rounded-2xl border-4 border-orange-400/50 shadow-2xl transform hover:scale-105 transition-transform">
+                <div className="text-5xl font-black text-transparent bg-clip-text bg-gradient-to-br from-orange-600 to-red-600 leading-none">
+                  {String(timeLeft.minutes).padStart(2, '0')}
+                </div>
+                <div className="text-xs text-gray-600 uppercase tracking-widest font-bold mt-2">
+                  Minutes
+                </div>
+              </div>
+            </div>
+
+            <div className="flex items-center text-5xl font-black text-yellow-300 drop-shadow-lg">:</div>
+
+            <div className="relative">
+              <div className="absolute inset-0 bg-gradient-to-br from-red-400 to-red-600 rounded-2xl blur-lg opacity-60"></div>
+              <div className="relative text-center bg-gradient-to-br from-white to-red-50 px-6 py-4 rounded-2xl border-4 border-red-400/50 shadow-2xl transform hover:scale-105 transition-transform animate-pulse">
+                <div className="text-5xl font-black text-transparent bg-clip-text bg-gradient-to-br from-red-600 to-red-800 leading-none">
+                  {String(timeLeft.seconds).padStart(2, '0')}
+                </div>
+                <div className="text-xs text-gray-600 uppercase tracking-widest font-bold mt-2">
+                  Seconds
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <ProductCarousel products={products} compact={false} />
+      </div>
+
+      {/* Bottom decoration */}
+      <div className="absolute bottom-0 left-0 right-0 h-20 bg-gradient-to-b from-transparent to-white"></div>
     </div>
   );
 }

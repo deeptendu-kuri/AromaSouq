@@ -8,6 +8,7 @@ import {
   Delete,
   UseGuards,
   Req,
+  Query,
 } from '@nestjs/common';
 import type { Request } from 'express';
 import { CouponsService } from './coupons.service';
@@ -20,6 +21,12 @@ import { UserRole } from '@prisma/client';
 @Controller('coupons')
 export class CouponsController {
   constructor(private readonly couponsService: CouponsService) {}
+
+  // Public endpoint to get active coupons by vendor
+  @Get('public/vendor/:vendorId')
+  getPublicCouponsByVendor(@Param('vendorId') vendorId: string) {
+    return this.couponsService.getActiveCouponsByVendor(vendorId);
+  }
 
   @Post()
   @UseGuards(JwtAuthGuard, RolesGuard)

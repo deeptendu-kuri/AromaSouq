@@ -12,13 +12,13 @@ interface CouponFormProps {
 }
 
 export function CouponForm({ initialData, onSubmit, onCancel, isSubmitting = false }: CouponFormProps) {
-  const [formData, setFormData] = useState<CreateCouponDto>({
+  const [formData, setFormData] = useState<any>({
     code: '',
     discountType: DiscountType.PERCENTAGE,
-    discountValue: 0,
-    minOrderAmount: undefined,
-    maxDiscount: undefined,
-    usageLimit: undefined,
+    discountValue: '',
+    minOrderAmount: '',
+    maxDiscount: '',
+    usageLimit: '',
     startDate: new Date().toISOString().split('T')[0],
     endDate: '',
   });
@@ -30,10 +30,10 @@ export function CouponForm({ initialData, onSubmit, onCancel, isSubmitting = fal
       setFormData({
         code: initialData.code,
         discountType: initialData.discountType,
-        discountValue: initialData.discountValue,
-        minOrderAmount: initialData.minOrderAmount || undefined,
-        maxDiscount: initialData.maxDiscount || undefined,
-        usageLimit: initialData.usageLimit || undefined,
+        discountValue: initialData.discountValue?.toString() || '',
+        minOrderAmount: initialData.minOrderAmount?.toString() || '',
+        maxDiscount: initialData.maxDiscount?.toString() || '',
+        usageLimit: initialData.usageLimit?.toString() || '',
         startDate: initialData.startDate.split('T')[0],
         endDate: initialData.endDate.split('T')[0],
       });
@@ -41,11 +41,11 @@ export function CouponForm({ initialData, onSubmit, onCancel, isSubmitting = fal
   }, [initialData]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    const { name, value, type } = e.target;
+    const { name, value } = e.target;
 
     setFormData((prev) => ({
       ...prev,
-      [name]: type === 'number' ? (value ? parseFloat(value) : undefined) : value,
+      [name]: value,
     }));
 
     if (errors[name]) {
@@ -66,11 +66,12 @@ export function CouponForm({ initialData, onSubmit, onCancel, isSubmitting = fal
       newErrors.code = 'Code must contain only uppercase letters, numbers, hyphens, and underscores';
     }
 
-    if (formData.discountValue <= 0) {
+    const discountValue = parseFloat(formData.discountValue);
+    if (!formData.discountValue || discountValue <= 0) {
       newErrors.discountValue = 'Discount value must be greater than 0';
     }
 
-    if (formData.discountType === DiscountType.PERCENTAGE && formData.discountValue > 100) {
+    if (formData.discountType === DiscountType.PERCENTAGE && discountValue > 100) {
       newErrors.discountValue = 'Percentage cannot exceed 100%';
     }
 
@@ -91,7 +92,18 @@ export function CouponForm({ initialData, onSubmit, onCancel, isSubmitting = fal
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (validate()) {
-      onSubmit(formData);
+      // Convert string values to proper types
+      const submitData: CreateCouponDto = {
+        code: formData.code,
+        discountType: formData.discountType,
+        discountValue: parseFloat(formData.discountValue),
+        minOrderAmount: formData.minOrderAmount ? parseFloat(formData.minOrderAmount) : undefined,
+        maxDiscount: formData.maxDiscount ? parseFloat(formData.maxDiscount) : undefined,
+        usageLimit: formData.usageLimit ? parseInt(formData.usageLimit) : undefined,
+        startDate: formData.startDate,
+        endDate: formData.endDate,
+      };
+      onSubmit(submitData);
     }
   };
 

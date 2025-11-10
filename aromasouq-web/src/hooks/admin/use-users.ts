@@ -15,8 +15,8 @@ interface UsersFilters {
 }
 
 interface UsersResponse {
-  users: User[]
-  pagination: {
+  data: User[]
+  meta: {
     total: number
     page: number
     limit: number
@@ -56,8 +56,8 @@ export function useUsers(filters: UsersFilters = {}) {
   })
 
   return {
-    users: usersQuery.data?.users || [],
-    pagination: usersQuery.data?.pagination,
+    users: usersQuery.data?.data || [],
+    pagination: usersQuery.data?.meta,
     isLoading: usersQuery.isLoading,
     updateStatus: updateStatusMutation.mutate,
     deleteUser: deleteUserMutation.mutate,

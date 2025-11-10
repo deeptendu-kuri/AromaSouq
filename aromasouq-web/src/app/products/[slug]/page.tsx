@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react"
 import Image from "next/image"
 import { useParams } from "next/navigation"
-import { Heart, Minus, Plus, Share2, Package, Truck, CheckCircle, RotateCcw, Lock } from "lucide-react"
+import { Heart, Minus, Plus, Share2, Package, Truck, CheckCircle, RotateCcw, Lock, Coins } from "lucide-react"
 import { Lens } from "@/components/aceternity/lens"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
@@ -15,6 +15,7 @@ import { ProductCard } from "@/components/ui/product-card"
 import { useProduct } from "@/hooks/useProducts"
 import { useCart } from "@/hooks/useCart"
 import { useWishlist } from "@/hooks/useWishlist"
+import { useWallet } from "@/hooks/useWallet"
 import { formatCurrency, calculateDiscount } from "@/lib/utils"
 import { getProductImageUrl, hasProductImages } from "@/lib/image-utils"
 import { ReviewStats } from "@/components/reviews/ReviewStats"
@@ -28,12 +29,14 @@ export default function ProductDetailPage() {
   const { data: product, isLoading } = useProduct(params.slug as string)
   const { addToCart } = useCart()
   const { toggleWishlist, isWishlisted } = useWishlist()
+  const { wallet } = useWallet()
   const { data: reviewStats } = useReviewStats(product?.id || '')
 
   const [selectedImage, setSelectedImage] = useState(0)
   const [selectedVariant, setSelectedVariant] = useState<string | null>(null)
   const [quantity, setQuantity] = useState(1)
   const [relatedProducts, setRelatedProducts] = useState<any[]>([])
+  const [coinsToUse, setCoinsToUse] = useState(0)
 
   // Fetch best sellers for "You may also like" section
   useEffect(() => {
@@ -62,22 +65,30 @@ export default function ProductDetailPage() {
   const currentImageUrl = getProductImageUrl(product, selectedImage)
   const productHasImages = hasProductImages(product)
 
+  // Calculate total price with coins
+  const totalPrice = currentPrice * quantity
+  const maxCoinsUsable = wallet?.balance || 0
+  const coinDiscount = Math.min(coinsToUse, maxCoinsUsable, totalPrice)
+  const finalPrice = totalPrice - coinDiscount
+
   return (
-    <div className="bg-ivory min-h-screen">
+    <div className="bg-gradient-to-br from-amber-50 via-white to-orange-50 min-h-screen">
       {/* Breadcrumb */}
-      <div className="container mx-auto px-[5%] py-5">
-        <div className="text-sm text-gray-600">
-          <Link href="/" className="text-oud-gold hover:underline">Home</Link>
-          <span className="mx-2">/</span>
+      <div className="container mx-auto px-[5%] py-6">
+        <div className="flex items-center gap-2 text-sm font-semibold">
+          <Link href="/" className="text-transparent bg-clip-text bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-700 hover:to-orange-700 transition-all">
+            🏠 Home
+          </Link>
+          <span className="text-amber-400">→</span>
           {product.category?.nameEn && (
             <>
-              <Link href={`/products?categorySlug=${product.category.slug}`} className="text-oud-gold hover:underline">
+              <Link href={`/products?categorySlug=${product.category.slug}`} className="text-transparent bg-clip-text bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-700 hover:to-orange-700 transition-all">
                 {product.category.nameEn}
               </Link>
-              <span className="mx-2">/</span>
+              <span className="text-amber-400">→</span>
             </>
           )}
-          <span>{product.nameEn}</span>
+          <span className="text-gray-700">{product.nameEn}</span>
         </div>
       </div>
 
@@ -89,7 +100,7 @@ export default function ProductDetailPage() {
             {/* Main Image with Lens Zoom */}
             {productHasImages ? (
               <Lens lensSize={200} zoomFactor={2.5} className="mb-4">
-                <div className="relative w-full h-[550px] rounded-xl overflow-hidden bg-gradient-to-br from-gray-100 to-gray-200">
+                <div className="relative w-full h-[550px] rounded-2xl overflow-hidden bg-gradient-to-br from-amber-100 via-orange-100 to-yellow-100 shadow-2xl border-4 border-white">
                   {currentImageUrl ? (
                     <Image
                       src={currentImageUrl}
@@ -101,18 +112,18 @@ export default function ProductDetailPage() {
                     <ProductImagePlaceholder className="w-full h-full" />
                   )}
                   {product.salePrice && (
-                    <div className="absolute top-5 left-5 bg-burgundy text-white px-4 py-2 rounded-full text-sm font-semibold">
-                      -{discount}% OFF
+                    <div className="absolute top-5 left-5 bg-gradient-to-r from-red-600 to-orange-600 text-white px-5 py-2.5 rounded-full text-sm font-black shadow-xl border-2 border-red-400/30">
+                      🔥 -{discount}% OFF
                     </div>
                   )}
                 </div>
               </Lens>
             ) : (
-              <div className="relative w-full h-[550px] rounded-xl overflow-hidden bg-gradient-to-br from-gray-100 to-gray-200 mb-4">
+              <div className="relative w-full h-[550px] rounded-2xl overflow-hidden bg-gradient-to-br from-amber-100 via-orange-100 to-yellow-100 mb-4 shadow-2xl border-4 border-white">
                 <ProductImagePlaceholder className="w-full h-full" />
                 {product.salePrice && (
-                  <div className="absolute top-5 left-5 bg-burgundy text-white px-4 py-2 rounded-full text-sm font-semibold">
-                    -{discount}% OFF
+                  <div className="absolute top-5 left-5 bg-gradient-to-r from-red-600 to-orange-600 text-white px-5 py-2.5 rounded-full text-sm font-black shadow-xl border-2 border-red-400/30">
+                    🔥 -{discount}% OFF
                   </div>
                 )}
               </div>
@@ -120,17 +131,17 @@ export default function ProductDetailPage() {
 
             {/* Thumbnails */}
             {productHasImages && (
-              <div className="flex gap-3 overflow-x-auto">
+              <div className="flex gap-3 overflow-x-auto pb-2">
                 {product.images.map((image, index) => {
                   const thumbUrl = getProductImageUrl(product, index)
                   return (
                     <button
                       key={image.id || index}
                       onClick={() => setSelectedImage(index)}
-                      className={`relative flex-shrink-0 w-[100px] h-[100px] rounded-lg overflow-hidden transition-all ${
+                      className={`relative flex-shrink-0 w-[100px] h-[100px] rounded-xl overflow-hidden transition-all shadow-lg hover:shadow-2xl hover:scale-105 ${
                         selectedImage === index
-                          ? 'ring-2 ring-oud-gold'
-                          : 'ring-2 ring-transparent hover:ring-oud-gold'
+                          ? 'ring-4 ring-amber-500 shadow-2xl scale-105'
+                          : 'ring-2 ring-amber-200 hover:ring-amber-400'
                       }`}
                     >
                       {thumbUrl ? (
@@ -148,56 +159,70 @@ export default function ProductDetailPage() {
           {/* Product Info */}
           <div className="py-3">
             {/* Brand */}
-            <p className="text-oud-gold text-xs font-semibold uppercase tracking-wider mb-2">
-              {product.brand?.nameEn || 'Premium Brand'}
-            </p>
+            <div className="inline-flex items-center gap-2 bg-gradient-to-r from-amber-100 to-orange-100 px-4 py-2 rounded-full mb-3 border-2 border-amber-200 shadow-md">
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-700 to-orange-700 text-sm font-black uppercase tracking-wider">
+                ✨ {product.brand?.nameEn || 'Premium Brand'}
+              </span>
+            </div>
 
             {/* Title */}
-            <h1 className="text-3xl lg:text-4xl font-bold text-charcoal mb-2 leading-tight">
-              {product.nameEn}
+            <h1 className="text-4xl lg:text-5xl font-black mb-3 leading-tight">
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-gray-800 via-gray-700 to-gray-800">
+                {product.nameEn}
+              </span>
             </h1>
 
             {/* SKU */}
             {product.sku && (
-              <p className="text-xs text-gray-400 mb-4">SKU: {product.sku}</p>
+              <p className="text-xs text-gray-500 mb-4 font-semibold">SKU: {product.sku}</p>
             )}
 
             {/* Rating */}
-            <div className="flex items-center gap-4 mb-5 pb-5 border-b border-gray-200">
-              <div className="flex items-center gap-2">
-                <div className="flex text-amber-400 text-lg">
+            <div className="flex items-center gap-4 mb-6 pb-6 border-b-2 border-amber-200">
+              <div className="flex items-center gap-2 bg-gradient-to-r from-amber-50 to-orange-50 px-4 py-2 rounded-full border-2 border-amber-200 shadow-md">
+                <div className="flex text-2xl">
                   {[...Array(5)].map((_, i) => (
-                    <span key={i}>{i < Math.floor(product.rating || 0) ? "★" : "☆"}</span>
+                    <span
+                      key={i}
+                      className={i < Math.floor(product.rating || 0) ? "text-yellow-400" : "text-gray-300"}
+                      style={{
+                        textShadow: i < Math.floor(product.rating || 0) ? '0 0 3px rgba(251, 191, 36, 0.6)' : 'none'
+                      }}
+                    >
+                      ★
+                    </span>
                   ))}
                 </div>
-                <span className="text-sm text-gray-600">{(product.rating || 0).toFixed(1)}</span>
+                <span className="text-base font-black text-gray-700">{(product.rating || 0).toFixed(1)}</span>
               </div>
-              <a href="#reviews" className="text-sm text-oud-gold hover:underline">
-                {product.reviewCount || 0} Reviews
+              <a href="#reviews" className="text-sm font-bold text-transparent bg-clip-text bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-700 hover:to-orange-700 transition-all">
+                📝 {product.reviewCount || 0} Reviews
               </a>
             </div>
 
             {/* Price */}
-            <div className="mb-6 pb-6 border-b border-gray-200">
-              <div className="flex items-baseline gap-3 mb-2">
-                <span className="text-4xl font-bold text-charcoal">
+            <div className="mb-8 pb-8 border-b-2 border-amber-200">
+              <div className="flex items-baseline gap-4 mb-3">
+                <span className="text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-amber-600 to-orange-600">
                   {formatCurrency(currentPrice)}
                 </span>
                 {product.salePrice && (
                   <>
-                    <span className="text-xl text-gray-400 line-through">
+                    <span className="text-2xl text-gray-400 line-through font-bold">
                       {formatCurrency(product.regularPrice)}
                     </span>
-                    <Badge className="bg-burgundy text-white text-xs px-3 py-1">
+                    <Badge className="bg-gradient-to-r from-red-600 to-orange-600 text-white text-sm px-4 py-1.5 font-black shadow-lg border-2 border-red-400/30">
                       -{discount}% OFF
                     </Badge>
                   </>
                 )}
               </div>
               {savings > 0 && (
-                <p className="text-sm text-green-600 font-semibold">
-                  You save {formatCurrency(savings)}
-                </p>
+                <div className="inline-flex items-center gap-2 bg-gradient-to-r from-green-100 to-emerald-100 px-4 py-2 rounded-full border-2 border-green-200 shadow-md">
+                  <span className="text-sm text-transparent bg-clip-text bg-gradient-to-r from-green-700 to-emerald-700 font-black">
+                    💰 You save {formatCurrency(savings)}
+                  </span>
+                </div>
               )}
             </div>
 
@@ -213,102 +238,201 @@ export default function ProductDetailPage() {
             {/* Size Display */}
             {product.size && (
               <div className="mb-6">
-                <span className="text-sm font-semibold text-charcoal block mb-3">Size</span>
-                <div className="inline-flex items-center gap-2 px-5 py-2.5 bg-oud-gold text-white rounded-lg font-medium">
-                  <Package className="h-4 w-4" />
+                <span className="text-sm font-black text-gray-700 block mb-3">📦 Size</span>
+                <div className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-amber-500 to-orange-500 text-white rounded-xl font-black shadow-lg hover:shadow-xl transition-all border-2 border-amber-400/30">
+                  <Package className="h-5 w-5" />
                   <span>{product.size}</span>
                 </div>
               </div>
             )}
 
             {/* Quantity */}
-            <div className="mb-6">
-              <span className="text-sm font-semibold text-charcoal block mb-3">Quantity</span>
-              <div className="flex items-center gap-3">
-                <div className="flex items-center border-2 border-gray-200 rounded-lg">
+            <div className="mb-8">
+              <span className="text-sm font-black text-gray-700 block mb-3">🔢 Quantity</span>
+              <div className="flex items-center gap-4">
+                <div className="flex items-center border-2 border-amber-300 rounded-xl bg-white shadow-lg">
                   <Button
                     variant="ghost"
                     size="icon"
-                    className="h-10 w-10 hover:bg-oud-gold hover:text-white hover:border-oud-gold transition-colors"
+                    className="h-12 w-12 hover:bg-gradient-to-r hover:from-amber-500 hover:to-orange-500 hover:text-white transition-all rounded-l-xl"
                     onClick={() => setQuantity(Math.max(1, quantity - 1))}
                     disabled={quantity <= 1}
                   >
-                    <Minus className="h-4 w-4" />
+                    <Minus className="h-5 w-5" />
                   </Button>
-                  <span className="px-4 font-semibold w-16 text-center">{quantity}</span>
+                  <span className="px-6 font-black text-xl w-20 text-center text-gray-800">{quantity}</span>
                   <Button
                     variant="ghost"
                     size="icon"
-                    className="h-10 w-10 hover:bg-oud-gold hover:text-white hover:border-oud-gold transition-colors"
+                    className="h-12 w-12 hover:bg-gradient-to-r hover:from-amber-500 hover:to-orange-500 hover:text-white transition-all rounded-r-xl"
                     onClick={() => setQuantity(quantity + 1)}
                     disabled={quantity >= product.stockQuantity}
                   >
-                    <Plus className="h-4 w-4" />
+                    <Plus className="h-5 w-5" />
                   </Button>
                 </div>
-                <span className="text-sm text-gray-600">
-                  {product.stockQuantity} in stock
-                </span>
+                <div className="inline-flex items-center gap-2 bg-gradient-to-r from-green-100 to-emerald-100 px-4 py-2.5 rounded-full border-2 border-green-200 shadow-md">
+                  <span className="text-sm text-transparent bg-clip-text bg-gradient-to-r from-green-700 to-emerald-700 font-black">
+                    ✅ {product.stockQuantity} in stock
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            {/* Order Summary with Coins */}
+            <div className="mb-8 bg-gradient-to-br from-blue-50 to-cyan-50 border-2 border-blue-200 rounded-2xl p-6 shadow-lg">
+              <h3 className="text-lg font-black text-gray-800 mb-4 flex items-center gap-2">
+                💰 Order Summary
+              </h3>
+
+              {/* Price Breakdown */}
+              <div className="space-y-3 mb-4">
+                <div className="flex justify-between text-sm">
+                  <span className="text-gray-600">Subtotal ({quantity} item{quantity > 1 ? 's' : ''})</span>
+                  <span className="font-bold text-gray-800">{formatCurrency(totalPrice)}</span>
+                </div>
+
+                {/* Coins Section */}
+                {wallet && wallet.balance > 0 && (
+                  <div className="pt-3 border-t border-blue-200">
+                    <div className="flex items-center justify-between mb-3">
+                      <div className="flex items-center gap-2">
+                        <Coins className="w-5 h-5 text-amber-600" />
+                        <span className="text-sm font-bold text-gray-700">Use Coins</span>
+                      </div>
+                      <Badge className="bg-gradient-to-r from-amber-500 to-orange-500 text-white font-bold">
+                        {wallet.balance} coins available
+                      </Badge>
+                    </div>
+
+                    <div className="space-y-2">
+                      <input
+                        type="range"
+                        min="0"
+                        max={Math.min(wallet.balance, totalPrice)}
+                        value={coinsToUse}
+                        onChange={(e) => setCoinsToUse(Number(e.target.value))}
+                        className="w-full h-2 bg-blue-200 rounded-lg appearance-none cursor-pointer accent-amber-500"
+                      />
+                      <div className="flex items-center justify-between">
+                        <input
+                          type="number"
+                          min="0"
+                          max={Math.min(wallet.balance, totalPrice)}
+                          value={coinsToUse}
+                          onChange={(e) => setCoinsToUse(Math.min(Number(e.target.value), wallet.balance, totalPrice))}
+                          className="w-24 px-3 py-2 border-2 border-blue-300 rounded-lg text-sm font-bold text-gray-800 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        />
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => setCoinsToUse(Math.min(wallet.balance, totalPrice))}
+                          className="border-2 border-amber-500 text-amber-700 hover:bg-amber-500 hover:text-white transition-all"
+                        >
+                          Use Max
+                        </Button>
+                      </div>
+                      {coinsToUse > 0 && (
+                        <p className="text-xs text-green-700 font-semibold flex items-center gap-1">
+                          ✨ You'll save {formatCurrency(coinDiscount)} with coins!
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                )}
+
+                {/* Coin Discount */}
+                {coinsToUse > 0 && (
+                  <div className="flex justify-between text-sm text-green-700">
+                    <span className="font-semibold">Coin Discount</span>
+                    <span className="font-bold">-{formatCurrency(coinDiscount)}</span>
+                  </div>
+                )}
+              </div>
+
+              {/* Total */}
+              <div className="pt-4 border-t-2 border-blue-300">
+                <div className="flex justify-between items-center">
+                  <span className="text-lg font-black text-gray-800">Total</span>
+                  <div className="text-right">
+                    <div className="text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-cyan-600">
+                      {formatCurrency(finalPrice)}
+                    </div>
+                    {coinsToUse > 0 && (
+                      <div className="text-xs text-gray-500 line-through">
+                        {formatCurrency(totalPrice)}
+                      </div>
+                    )}
+                  </div>
+                </div>
               </div>
             </div>
 
             {/* Action Buttons */}
-            <div className="flex gap-3 mb-8">
+            <div className="flex gap-3 mb-10">
               <Button
-                className="flex-1 h-14 bg-gradient-to-r from-oud-gold to-amber-600 hover:shadow-lg hover:-translate-y-0.5 transition-all text-white font-semibold text-base"
+                className="flex-1 h-16 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 hover:shadow-2xl hover:scale-105 transition-all text-white font-black text-lg rounded-xl border-2 border-amber-400/30"
                 onClick={() => addToCart({ productId: product.id, variantId: selectedVariant || undefined, quantity })}
                 disabled={product.stockQuantity === 0}
               >
-                {product.stockQuantity === 0 ? 'Out of Stock' : 'Add to Cart'}
+                {product.stockQuantity === 0 ? '❌ Out of Stock' : '🛒 Add to Cart'}
               </Button>
               <Button
                 variant="outline"
-                className="flex-1 h-14 border-2 border-oud-gold text-charcoal hover:bg-oud-gold hover:text-white font-semibold text-base transition-colors"
+                className="flex-1 h-16 border-2 border-amber-500 text-gray-800 hover:bg-gradient-to-r hover:from-amber-500 hover:to-orange-500 hover:text-white font-black text-lg transition-all rounded-xl hover:shadow-2xl hover:scale-105"
               >
-                Buy Now
+                ⚡ Buy Now
               </Button>
               <Button
                 variant="outline"
                 size="icon"
-                className="h-14 w-14 border-2 border-gray-200 hover:border-burgundy hover:text-burgundy transition-colors"
+                className="h-16 w-16 border-2 border-amber-300 hover:border-red-500 hover:bg-red-50 transition-all rounded-xl shadow-md hover:shadow-lg"
                 onClick={() => toggleWishlist(product.id)}
               >
                 <Heart
-                  className={`h-5 w-5 ${isWishlisted(product.id) ? 'fill-red-500 text-red-500' : ''}`}
+                  className={`h-6 w-6 ${isWishlisted(product.id) ? 'fill-red-500 text-red-500' : 'text-gray-600'}`}
                 />
               </Button>
               <Button
                 variant="outline"
                 size="icon"
-                className="h-14 w-14 border-2 border-gray-200 hover:border-oud-gold hover:text-oud-gold transition-colors"
+                className="h-16 w-16 border-2 border-amber-300 hover:border-amber-500 hover:bg-amber-50 transition-all rounded-xl shadow-md hover:shadow-lg"
               >
-                <Share2 className="h-5 w-5" />
+                <Share2 className="h-6 w-6 text-gray-600" />
               </Button>
             </div>
 
             {/* Features Grid */}
-            <div className="grid grid-cols-2 gap-4 mb-6 pb-6 border-b border-gray-200">
-              <div className="flex items-center gap-2.5 p-3 bg-gray-50 rounded-lg text-sm">
-                <Truck className="h-5 w-5 text-oud-gold flex-shrink-0" />
-                <span className="text-gray-700">Free delivery on orders over AED 200</span>
+            <div className="grid grid-cols-2 gap-4 mb-8 pb-8 border-b-2 border-amber-200">
+              <div className="flex items-center gap-3 p-4 bg-gradient-to-br from-blue-50 to-cyan-50 rounded-xl text-sm shadow-md border-2 border-blue-200 hover:shadow-lg transition-all">
+                <div className="bg-white p-2 rounded-lg shadow-sm">
+                  <Truck className="h-5 w-5 text-blue-600 flex-shrink-0" />
+                </div>
+                <span className="text-gray-700 font-bold">Free delivery on orders over AED 200</span>
               </div>
-              <div className="flex items-center gap-2.5 p-3 bg-gray-50 rounded-lg text-sm">
-                <CheckCircle className="h-5 w-5 text-oud-gold flex-shrink-0" />
-                <span className="text-gray-700">100% Authentic Products</span>
+              <div className="flex items-center gap-3 p-4 bg-gradient-to-br from-green-50 to-emerald-50 rounded-xl text-sm shadow-md border-2 border-green-200 hover:shadow-lg transition-all">
+                <div className="bg-white p-2 rounded-lg shadow-sm">
+                  <CheckCircle className="h-5 w-5 text-green-600 flex-shrink-0" />
+                </div>
+                <span className="text-gray-700 font-bold">100% Authentic Products</span>
               </div>
-              <div className="flex items-center gap-2.5 p-3 bg-gray-50 rounded-lg text-sm">
-                <RotateCcw className="h-5 w-5 text-oud-gold flex-shrink-0" />
-                <span className="text-gray-700">Easy 14-day returns</span>
+              <div className="flex items-center gap-3 p-4 bg-gradient-to-br from-purple-50 to-pink-50 rounded-xl text-sm shadow-md border-2 border-purple-200 hover:shadow-lg transition-all">
+                <div className="bg-white p-2 rounded-lg shadow-sm">
+                  <RotateCcw className="h-5 w-5 text-purple-600 flex-shrink-0" />
+                </div>
+                <span className="text-gray-700 font-bold">Easy 14-day returns</span>
               </div>
-              <div className="flex items-center gap-2.5 p-3 bg-gray-50 rounded-lg text-sm">
-                <Lock className="h-5 w-5 text-oud-gold flex-shrink-0" />
-                <span className="text-gray-700">Secure payment</span>
+              <div className="flex items-center gap-3 p-4 bg-gradient-to-br from-orange-50 to-amber-50 rounded-xl text-sm shadow-md border-2 border-orange-200 hover:shadow-lg transition-all">
+                <div className="bg-white p-2 rounded-lg shadow-sm">
+                  <Lock className="h-5 w-5 text-orange-600 flex-shrink-0" />
+                </div>
+                <span className="text-gray-700 font-bold">Secure payment</span>
               </div>
             </div>
 
             {/* Delivery Info */}
-            <div className="bg-gray-50 p-4 rounded-lg text-sm text-gray-700">
-              <strong className="text-charcoal">Delivery:</strong> Usually ships within 24 hours. Estimated delivery 2-3 business days in UAE.
+            <div className="bg-gradient-to-br from-indigo-50 to-purple-50 p-5 rounded-2xl text-sm border-2 border-indigo-200 shadow-lg">
+              <span className="text-lg">🚚</span> <strong className="text-gray-800 font-black">Delivery:</strong> <span className="text-gray-700 font-semibold">Usually ships within 24 hours. Estimated delivery 2-3 business days in UAE.</span>
             </div>
           </div>
         </div>
@@ -317,30 +441,30 @@ export default function ProductDetailPage() {
       {/* Tabs Section */}
       <div className="container mx-auto px-[5%] mb-16">
         <Tabs defaultValue="description" className="w-full">
-          <TabsList className="w-full justify-start border-b border-gray-200 bg-transparent h-auto p-0 rounded-none">
+          <TabsList className="w-full justify-start border-b-2 border-amber-200 bg-gradient-to-r from-white to-amber-50 h-auto p-0 rounded-none shadow-md">
             <TabsTrigger
               value="description"
-              className="data-[state=active]:border-b-2 data-[state=active]:border-oud-gold data-[state=active]:text-oud-gold rounded-none px-8 py-4 font-semibold"
+              className="data-[state=active]:border-b-4 data-[state=active]:border-amber-500 data-[state=active]:text-transparent data-[state=active]:bg-clip-text data-[state=active]:bg-gradient-to-r data-[state=active]:from-amber-600 data-[state=active]:to-orange-600 data-[state=active]:font-black rounded-none px-8 py-4 font-bold text-gray-600 hover:text-gray-800 transition-all"
             >
-              Description
+              📝 Description
             </TabsTrigger>
             <TabsTrigger
               value="specifications"
-              className="data-[state=active]:border-b-2 data-[state=active]:border-oud-gold data-[state=active]:text-oud-gold rounded-none px-8 py-4 font-semibold"
+              className="data-[state=active]:border-b-4 data-[state=active]:border-amber-500 data-[state=active]:text-transparent data-[state=active]:bg-clip-text data-[state=active]:bg-gradient-to-r data-[state=active]:from-amber-600 data-[state=active]:to-orange-600 data-[state=active]:font-black rounded-none px-8 py-4 font-bold text-gray-600 hover:text-gray-800 transition-all"
             >
-              Specifications
+              📊 Specifications
             </TabsTrigger>
             <TabsTrigger
               value="notes"
-              className="data-[state=active]:border-b-2 data-[state=active]:border-oud-gold data-[state=active]:text-oud-gold rounded-none px-8 py-4 font-semibold"
+              className="data-[state=active]:border-b-4 data-[state=active]:border-amber-500 data-[state=active]:text-transparent data-[state=active]:bg-clip-text data-[state=active]:bg-gradient-to-r data-[state=active]:from-amber-600 data-[state=active]:to-orange-600 data-[state=active]:font-black rounded-none px-8 py-4 font-bold text-gray-600 hover:text-gray-800 transition-all"
             >
-              Fragrance Notes
+              🌸 Fragrance Notes
             </TabsTrigger>
             <TabsTrigger
               value="reviews"
-              className="data-[state=active]:border-b-2 data-[state=active]:border-oud-gold data-[state=active]:text-oud-gold rounded-none px-8 py-4 font-semibold"
+              className="data-[state=active]:border-b-4 data-[state=active]:border-amber-500 data-[state=active]:text-transparent data-[state=active]:bg-clip-text data-[state=active]:bg-gradient-to-r data-[state=active]:from-amber-600 data-[state=active]:to-orange-600 data-[state=active]:font-black rounded-none px-8 py-4 font-bold text-gray-600 hover:text-gray-800 transition-all"
             >
-              Reviews ({product.reviewCount || 0})
+              ⭐ Reviews ({product.reviewCount || 0})
             </TabsTrigger>
           </TabsList>
 

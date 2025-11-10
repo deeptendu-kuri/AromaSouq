@@ -62,7 +62,7 @@ const oudTypeIcons: Record<string, string> = {
   THAI: "✨",
   MALAYSIAN: "🌴",
   LAOTIAN: "🏔️",
-  MUKHALLAT: "🎭"
+  MUKHALLAT: "🌙"
 };
 
 interface PageContext {
@@ -305,6 +305,11 @@ function getPageContext(filters: any): PageContext {
         title: "Malaysian Oud",
         subtitle: "Balanced & Refined",
         description: "Malaysian oud perfection. Balanced and refined with sophisticated depth."
+      },
+      MUKHALLAT: {
+        title: "Dehn Al Oud",
+        subtitle: "Pure Oil Perfection",
+        description: "Discover Dehn Al Oud. Pure oil perfection for connoisseurs - the ultimate expression of oud artistry."
       }
     };
 
@@ -405,7 +410,7 @@ export default function ProductsPage() {
   const [filters, setFilters] = useState({
     search: searchParams.get('search') || '',
     categorySlug: searchParams.get('categorySlug') || searchParams.get('category') || '',
-    brand: searchParams.get('brand') || '',
+    brandId: searchParams.get('brandId') || searchParams.get('brand') || '',
     minPrice: searchParams.get('minPrice') || '',
     maxPrice: searchParams.get('maxPrice') || '',
     gender: searchParams.get('gender') || '',
@@ -427,7 +432,7 @@ export default function ProductsPage() {
     setFilters({
       search: searchParams.get('search') || '',
       categorySlug: searchParams.get('categorySlug') || searchParams.get('category') || '',
-      brand: searchParams.get('brand') || '',
+      brandId: searchParams.get('brandId') || searchParams.get('brand') || '',
       minPrice: searchParams.get('minPrice') || '',
       maxPrice: searchParams.get('maxPrice') || '',
       gender: searchParams.get('gender') || '',
@@ -514,7 +519,7 @@ export default function ProductsPage() {
     const clearedFilters = {
       search: '',
       categorySlug: '',
-      brand: '',
+      brandId: '',
       minPrice: '',
       maxPrice: '',
       gender: '',
@@ -545,81 +550,104 @@ export default function ProductsPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Dynamic Hero Section */}
-      <div className={`bg-gradient-to-r ${pageContext.gradient} text-white py-16 mb-8`}>
-        <div className="container mx-auto px-4">
+    <div className="min-h-screen bg-gradient-to-br from-amber-50 via-white to-orange-50">
+      {/* Dynamic Hero Section - Vibrant & Artistic */}
+      <div className={`relative overflow-hidden bg-gradient-to-br ${pageContext.gradient} text-white py-20 mb-0`}>
+        {/* Artistic Background Elements */}
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          {/* Sparkles */}
+          <div className="absolute top-20 left-[15%] w-3 h-3 bg-yellow-300 rounded-full shadow-[0_0_25px_10px_rgba(253,224,71,0.6)] animate-pulse"></div>
+          <div className="absolute top-40 right-[20%] w-2 h-2 bg-amber-400 rounded-full shadow-[0_0_20px_8px_rgba(251,191,36,0.5)] animate-pulse" style={{ animationDelay: '0.5s' }}></div>
+          <div className="absolute bottom-32 left-[25%] w-2 h-2 bg-orange-300 rounded-full shadow-[0_0_20px_8px_rgba(251,146,60,0.5)] animate-pulse" style={{ animationDelay: '1s' }}></div>
+
+          {/* Glowing orbs */}
+          <div className="absolute top-10 right-[10%] w-96 h-96 bg-yellow-400/20 rounded-full blur-3xl animate-pulse"></div>
+          <div className="absolute bottom-10 left-[15%] w-80 h-80 bg-orange-500/20 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }}></div>
+
+          {/* Decorative patterns */}
+          <svg className="absolute top-0 right-0 w-64 h-64 opacity-10" viewBox="0 0 100 100" fill="none">
+            <circle cx="50" cy="50" r="40" stroke="white" strokeWidth="2" />
+            <circle cx="50" cy="50" r="30" stroke="white" strokeWidth="1.5" opacity="0.7" />
+            <circle cx="50" cy="50" r="20" stroke="white" strokeWidth="1" opacity="0.5" />
+          </svg>
+        </div>
+
+        <div className="container mx-auto px-4 relative z-10">
           {/* Breadcrumbs */}
-          <nav className="flex items-center gap-2 text-sm mb-6 text-white/80">
+          <nav className="flex items-center gap-2 text-sm mb-8 text-white/90">
             {pageContext.breadcrumbs.map((crumb, index) => (
               <div key={index} className="flex items-center gap-2">
+                {index === 0 && <Home className="w-4 h-4" />}
                 {crumb.href ? (
-                  <Link href={crumb.href} className="hover:text-white transition-colors">
+                  <Link href={crumb.href} className="hover:text-yellow-300 transition-colors font-semibold">
                     {crumb.label}
                   </Link>
                 ) : (
-                  <span className="text-white font-medium">{crumb.label}</span>
+                  <span className="text-white font-bold">{crumb.label}</span>
                 )}
                 {index < pageContext.breadcrumbs.length - 1 && (
-                  <ChevronRight className="w-4 h-4" />
+                  <ChevronRight className="w-4 h-4 text-white/60" />
                 )}
               </div>
             ))}
           </nav>
 
           {/* Hero Content */}
-          <div className="max-w-3xl">
-            <div className="flex items-center gap-4 mb-4">
-              <span className="text-5xl">{pageContext.icon}</span>
-              <div>
-                <h1 className="text-4xl md:text-5xl font-bold mb-2">
-                  {pageContext.title}
-                </h1>
-                <p className="text-xl text-white/90">{pageContext.subtitle}</p>
-              </div>
+          <div className="max-w-4xl">
+            <div className="inline-flex items-center gap-3 bg-white/20 backdrop-blur-md px-5 py-2 rounded-full mb-6 border border-white/30">
+              <span className="text-4xl drop-shadow-lg">{pageContext.icon}</span>
+              <span className="text-sm font-black tracking-wider uppercase">{pageContext.subtitle}</span>
             </div>
-            <p className="text-base text-white/80 leading-relaxed max-w-2xl">
+
+            <h1 className="text-5xl md:text-7xl font-black mb-4 drop-shadow-[0_4px_20px_rgba(0,0,0,0.3)] leading-tight">
+              {pageContext.title}
+            </h1>
+
+            <p className="text-xl md:text-2xl text-white/95 leading-relaxed max-w-3xl font-semibold drop-shadow-md">
               {pageContext.description}
             </p>
           </div>
         </div>
+
+        {/* Bottom decoration */}
+        <div className="absolute bottom-0 left-0 right-0 h-20 bg-gradient-to-b from-transparent to-white/20"></div>
       </div>
 
-      <div className="container mx-auto py-8 px-4">
-        <div className="flex gap-6">
+      <div className="container mx-auto py-12 px-4">
+        <div className="flex gap-8">
           {/* Filters Sidebar */}
           <aside
             className={`${
               showFilters ? 'w-80' : 'w-0'
             } transition-all duration-300 overflow-hidden`}
           >
-            <div className="bg-white rounded-lg shadow-md p-6 sticky top-4">
+            <div className="bg-gradient-to-br from-white to-amber-50 rounded-2xl shadow-xl p-6 sticky top-24 border-2 border-amber-200">
               <div className="flex items-center justify-between mb-6">
-                <h2 className="text-xl font-semibold flex items-center gap-2">
-                  <Filter className="w-5 h-5" />
+                <h2 className="text-2xl font-black flex items-center gap-2 text-transparent bg-clip-text bg-gradient-to-r from-amber-600 to-orange-600">
+                  <Filter className="w-6 h-6 text-amber-600" />
                   Filters
                 </h2>
                 {hasActiveFilters && (
                   <button
                     onClick={clearFilters}
-                    className="text-sm text-red-600 hover:text-red-700 flex items-center gap-1"
+                    className="px-3 py-1.5 bg-gradient-to-r from-red-500 to-red-600 text-white text-xs font-bold rounded-full flex items-center gap-1 hover:shadow-lg transition-all hover:scale-105"
                   >
-                    <X className="w-4 h-4" />
+                    <X className="w-3.5 h-3.5" />
                     Clear All
                   </button>
                 )}
               </div>
 
-              <div className="space-y-6">
+              <div className="space-y-5">
                 {/* Search */}
                 <div>
-                  <label className="block text-sm font-medium mb-2">Search</label>
+                  <label className="block text-sm font-black mb-2 text-gray-700">🔍 Search</label>
                   <input
                     type="text"
                     value={filters.search}
                     onChange={(e) => handleFilterChange('search', e.target.value)}
                     placeholder="Search products..."
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#C9A86A] focus:border-transparent"
+                    className="w-full px-4 py-2.5 border-2 border-amber-300 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-amber-500 font-semibold transition-all"
                   />
                 </div>
 
@@ -644,8 +672,8 @@ export default function ProductsPage() {
                 <div>
                   <label className="block text-sm font-medium mb-2">Brand</label>
                   <select
-                    value={filters.brand}
-                    onChange={(e) => handleFilterChange('brand', e.target.value)}
+                    value={filters.brandId}
+                    onChange={(e) => handleFilterChange('brandId', e.target.value)}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#C9A86A] focus:border-transparent"
                   >
                     <option value="">All Brands</option>
@@ -942,20 +970,23 @@ export default function ProductsPage() {
           {/* Products Grid */}
           <main className="flex-1">
             {/* Toolbar */}
-            <div className="bg-white rounded-lg shadow-md p-4 mb-6 flex items-center justify-between">
+            <div className="bg-gradient-to-r from-white via-amber-50 to-orange-50 rounded-2xl shadow-xl p-5 mb-8 flex items-center justify-between border-2 border-amber-200">
               <div className="flex items-center gap-4">
                 <button
                   onClick={() => setShowFilters(!showFilters)}
-                  className="lg:hidden px-4 py-2 border rounded-lg hover:bg-gray-50 flex items-center gap-2"
+                  className="lg:hidden px-5 py-2.5 bg-gradient-to-r from-amber-500 to-orange-500 text-white font-bold rounded-full hover:shadow-lg transition-all hover:scale-105 flex items-center gap-2 border-2 border-amber-300/30"
                 >
                   <Filter className="w-4 h-4" />
                   {showFilters ? 'Hide' : 'Show'} Filters
                 </button>
 
-                <p className="text-gray-600">
-                  {data?.pagination?.total || 0} product{data?.pagination?.total !== 1 ? 's' : ''} found
+                <p className="text-gray-700 font-semibold">
+                  <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-600 to-orange-600 font-black text-lg">
+                    {data?.pagination?.total || 0}
+                  </span>
+                  {' '}product{data?.pagination?.total !== 1 ? 's' : ''} found
                   {hasActiveFilters && (
-                    <span className="text-[#C9A86A] ml-2 font-medium">
+                    <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-600 to-orange-600 ml-2 font-black">
                       (filtered)
                     </span>
                   )}
@@ -965,16 +996,16 @@ export default function ProductsPage() {
               <select
                 value={filters.sort}
                 onChange={(e) => handleFilterChange('sort', e.target.value)}
-                className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#C9A86A] focus:border-transparent"
+                className="px-4 py-2.5 border-2 border-amber-300 rounded-xl bg-gradient-to-r from-white to-amber-50 focus:ring-2 focus:ring-amber-500 focus:border-amber-500 font-bold text-gray-700 hover:shadow-md transition-all cursor-pointer"
               >
-                <option value="createdAt_desc">Newest First</option>
-                <option value="createdAt_asc">Oldest First</option>
-                <option value="price_asc">Price: Low to High</option>
-                <option value="price_desc">Price: High to Low</option>
-                <option value="name_asc">Name: A to Z</option>
-                <option value="name_desc">Name: Z to A</option>
-                <option value="rating_desc">Highest Rated</option>
-                <option value="salesCount_desc">Most Popular</option>
+                <option value="createdAt_desc">✨ Newest First</option>
+                <option value="createdAt_asc">🕐 Oldest First</option>
+                <option value="price_asc">💰 Price: Low to High</option>
+                <option value="price_desc">💎 Price: High to Low</option>
+                <option value="name_asc">🔤 Name: A to Z</option>
+                <option value="name_desc">🔡 Name: Z to A</option>
+                <option value="rating_desc">⭐ Highest Rated</option>
+                <option value="salesCount_desc">🔥 Most Popular</option>
               </select>
             </div>
 
@@ -982,10 +1013,10 @@ export default function ProductsPage() {
             {isLoading && (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                 {[...Array(8)].map((_, i) => (
-                  <div key={i} className="animate-pulse">
-                    <div className="bg-gray-200 rounded-lg h-64 mb-4"></div>
-                    <div className="h-4 bg-gray-200 rounded w-3/4 mb-2"></div>
-                    <div className="h-4 bg-gray-200 rounded w-1/2"></div>
+                  <div key={i} className="animate-pulse bg-white rounded-xl p-4 shadow-lg border-2 border-amber-100">
+                    <div className="bg-gradient-to-br from-amber-200 to-orange-200 rounded-xl h-64 mb-4"></div>
+                    <div className="h-4 bg-gradient-to-r from-amber-200 to-orange-200 rounded-full w-3/4 mb-2"></div>
+                    <div className="h-4 bg-gradient-to-r from-amber-200 to-orange-200 rounded-full w-1/2"></div>
                   </div>
                 ))}
               </div>
@@ -993,23 +1024,26 @@ export default function ProductsPage() {
 
             {/* Error State */}
             {error && (
-              <div className="bg-red-50 border border-red-200 rounded-lg p-6 text-center">
-                <p className="text-red-700">Failed to load products. Please try again.</p>
+              <div className="bg-gradient-to-br from-red-50 to-orange-50 border-2 border-red-300 rounded-2xl p-8 text-center shadow-xl">
+                <div className="text-5xl mb-4">⚠️</div>
+                <p className="text-red-700 font-bold text-lg">Failed to load products. Please try again.</p>
               </div>
             )}
 
             {/* Empty State */}
             {!isLoading && !error && data?.data.length === 0 && (
-              <div className="bg-white rounded-lg shadow-md p-12 text-center">
-                <Filter className="w-16 h-16 mx-auto mb-4 text-gray-300" />
-                <h3 className="text-xl font-semibold mb-2">No products found</h3>
-                <p className="text-gray-600 mb-4">
+              <div className="bg-gradient-to-br from-white to-amber-50 rounded-2xl shadow-2xl p-16 text-center border-2 border-amber-200">
+                <div className="bg-gradient-to-br from-amber-100 to-orange-100 w-24 h-24 rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg">
+                  <Filter className="w-12 h-12 text-amber-600" />
+                </div>
+                <h3 className="text-3xl font-black mb-3 text-transparent bg-clip-text bg-gradient-to-r from-amber-600 to-orange-600">No products found</h3>
+                <p className="text-gray-700 mb-6 text-lg font-semibold">
                   Try adjusting your filters or search terms
                 </p>
                 {hasActiveFilters && (
                   <button
                     onClick={clearFilters}
-                    className="px-6 py-2 bg-[#C9A86A] text-white rounded-lg hover:bg-[#D4A574]"
+                    className="px-8 py-3 bg-gradient-to-r from-amber-500 to-orange-500 text-white rounded-full font-black text-base hover:shadow-2xl transition-all hover:scale-105 border-2 border-amber-300/30"
                   >
                     Clear Filters
                   </button>
@@ -1028,16 +1062,16 @@ export default function ProductsPage() {
 
                 {/* Pagination */}
                 {data && data.pagination && data.pagination.totalPages > 1 && (
-                  <div className="mt-8 flex justify-center items-center gap-2">
+                  <div className="mt-12 flex justify-center items-center gap-3">
                     <button
                       onClick={() => setPage(page - 1)}
                       disabled={page === 1}
-                      className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="px-6 py-3 border-2 border-amber-300 rounded-xl bg-gradient-to-r from-white to-amber-50 hover:from-amber-50 hover:to-orange-50 disabled:opacity-50 disabled:cursor-not-allowed font-bold text-gray-700 hover:shadow-lg transition-all disabled:hover:shadow-none"
                     >
-                      Previous
+                      ← Previous
                     </button>
 
-                    <div className="flex gap-1">
+                    <div className="flex gap-2">
                       {[...Array(data.pagination.totalPages)].map((_, i) => {
                         const pageNum = i + 1;
                         if (
@@ -1049,10 +1083,10 @@ export default function ProductsPage() {
                             <button
                               key={pageNum}
                               onClick={() => setPage(pageNum)}
-                              className={`px-4 py-2 border rounded-lg ${
+                              className={`px-5 py-3 border-2 rounded-xl font-black transition-all ${
                                 page === pageNum
-                                  ? 'bg-[#C9A86A] text-white border-[#C9A86A]'
-                                  : 'border-gray-300 hover:bg-gray-50'
+                                  ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-white border-amber-400 shadow-lg scale-110'
+                                  : 'border-amber-300 bg-white hover:bg-gradient-to-r hover:from-amber-50 hover:to-orange-50 text-gray-700 hover:shadow-md'
                               }`}
                             >
                               {pageNum}
@@ -1062,7 +1096,7 @@ export default function ProductsPage() {
                           pageNum === page - 2 ||
                           pageNum === page + 2
                         ) {
-                          return <span key={pageNum} className="px-2">...</span>;
+                          return <span key={pageNum} className="px-3 text-amber-600 font-black text-xl">...</span>;
                         }
                         return null;
                       })}
@@ -1071,9 +1105,9 @@ export default function ProductsPage() {
                     <button
                       onClick={() => setPage(page + 1)}
                       disabled={page === data.pagination.totalPages}
-                      className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="px-6 py-3 border-2 border-amber-300 rounded-xl bg-gradient-to-r from-white to-amber-50 hover:from-amber-50 hover:to-orange-50 disabled:opacity-50 disabled:cursor-not-allowed font-bold text-gray-700 hover:shadow-lg transition-all disabled:hover:shadow-none"
                     >
-                      Next
+                      Next →
                     </button>
                   </div>
                 )}

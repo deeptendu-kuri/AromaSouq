@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { Search, ExternalLink, CheckCircle, XCircle } from 'lucide-react'
+import { Search, ExternalLink, CheckCircle, XCircle, Ban, Play } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
@@ -33,9 +33,11 @@ export default function VendorsPage() {
   const [search, setSearch] = useState('')
   const [activeTab, setActiveTab] = useState<string>('PENDING')
   const [rejectDialog, setRejectDialog] = useState<{ open: boolean; vendorId?: string }>({ open: false })
+  const [suspendDialog, setSuspendDialog] = useState<{ open: boolean; vendorId?: string }>({ open: false })
   const [rejectionReason, setRejectionReason] = useState('')
+  const [suspensionReason, setSuspensionReason] = useState('')
 
-  const { vendors, isLoading, approve, reject, isProcessing } = useVendorApprovals({
+  const { vendors, isLoading, approve, reject, suspend, isProcessing } = useVendorApprovals({
     search: search || undefined,
     status: activeTab === 'ALL' ? undefined : activeTab as any,
   })
@@ -59,6 +61,25 @@ export default function VendorsPage() {
       reject({ vendorId: rejectDialog.vendorId, reason: rejectionReason })
       setRejectDialog({ open: false })
       setRejectionReason('')
+    }
+  }
+
+  const handleSuspendClick = (vendorId: string) => {
+    setSuspendDialog({ open: true, vendorId })
+    setSuspensionReason('')
+  }
+
+  const handleSuspendConfirm = () => {
+    if (suspendDialog.vendorId && suspensionReason.trim()) {
+      suspend({ vendorId: suspendDialog.vendorId, reason: suspensionReason })
+      setSuspendDialog({ open: false })
+      setSuspensionReason('')
+    }
+  }
+
+  const handleReactivate = (vendorId: string) => {
+    if (confirm('Are you sure you want to reactivate this vendor? Their products will be relisted.')) {
+      approve(vendorId)
     }
   }
 
@@ -195,6 +216,29 @@ export default function VendorsPage() {
                                   </Button>
                                 </>
                               )}
+                              {vendor.status === 'APPROVED' && (
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  onClick={() => handleSuspendClick(vendor.id)}
+                                  disabled={isProcessing}
+                                  className="border-red-300 text-red-700 hover:bg-red-50"
+                                >
+                                  <Ban className="h-4 w-4 mr-2" />
+                                  Suspend
+                                </Button>
+                              )}
+                              {vendor.status === 'SUSPENDED' && (
+                                <Button
+                                  size="sm"
+                                  onClick={() => handleReactivate(vendor.id)}
+                                  disabled={isProcessing}
+                                  className="bg-green-600 hover:bg-green-700"
+                                >
+                                  <Play className="h-4 w-4 mr-2" />
+                                  Reactivate
+                                </Button>
+                              )}
                             </div>
                           </TableCell>
                         </TableRow>
@@ -239,6 +283,42 @@ export default function VendorsPage() {
               disabled={!rejectionReason.trim() || isProcessing}
             >
               Reject Application
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Suspension Dialog */}
+      <Dialog open={suspendDialog.open} onOpenChange={(open) => setSuspendDialog({ open })}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Suspend Vendor</DialogTitle>
+            <DialogDescription>
+              Suspending this vendor will deactivate all their products and prevent them from accessing their dashboard. Please provide a reason.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="suspend-reason">Suspension Reason</Label>
+              <Textarea
+                id="suspend-reason"
+                placeholder="Enter the reason for suspension..."
+                value={suspensionReason}
+                onChange={(e) => setSuspensionReason(e.target.value)}
+                rows={4}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setSuspendDialog({ open: false })}>
+              Cancel
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={handleSuspendConfirm}
+              disabled={!suspensionReason.trim() || isProcessing}
+            >
+              Suspend Vendor
             </Button>
           </DialogFooter>
         </DialogContent>

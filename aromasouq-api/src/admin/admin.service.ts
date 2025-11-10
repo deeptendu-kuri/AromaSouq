@@ -479,6 +479,22 @@ export class AdminService {
       updateData.verifiedAt = new Date();
     }
 
+    // When vendor is suspended/rejected, deactivate all their products
+    if (status === 'SUSPENDED' || status === 'REJECTED') {
+      await this.prisma.product.updateMany({
+        where: { vendorId },
+        data: { isActive: false },
+      });
+    }
+
+    // When vendor is approved, reactivate their products
+    if (status === 'APPROVED') {
+      await this.prisma.product.updateMany({
+        where: { vendorId },
+        data: { isActive: true },
+      });
+    }
+
     const updatedVendor = await this.prisma.vendor.update({
       where: { id: vendorId },
       data: updateData,

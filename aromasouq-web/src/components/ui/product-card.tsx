@@ -23,6 +23,7 @@ interface ProductCardProps {
   onToggleWishlist?: (product: any) => void
   isWishlisted?: boolean
   className?: string
+  compact?: boolean
 }
 
 export function ProductCard({
@@ -34,6 +35,7 @@ export function ProductCard({
   onToggleWishlist,
   isWishlisted = false,
   className,
+  compact = false,
 }: ProductCardProps) {
   // Handle both API response formats
   const hasVideo = showVideo && product.videos && product.videos.length > 0
@@ -49,19 +51,29 @@ export function ProductCard({
   const brandName = product.brand?.name || (product as any).vendor?.businessName || 'Premium Brand'
   const productName = product.name || product.nameEn || 'Product'
 
+  // Handle rating - check multiple possible field names
+  const rating = product.rating || (product as any).averageRating || 0
+  const reviewCount = product.reviewCount || (product as any).reviewCount || 0
+
   const CardWrapper = featured ? GlareCard : React.Fragment
   const wrapperProps = featured ? { className: "h-full" } : {}
 
   return (
     <CardWrapper {...wrapperProps}>
       <motion.div
-        whileHover={{ y: -8 }}
+        whileHover={{ y: compact ? -4 : -8 }}
         transition={{ duration: 0.3 }}
         className={cn("h-full", className)}
       >
-        <Card className="h-full overflow-hidden hover:shadow-xl transition-all duration-300 rounded-xl border border-gray-100">
-          {/* Image Container - Reduced aspect ratio */}
-          <div className="relative aspect-[4/5] overflow-hidden bg-gradient-to-br from-[#f8f8f8] via-[#f0f0f0] to-[#e8e8e8]">
+        <Card className={cn(
+          "h-full overflow-hidden transition-all duration-300 border border-gray-200",
+          compact ? "hover:shadow-lg rounded-lg" : "hover:shadow-xl rounded-xl border-gray-100"
+        )}>
+          {/* Image Container */}
+          <div className={cn(
+            "relative overflow-hidden bg-gradient-to-br from-[#f8f8f8] via-[#f0f0f0] to-[#e8e8e8]",
+            compact ? "aspect-[3/4]" : "aspect-[4/5]"
+          )}>
             <Link href={`/products/${product.slug}`}>
               {productImage ? (
                 <Image
@@ -75,42 +87,61 @@ export function ProductCard({
               )}
             </Link>
 
-            {/* Badges - More compact */}
-            <div className="absolute top-2 left-2 flex flex-col gap-1">
+            {/* Badges */}
+            <div className={cn(
+              "absolute flex flex-col gap-1",
+              compact ? "top-1.5 left-1.5" : "top-2 left-2"
+            )}>
               {product.createdAt && new Date(product.createdAt).getTime() > Date.now() - 7 * 24 * 60 * 60 * 1000 && (
-                <Badge className="bg-gradient-to-br from-[#4CAF50] to-[#66BB6A] border-0 text-white text-[9px] py-0.5 px-2 font-bold">
+                <Badge className={cn(
+                  "bg-gradient-to-br from-[#4CAF50] to-[#66BB6A] border-0 text-white font-bold",
+                  compact ? "text-[8px] py-0.5 px-1.5" : "text-[9px] py-0.5 px-2"
+                )}>
                   NEW
                 </Badge>
               )}
               {discount > 0 && (
-                <Badge className="bg-gradient-to-br from-[#EF5350] to-[#E57373] border-0 text-white text-[9px] py-0.5 px-2 font-bold">
+                <Badge className={cn(
+                  "bg-gradient-to-br from-[#EF5350] to-[#E57373] border-0 text-white font-bold",
+                  compact ? "text-[8px] py-0.5 px-1.5" : "text-[9px] py-0.5 px-2"
+                )}>
                   -{discount}%
                 </Badge>
               )}
               {isLowStock && (
-                <Badge className="bg-gradient-to-br from-[#8B3A3A] to-[#A94442] border-0 text-white text-[9px] py-0.5 px-2 font-bold">
+                <Badge className={cn(
+                  "bg-gradient-to-br from-[#8B3A3A] to-[#A94442] border-0 text-white font-bold",
+                  compact ? "text-[8px] py-0.5 px-1.5" : "text-[9px] py-0.5 px-2"
+                )}>
                   {stockQuantity} LEFT
                 </Badge>
               )}
               {(product as any).salesCount && (product as any).salesCount > 0 && (
-                <Badge className="bg-gradient-to-br from-[#FFA726] to-[#FFB74D] border-0 text-white text-[9px] py-0.5 px-2 font-bold">
+                <Badge className={cn(
+                  "bg-gradient-to-br from-[#FFA726] to-[#FFB74D] border-0 text-white font-bold",
+                  compact ? "text-[8px] py-0.5 px-1.5" : "text-[9px] py-0.5 px-2"
+                )}>
                   🔥 {(product as any).salesCount}
                 </Badge>
               )}
             </div>
 
-            {/* Wishlist Heart - Smaller */}
+            {/* Wishlist Heart */}
             <motion.button
               whileTap={{ scale: 1.2 }}
               onClick={(e) => {
                 e.preventDefault()
                 onToggleWishlist?.(product)
               }}
-              className="absolute top-2 right-2 p-1.5 rounded-full bg-white/90 hover:bg-white shadow-md transition-all hover:scale-110"
+              className={cn(
+                "absolute rounded-full bg-white/90 hover:bg-white shadow-md transition-all hover:scale-110",
+                compact ? "top-1.5 right-1.5 p-1" : "top-2 right-2 p-1.5"
+              )}
             >
               <Heart
                 className={cn(
-                  "w-4 h-4 transition-colors",
+                  "transition-colors",
+                  compact ? "w-3 h-3" : "w-4 h-4",
                   isWishlisted ? "fill-red-500 text-red-500" : "text-gray-600"
                 )}
               />
@@ -148,50 +179,59 @@ export function ProductCard({
             )}
           </div>
 
-          {/* Content - More compact spacing */}
-          <CardContent className="p-3">
-            {/* Brand - Smaller */}
+          {/* Content */}
+          <CardContent className={compact ? "p-2.5" : "p-3"}>
+            {/* Brand */}
             <Link
               href={`/brands/${brandName.toLowerCase().replace(/\s+/g, '-')}`}
-              className="text-[10px] text-[#C9A86A] hover:text-[#B8975A] transition-colors font-semibold uppercase tracking-wide"
+              className={cn(
+                "text-[#C9A86A] hover:text-[#B8975A] transition-colors font-semibold uppercase tracking-wide",
+                compact ? "text-[9px]" : "text-[10px]"
+              )}
             >
               {brandName}
             </Link>
 
-            {/* Product Name - Single line */}
+            {/* Product Name */}
             <Link href={`/products/${product.slug}`}>
-              <h3 className="font-bold text-[13px] mt-1 truncate hover:text-[#C9A86A] transition-colors text-[#2D2D2D]">
+              <h3 className={cn(
+                "font-bold truncate hover:text-[#C9A86A] transition-colors text-[#2D2D2D]",
+                compact ? "text-[12px] mt-0.5" : "text-[13px] mt-1"
+              )}>
                 {productName}
               </h3>
             </Link>
 
-            {/* Rating - More compact */}
-            <div className="flex items-center gap-1 mt-1.5">
-              <div className="flex items-center">
+            {/* Rating */}
+            <div className={cn("flex items-center gap-1.5", compact ? "mt-1" : "mt-1.5")}>
+              <div className="flex items-center gap-0.5">
                 {[...Array(5)].map((_, i) => (
                   <span
                     key={i}
                     className={cn(
-                      "text-[10px]",
-                      i < Math.floor(product.rating || 0) ? "text-[#C9A86A]" : "text-gray-300"
+                      compact ? "text-[11px]" : "text-[13px]",
+                      i < Math.floor(rating) ? "text-[#FFD700]" : "text-gray-300"
                     )}
+                    style={{
+                      textShadow: i < Math.floor(rating) ? '0 0 2px rgba(255, 215, 0, 0.5)' : 'none'
+                    }}
                   >
                     ★
                   </span>
                 ))}
               </div>
-              <span className="text-[9px] text-gray-400">
-                ({product.reviewCount || 0})
+              <span className={cn("text-gray-500 font-medium", compact ? "text-[9px]" : "text-[10px]")}>
+                ({reviewCount})
               </span>
             </div>
 
-            {/* Price - More compact */}
-            <div className="mt-2 flex items-baseline gap-1.5">
-              <span className="text-base font-bold text-[#1A1F2E]">
+            {/* Price */}
+            <div className={cn("flex items-baseline gap-1.5", compact ? "mt-1.5" : "mt-2")}>
+              <span className={cn("font-bold text-[#1A1F2E]", compact ? "text-sm" : "text-base")}>
                 {formatCurrency(salePrice || regularPrice)}
               </span>
               {salePrice && (
-                <span className="text-[11px] text-gray-400 line-through">
+                <span className={cn("text-gray-400 line-through", compact ? "text-[10px]" : "text-[11px]")}>
                   {formatCurrency(regularPrice)}
                 </span>
               )}

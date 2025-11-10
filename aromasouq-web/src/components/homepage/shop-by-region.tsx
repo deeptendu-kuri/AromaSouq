@@ -64,53 +64,62 @@ export function ShopByRegion({ regions }: ShopByRegionProps) {
   };
 
   return (
-    <div className="bg-[#f9f9f9] py-12 mb-16">
-      <div className="container mx-auto px-[5%]">
-        <div className="flex justify-between items-center mb-8">
+    <div className="relative overflow-hidden bg-gradient-to-br from-sky-50 via-blue-50 to-indigo-50 py-20 mb-0">
+      {/* Decorative elements */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-10 left-10 w-96 h-96 bg-gradient-to-br from-sky-300/20 to-transparent rounded-full blur-3xl"></div>
+        <div className="absolute bottom-10 right-10 w-96 h-96 bg-gradient-to-tr from-indigo-300/20 to-transparent rounded-full blur-3xl"></div>
+      </div>
+
+      <div className="container mx-auto px-[5%] relative z-10">
+        <div className="flex justify-between items-center mb-12">
           <div>
-            <h2 className="text-[32px] text-[var(--color-deep-navy)] font-bold mb-2.5">
+            <div className="inline-flex items-center gap-2 bg-gradient-to-r from-sky-500 to-indigo-500 text-white px-5 py-1.5 rounded-full mb-3 shadow-lg text-xs font-bold tracking-wide">
+              🌍 GLOBAL FRAGRANCE JOURNEY
+            </div>
+            <h2 className="text-5xl text-[var(--color-deep-navy)] font-bold mb-3 bg-clip-text text-transparent bg-gradient-to-r from-sky-600 to-indigo-600">
               Shop by Region
             </h2>
-            <p className="text-[15px] text-gray-600">
-              Explore fragrances from around the world
+            <p className="text-lg text-gray-700">
+              Explore fragrances from around the world • Discover cultural scent traditions
             </p>
           </div>
-          <div className="flex gap-2.5">
+          <div className="flex gap-3">
             <button
               onClick={() => scroll('left')}
-              className="w-10 h-10 rounded-full border-2 border-gray-200 bg-white flex items-center justify-center transition-all duration-300 hover:bg-[var(--color-oud-gold)] hover:border-[var(--color-oud-gold)] hover:text-white"
+              className="w-12 h-12 rounded-full border-2 border-sky-200 bg-white/80 backdrop-blur-sm flex items-center justify-center transition-all duration-300 hover:bg-sky-500 hover:border-sky-500 hover:text-white shadow-lg hover:scale-110"
               aria-label="Previous"
             >
-              <ChevronLeft className="w-5 h-5" />
+              <ChevronLeft className="w-6 h-6" />
             </button>
             <button
               onClick={() => scroll('right')}
-              className="w-10 h-10 rounded-full border-2 border-gray-200 bg-white flex items-center justify-center transition-all duration-300 hover:bg-[var(--color-oud-gold)] hover:border-[var(--color-oud-gold)] hover:text-white"
+              className="w-12 h-12 rounded-full border-2 border-sky-200 bg-white/80 backdrop-blur-sm flex items-center justify-center transition-all duration-300 hover:bg-sky-500 hover:border-sky-500 hover:text-white shadow-lg hover:scale-110"
               aria-label="Next"
             >
-              <ChevronRight className="w-5 h-5" />
+              <ChevronRight className="w-6 h-6" />
             </button>
           </div>
         </div>
 
         <div
           ref={trackRef}
-          className="flex gap-6 overflow-x-auto scrollbar-hide scroll-smooth"
+          className="flex gap-6 overflow-x-auto scrollbar-hide scroll-smooth pb-4"
         >
           {regions.filter(region => region.region).map((region, index) => (
             <Link
               key={region.region || `region-${index}`}
               href={`/products?region=${encodeURIComponent(region.region)}`}
-              className="flex-shrink-0 w-[240px] bg-white rounded-xl overflow-hidden shadow-[var(--shadow-card)] transition-all duration-300 hover:-translate-y-1.5 hover:shadow-[var(--shadow-card-hover)] cursor-pointer"
+              className="flex-shrink-0 w-[260px] bg-white/80 backdrop-blur-sm rounded-2xl overflow-hidden shadow-xl transition-all duration-300 hover:-translate-y-2 hover:shadow-2xl cursor-pointer border border-white/50 group"
             >
-              <div className="h-[140px] flex items-center justify-center text-[72px] bg-gradient-to-br from-[#f5f5f5] to-[#e8e8e8]">
+              <div className="h-[160px] flex items-center justify-center text-8xl bg-gradient-to-br from-sky-100 via-blue-50 to-indigo-100 group-hover:from-sky-200 group-hover:via-blue-100 group-hover:to-indigo-200 transition-all duration-300">
                 {getRegionFlag(region.region)}
               </div>
-              <div className="p-5 text-center">
-                <div className="text-base font-bold text-[var(--color-charcoal)] mb-1.5">
+              <div className="p-6 text-center bg-gradient-to-br from-white to-sky-50/50">
+                <div className="text-lg font-bold text-[var(--color-deep-navy)] mb-2">
                   {region.region}
                 </div>
-                <div className="text-xs text-[var(--color-oud-gold)] font-semibold">
+                <div className="text-sm text-sky-600 font-bold bg-sky-100 px-4 py-1 rounded-full inline-block">
                   {region.count} Products
                 </div>
               </div>
@@ -118,6 +127,9 @@ export function ShopByRegion({ regions }: ShopByRegionProps) {
           ))}
         </div>
       </div>
+
+      {/* Bottom decoration */}
+      <div className="absolute bottom-0 left-0 right-0 h-16 bg-gradient-to-b from-transparent to-white"></div>
     </div>
   );
 }

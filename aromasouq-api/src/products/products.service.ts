@@ -388,11 +388,16 @@ export class ProductsService {
     // Remove vendorId from DTO to prevent client manipulation
     const { vendorId: _, ...productData } = createProductDto;
 
+    // Auto-activate products for approved vendors
+    // Vendors who are APPROVED should have their products active by default
+    const isActiveStatus = productData.isActive !== undefined ? productData.isActive : true;
+
     try {
       return await this.prisma.product.create({
         data: {
           ...productData,
           vendorId, // Use the auto-injected/validated vendorId
+          isActive: isActiveStatus, // Set active by default for approved vendors
         },
         include: {
           category: true,

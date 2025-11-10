@@ -160,4 +160,32 @@ export class CouponsService {
       finalAmount: orderAmount - discountAmount,
     };
   }
+
+  // Get active coupons for a specific vendor (public endpoint)
+  async getActiveCouponsByVendor(vendorId: string) {
+    const now = new Date();
+
+    return this.prisma.coupon.findMany({
+      where: {
+        vendorId,
+        isActive: true,
+        startDate: { lte: now },
+        endDate: { gte: now },
+        OR: [
+          { usageLimit: null },
+          { usageCount: { lt: this.prisma.coupon.fields.usageLimit } }
+        ]
+      },
+      select: {
+        id: true,
+        code: true,
+        discountType: true,
+        discountValue: true,
+        minOrderAmount: true,
+        maxDiscount: true,
+        endDate: true,
+      },
+      orderBy: { createdAt: 'desc' },
+    });
+  }
 }

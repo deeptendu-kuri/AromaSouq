@@ -36,36 +36,50 @@ function getOccasionData(occasionName: string | undefined) {
 
 export function ShopByOccasion({ occasions }: ShopByOccasionProps) {
   return (
-    <div className="container mx-auto px-[5%] mb-16">
-      <div className="text-center mb-10">
-        <h2 className="text-[32px] text-[var(--color-deep-navy)] font-bold mb-2.5">
-          Shop by Occasion
-        </h2>
-        <p className="text-[15px] text-gray-600">
-          Find the perfect scent for every moment
-        </p>
+    <div className="relative overflow-hidden bg-gradient-to-br from-violet-50 via-purple-50 to-fuchsia-50 py-20 mb-0">
+      {/* Decorative elements */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-20 left-10 w-96 h-96 bg-gradient-to-br from-violet-300/20 to-transparent rounded-full blur-3xl"></div>
+        <div className="absolute bottom-20 right-10 w-96 h-96 bg-gradient-to-tr from-fuchsia-300/20 to-transparent rounded-full blur-3xl"></div>
       </div>
 
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-5">
-        {occasions.filter(occasion => occasion.occasion).map((occasion, index) => {
-          const { icon, tag } = getOccasionData(occasion.occasion);
-          return (
-            <Link
-              key={occasion.occasion || `occasion-${index}`}
-              href={`/products?occasion=${encodeURIComponent(occasion.occasion)}`}
-              className="bg-white rounded-xl p-8 px-6 text-center shadow-[var(--shadow-card)] transition-all duration-300 hover:-translate-y-1 hover:shadow-[var(--shadow-card)] hover:border-2 hover:border-[var(--color-oud-gold)] cursor-pointer border-2 border-transparent"
-            >
-              <div className="text-5xl mb-4">{icon}</div>
-              <div className="text-[15px] font-bold text-[var(--color-charcoal)] mb-1.5">
-                {occasion.occasion}
-              </div>
-              <div className="text-[11px] text-[var(--color-oud-gold)] font-semibold">
-                {tag}
-              </div>
-            </Link>
-          );
-        })}
+      <div className="container mx-auto px-[5%] relative z-10">
+        <div className="text-center mb-12">
+          <div className="inline-flex items-center gap-2 bg-gradient-to-r from-violet-500 to-fuchsia-500 text-white px-5 py-1.5 rounded-full mb-3 shadow-lg text-xs font-bold tracking-wide">
+            ✨ EVERY MOMENT MATTERS
+          </div>
+          <h2 className="text-5xl text-[var(--color-deep-navy)] font-bold mb-4 bg-clip-text text-transparent bg-gradient-to-r from-violet-600 to-fuchsia-600">
+            Shop by Occasion
+          </h2>
+          <p className="text-lg text-gray-700 max-w-2xl mx-auto">
+            Find the perfect scent for every moment • Make lasting impressions
+          </p>
+        </div>
+
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6">
+          {occasions.filter(occasion => occasion.occasion).map((occasion, index) => {
+            const { icon, tag } = getOccasionData(occasion.occasion);
+            return (
+              <Link
+                key={occasion.occasion || `occasion-${index}`}
+                href={`/products?occasion=${encodeURIComponent(occasion.occasion)}`}
+                className="bg-white/80 backdrop-blur-sm rounded-2xl p-8 px-6 text-center shadow-xl transition-all duration-300 hover:-translate-y-2 hover:shadow-2xl cursor-pointer border border-white/50 group hover:bg-gradient-to-br hover:from-violet-50 hover:to-fuchsia-50"
+              >
+                <div className="text-6xl mb-5 transform group-hover:scale-110 transition-transform duration-300">{icon}</div>
+                <div className="text-base font-bold text-[var(--color-deep-navy)] mb-2">
+                  {occasion.occasion}
+                </div>
+                <div className="text-xs text-violet-600 font-semibold bg-violet-100 px-3 py-1 rounded-full inline-block">
+                  {tag}
+                </div>
+              </Link>
+            );
+          })}
+        </div>
       </div>
+
+      {/* Bottom decoration */}
+      <div className="absolute bottom-0 left-0 right-0 h-16 bg-gradient-to-b from-transparent to-white"></div>
     </div>
   );
 }

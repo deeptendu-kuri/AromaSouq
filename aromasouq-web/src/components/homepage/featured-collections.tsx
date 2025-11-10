@@ -7,20 +7,21 @@ import Link from 'next/link';
 
 export function FeaturedCollections() {
   return (
-    <div className="container mx-auto px-[5%] mb-16">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+    <div className="container mx-auto px-[5%] py-12 mb-0">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-5 max-w-5xl mx-auto">
         {/* Men's Banner */}
         <Link
           href="/products?gender=men"
-          className="h-[350px] rounded-[14px] overflow-hidden relative group cursor-pointer shadow-[var(--shadow-card)] transition-all duration-300 hover:-translate-y-1.5 hover:shadow-[var(--shadow-card-hover)] bg-gradient-to-br from-[var(--color-deep-navy)]/85 to-[var(--color-charcoal)]/70"
+          className="h-[220px] rounded-xl overflow-hidden relative group cursor-pointer shadow-lg transition-all duration-300 hover:-translate-y-1 hover:shadow-xl bg-gradient-to-br from-slate-800 to-gray-700"
         >
-          <div className="absolute bottom-[35px] left-[35px] text-white">
-            <h3 className="text-[38px] font-bold mb-2">For Him</h3>
-            <p className="text-[15px] mb-4.5 opacity-95">
-              Bold and sophisticated fragrances
+          <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent"></div>
+          <div className="absolute bottom-6 left-6 text-white z-10">
+            <h3 className="text-2xl font-bold mb-1.5">For Him</h3>
+            <p className="text-sm mb-3 text-gray-200">
+              Bold & sophisticated
             </p>
-            <span className="inline-block bg-white text-[var(--color-deep-navy)] px-6.5 py-2.5 rounded-full font-semibold text-sm transition-all duration-300 hover:bg-[var(--color-oud-gold)] hover:-translate-y-0.5">
-              Shop Men's
+            <span className="inline-block bg-white text-slate-900 px-5 py-2 rounded-full font-semibold text-xs transition-all duration-300 hover:bg-[var(--color-oud-gold)] hover:text-white shadow-md">
+              Shop Men's →
             </span>
           </div>
         </Link>
@@ -28,15 +29,16 @@ export function FeaturedCollections() {
         {/* Women's Banner */}
         <Link
           href="/products?gender=women"
-          className="h-[350px] rounded-[14px] overflow-hidden relative group cursor-pointer shadow-[var(--shadow-card)] transition-all duration-300 hover:-translate-y-1.5 hover:shadow-[var(--shadow-card-hover)] bg-gradient-to-br from-[var(--color-burgundy)]/75 to-[var(--color-oud-gold)]/70"
+          className="h-[220px] rounded-xl overflow-hidden relative group cursor-pointer shadow-lg transition-all duration-300 hover:-translate-y-1 hover:shadow-xl bg-gradient-to-br from-rose-400 to-pink-500"
         >
-          <div className="absolute bottom-[35px] left-[35px] text-white">
-            <h3 className="text-[38px] font-bold mb-2">For Her</h3>
-            <p className="text-[15px] mb-4.5 opacity-95">
-              Elegant and luxurious scents
+          <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent"></div>
+          <div className="absolute bottom-6 left-6 text-white z-10">
+            <h3 className="text-2xl font-bold mb-1.5">For Her</h3>
+            <p className="text-sm mb-3 text-gray-50">
+              Elegant & luxurious
             </p>
-            <span className="inline-block bg-white text-[var(--color-deep-navy)] px-6.5 py-2.5 rounded-full font-semibold text-sm transition-all duration-300 hover:bg-[var(--color-oud-gold)] hover:-translate-y-0.5">
-              Shop Women's
+            <span className="inline-block bg-white text-rose-600 px-5 py-2 rounded-full font-semibold text-xs transition-all duration-300 hover:bg-[var(--color-oud-gold)] hover:text-white shadow-md">
+              Shop Women's →
             </span>
           </div>
         </Link>

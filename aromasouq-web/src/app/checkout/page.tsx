@@ -7,6 +7,7 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import { Check } from "lucide-react"
 import { motion } from "framer-motion"
 import { Button } from "@/components/ui/button"
+import { Badge } from "@/components/ui/badge"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
@@ -471,27 +472,60 @@ export default function CheckoutPage() {
 
                       {/* Coins Redemption */}
                       {wallet && wallet.balance > 0 && (
-                        <div>
-                          <h3 className="font-semibold mb-2">Use Coins</h3>
-                          <p className="text-sm text-muted-foreground mb-4">
-                            Available: <strong>{wallet.balance} coins</strong> (1 coin = 0.10 AED)
-                            <br />
-                            Max {maxCoinsAllowed} coins can be used (50% of subtotal)
+                        <div className="bg-gradient-to-br from-amber-50 to-orange-50 border-2 border-amber-200 rounded-lg p-4">
+                          <div className="flex items-center justify-between mb-3">
+                            <h3 className="font-semibold">Use Coins</h3>
+                            <Badge className="bg-gradient-to-r from-amber-500 to-orange-500 text-white font-bold">
+                              {wallet.balance} coins available
+                            </Badge>
+                          </div>
+
+                          <p className="text-xs text-gray-600 mb-4">
+                            1 coin = 0.10 AED • Max {maxCoinsAllowed} coins (50% of subtotal)
                           </p>
 
-                          <Slider
-                            value={[coinsToUse]}
-                            onValueChange={([value]) => setCoinsToUse(value)}
-                            max={maxCoinsAllowed}
-                            step={1}
-                            className="mb-2"
-                          />
+                          <div className="space-y-3">
+                            <Slider
+                              value={[coinsToUse]}
+                              onValueChange={([value]) => setCoinsToUse(value)}
+                              max={maxCoinsAllowed}
+                              step={1}
+                              className="mb-2"
+                            />
 
-                          <div className="flex justify-between text-sm">
-                            <span>Using: {coinsToUse} coins</span>
-                            <span className="font-semibold text-green-600">
-                              - {formatCurrency(coinsDiscount)}
-                            </span>
+                            <div className="flex items-center gap-2">
+                              <Input
+                                type="number"
+                                min="0"
+                                max={maxCoinsAllowed}
+                                value={coinsToUse}
+                                onChange={(e) => {
+                                  const value = Math.min(Number(e.target.value), maxCoinsAllowed)
+                                  setCoinsToUse(Math.max(0, value))
+                                }}
+                                className="w-28 h-9 text-sm"
+                                placeholder="0"
+                              />
+                              <span className="text-sm text-gray-600 flex-1">coins</span>
+                              <Button
+                                type="button"
+                                size="sm"
+                                variant="outline"
+                                onClick={() => setCoinsToUse(maxCoinsAllowed)}
+                                className="border-amber-500 text-amber-700 hover:bg-amber-500 hover:text-white"
+                              >
+                                Use Max
+                              </Button>
+                            </div>
+
+                            {coinsToUse > 0 && (
+                              <div className="flex justify-between text-sm pt-2 border-t border-amber-200">
+                                <span className="font-semibold text-gray-700">Coin Discount:</span>
+                                <span className="font-bold text-green-600">
+                                  - {formatCurrency(coinsDiscount)}
+                                </span>
+                              </div>
+                            )}
                           </div>
 
                           <Separator className="my-6" />
