@@ -13,6 +13,8 @@ import { ProductImagePlaceholder } from "@/components/ui/product-image-placehold
 import { cn, formatCurrency, calculateDiscount } from "@/lib/utils"
 import { getFirstProductImage } from "@/lib/image-utils"
 import { Product } from "@/types"
+import { useTranslations, useLocale } from "next-intl"
+import { useDirection } from "@/lib/rtl-utils"
 
 interface ProductCardProps {
   product: Product
@@ -37,6 +39,10 @@ export function ProductCard({
   className,
   compact = false,
 }: ProductCardProps) {
+  const t = useTranslations('products')
+  const locale = useLocale()
+  const { isRTL } = useDirection()
+
   // Handle both API response formats
   const hasVideo = showVideo && product.videos && product.videos.length > 0
   const regularPrice = (product as any).regularPrice || (product as any).price || 0
@@ -49,7 +55,10 @@ export function ProductCard({
   const productImage = getFirstProductImage(product)
 
   const brandName = product.brand?.name || (product as any).vendor?.businessName || 'Premium Brand'
-  const productName = product.name || product.nameEn || 'Product'
+  // Use Arabic name if locale is 'ar' and nameAr exists, otherwise use English name
+  const productName = (locale === 'ar' && (product as any).nameAr)
+    ? (product as any).nameAr
+    : (product.name || product.nameEn || 'Product')
 
   // Handle rating - check multiple possible field names
   const rating = product.rating || (product as any).averageRating || 0
@@ -90,14 +99,15 @@ export function ProductCard({
             {/* Badges */}
             <div className={cn(
               "absolute flex flex-col gap-1",
-              compact ? "top-1.5 left-1.5" : "top-2 left-2"
+              compact ? "top-1.5" : "top-2",
+              isRTL ? (compact ? "right-1.5" : "right-2") : (compact ? "left-1.5" : "left-2")
             )}>
               {product.createdAt && new Date(product.createdAt).getTime() > Date.now() - 7 * 24 * 60 * 60 * 1000 && (
                 <Badge className={cn(
                   "bg-gradient-to-br from-[#4CAF50] to-[#66BB6A] border-0 text-white font-bold",
                   compact ? "text-[8px] py-0.5 px-1.5" : "text-[9px] py-0.5 px-2"
                 )}>
-                  NEW
+                  {t('new')}
                 </Badge>
               )}
               {discount > 0 && (
@@ -105,7 +115,7 @@ export function ProductCard({
                   "bg-gradient-to-br from-[#EF5350] to-[#E57373] border-0 text-white font-bold",
                   compact ? "text-[8px] py-0.5 px-1.5" : "text-[9px] py-0.5 px-2"
                 )}>
-                  -{discount}%
+                  {t('sale')} -{discount}%
                 </Badge>
               )}
               {isLowStock && (
@@ -113,7 +123,7 @@ export function ProductCard({
                   "bg-gradient-to-br from-[#8B3A3A] to-[#A94442] border-0 text-white font-bold",
                   compact ? "text-[8px] py-0.5 px-1.5" : "text-[9px] py-0.5 px-2"
                 )}>
-                  {stockQuantity} LEFT
+                  {stockQuantity} {t('left')}
                 </Badge>
               )}
               {(product as any).salesCount && (product as any).salesCount > 0 && (
@@ -135,7 +145,8 @@ export function ProductCard({
               }}
               className={cn(
                 "absolute rounded-full bg-white/90 hover:bg-white shadow-md transition-all hover:scale-110",
-                compact ? "top-1.5 right-1.5 p-1" : "top-2 right-2 p-1.5"
+                compact ? "top-1.5 p-1" : "top-2 p-1.5",
+                isRTL ? (compact ? "left-1.5" : "left-2") : (compact ? "right-1.5" : "right-2")
               )}
             >
               <Heart
@@ -172,8 +183,8 @@ export function ProductCard({
                     onQuickView(product)
                   }}
                 >
-                  <Eye className="w-3.5 h-3.5 mr-1.5" />
-                  Quick View
+                  <Eye className={cn("w-3.5 h-3.5", isRTL ? "ml-1.5" : "mr-1.5")} />
+                  {t('quickView')}
                 </Button>
               </motion.div>
             )}
@@ -240,7 +251,7 @@ export function ProductCard({
             {/* Coins - Smaller */}
             {(product as any).coinsToAward && (product as any).coinsToAward > 0 && (
               <div className="mt-1 text-[9px] text-gray-500">
-                +{(product as any).coinsToAward} coins 🪙
+                +{(product as any).coinsToAward} {t('coins')} 🪙
               </div>
             )}
 
@@ -257,11 +268,11 @@ export function ProductCard({
                 disabled={stockQuantity === 0}
               >
                 {stockQuantity === 0 ? (
-                  "Out of Stock"
+                  t('outOfStock')
                 ) : (
                   <>
-                    <ShoppingCart className="w-3.5 h-3.5 mr-1.5" />
-                    Add to Cart
+                    <ShoppingCart className={cn("w-3.5 h-3.5", isRTL ? "ml-1.5" : "mr-1.5")} />
+                    {t('addToCart')}
                   </>
                 )}
               </Button>

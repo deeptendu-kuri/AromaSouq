@@ -3,14 +3,21 @@
  * Displays categories as circular icons
  */
 
-import Link from 'next/link';
+'use client';
+
+import { useTranslations } from 'next-intl';
+import { Link } from '@/i18n/navigation';
 import { Category } from '@/lib/api/homepage';
+import { translateCategory } from '@/lib/translation-helpers';
 
 interface ShopByCategoryProps {
   categories: Category[];
 }
 
 export function ShopByCategory({ categories }: ShopByCategoryProps) {
+  const t = useTranslations('homepage.categories');
+  const tCategories = useTranslations('categories');
+
   return (
     <div className="relative overflow-hidden bg-gradient-to-br from-amber-50 via-white to-orange-50 py-20 mb-0">
       {/* Artistic decorative elements - Hexagon patterns and sparkles */}
@@ -70,18 +77,18 @@ export function ShopByCategory({ categories }: ShopByCategoryProps) {
         <div className="text-center mb-12">
           <div className="inline-flex items-center gap-2 bg-gradient-to-r from-amber-500 via-orange-500 to-yellow-500 text-white px-5 py-2 rounded-full mb-4 shadow-2xl text-sm font-black tracking-wider border-2 border-yellow-300/30">
             <span className="text-lg">🎯</span>
-            <span>START YOUR JOURNEY</span>
+            <span>{t('subtitle').toUpperCase()}</span>
             <span className="text-lg">✨</span>
           </div>
 
           <h2 className="text-5xl md:text-6xl font-black mb-3 drop-shadow-md">
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-600 via-orange-600 to-yellow-600">
-              Shop by Category
+              {t('title')}
             </span>
           </h2>
 
           <p className="text-lg text-gray-700 font-semibold max-w-2xl mx-auto">
-            🌺 Discover our curated collections • Find your perfect fragrance type
+            🌺 {t('description')}
           </p>
         </div>
 
@@ -102,7 +109,7 @@ export function ShopByCategory({ categories }: ShopByCategoryProps) {
                 <span className="relative z-10 drop-shadow-[0_4px_8px_rgba(0,0,0,0.3)] filter brightness-110">{category.icon}</span>
               </div>
               <div className="font-black text-gray-800 text-base group-hover:text-transparent group-hover:bg-clip-text group-hover:bg-gradient-to-r group-hover:from-amber-600 group-hover:to-orange-600 transition-all">
-                {category.name}
+                {translateCategory(tCategories, category.name)}
               </div>
             </Link>
           ))}

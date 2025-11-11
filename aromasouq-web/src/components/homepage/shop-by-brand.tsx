@@ -1,9 +1,12 @@
 /**
- * Shop by Brand Component
+ * {t('title')} Component
  * Grid display of brand cards
  */
 
-import Link from 'next/link';
+'use client';
+
+import { useTranslations } from 'next-intl';
+import { Link } from '@/i18n/navigation';
 import { Brand } from '@/lib/api/homepage';
 
 interface ShopByBrandProps {
@@ -11,6 +14,7 @@ interface ShopByBrandProps {
 }
 
 export function ShopByBrand({ brands }: ShopByBrandProps) {
+  const t = useTranslations('homepage.shopByBrand');
   return (
     <div className="relative overflow-hidden bg-white py-16 mb-0">
       {/* Subtle decorative elements */}
@@ -21,13 +25,13 @@ export function ShopByBrand({ brands }: ShopByBrandProps) {
       <div className="container mx-auto px-[5%] relative z-10">
         <div className="mb-10">
           <div className="inline-flex items-center gap-2 bg-gradient-to-r from-gray-800 to-slate-700 text-white px-4 py-1.5 rounded-full mb-3 shadow-md text-xs font-bold tracking-wide">
-            👑 PREMIUM BRANDS
+            👑 {t('badge').toUpperCase()}
           </div>
           <h2 className="text-4xl text-[var(--color-deep-navy)] font-bold mb-2">
-            Shop by Brand
+            {t('title')}
           </h2>
           <p className="text-base text-gray-600 max-w-2xl">
-            Discover fragrances from the world's finest perfume houses
+            {t('description')}
           </p>
         </div>
 
@@ -42,7 +46,7 @@ export function ShopByBrand({ brands }: ShopByBrandProps) {
                 {brand.name}
               </div>
               <div className="text-[10px] text-gray-500 font-medium">
-                {brand._count.products} Products
+                {brand._count.products} {t('products')}
               </div>
             </Link>
           ))}

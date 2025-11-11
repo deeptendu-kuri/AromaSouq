@@ -1,14 +1,16 @@
 /**
- * Shop by Scent Family Component
+ * {t('title')} Component
  * Horizontal carousel of scent family cards
  */
 
 'use client';
 
+import { useTranslations } from 'next-intl';
 import { useRef } from 'react';
-import Link from 'next/link';
+import { Link } from '@/i18n/navigation';
 import { ScentFamily } from '@/lib/api/homepage';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { translateScentFamily, safeTranslate } from '@/lib/translation-helpers';
 
 interface ShopByScentProps {
   scentFamilies: ScentFamily[];
@@ -35,6 +37,9 @@ function getScentIcon(scentName: string | undefined): string {
 }
 
 export function ShopByScent({ scentFamilies }: ShopByScentProps) {
+  const t = useTranslations('homepage.shopByScent');
+  const tScents = useTranslations('scentFamilies');
+  const tCommon = useTranslations('common');
   const trackRef = useRef<HTMLDivElement>(null);
 
   const scroll = (direction: 'left' | 'right') => {
@@ -58,13 +63,13 @@ export function ShopByScent({ scentFamilies }: ShopByScentProps) {
         <div className="flex justify-between items-center mb-12">
           <div>
             <div className="inline-flex items-center gap-2 bg-gradient-to-r from-emerald-500 to-teal-500 text-white px-5 py-1.5 rounded-full mb-3 shadow-lg text-xs font-bold tracking-wide">
-              🌿 DISCOVER YOUR SIGNATURE
+              🌿 {t('badge').toUpperCase()}
             </div>
             <h2 className="text-5xl text-[var(--color-deep-navy)] font-bold mb-3 bg-clip-text text-transparent bg-gradient-to-r from-emerald-700 to-teal-600">
-              Shop by Scent Family
+              {t('title')}
             </h2>
             <p className="text-lg text-gray-700">
-              Find your perfect fragrance DNA
+              {t('description')}
             </p>
           </div>
           <div className="flex gap-3">
@@ -100,10 +105,10 @@ export function ShopByScent({ scentFamilies }: ShopByScentProps) {
               </div>
               <div className="p-6 bg-gradient-to-br from-white to-emerald-50/50">
                 <div className="text-lg font-bold text-[var(--color-deep-navy)] mb-2">
-                  {scent.scentFamily}
+                  {translateScentFamily(tScents, scent.scentFamily)}
                 </div>
                 <div className="text-sm text-emerald-600 font-bold bg-emerald-100 px-4 py-1 rounded-full inline-block">
-                  {scent.count} Products
+                  {scent.count} {safeTranslate(tCommon, 'products', 'Products')}
                 </div>
               </div>
             </Link>

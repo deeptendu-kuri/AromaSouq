@@ -3,6 +3,9 @@
  * Displays top-selling products
  */
 
+'use client';
+
+import { useTranslations } from 'next-intl';
 import { Product } from '@/lib/api/homepage';
 import { ProductCarousel } from './product-carousel';
 import { TrendingUp } from 'lucide-react';
@@ -12,6 +15,8 @@ interface BestSellersProps {
 }
 
 export function BestSellers({ products }: BestSellersProps) {
+  const t = useTranslations('homepage.bestSellers');
+
   return (
     <div className="relative overflow-hidden bg-gradient-to-br from-indigo-900 via-purple-800 to-pink-700 py-20 mb-0">
       {/* Artistic background elements - Stars and constellation patterns */}
@@ -73,16 +78,16 @@ export function BestSellers({ products }: BestSellersProps) {
         <div className="text-center mb-12">
           <div className="inline-flex items-center gap-2 bg-gradient-to-r from-yellow-400 via-pink-500 to-purple-600 text-white px-5 py-2 rounded-full mb-4 shadow-2xl text-sm font-black tracking-wider border-2 border-yellow-300/30">
             <TrendingUp className="w-5 h-5 animate-bounce" />
-            <span>CUSTOMER FAVORITES</span>
+            <span>{t('badge').toUpperCase()}</span>
             <span className="text-lg">⭐</span>
           </div>
 
           <h2 className="text-5xl md:text-6xl text-white font-black mb-3 drop-shadow-[0_4px_12px_rgba(0,0,0,0.5)]">
-            Best Sellers
+            {t('title')}
           </h2>
 
           <p className="text-lg text-purple-100 font-semibold max-w-3xl mx-auto">
-            🏆 Discover our most loved fragrances • Trusted by thousands • Award-winning scents
+            🏆 {t('description')}
           </p>
         </div>
 

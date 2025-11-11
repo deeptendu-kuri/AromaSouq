@@ -3,9 +3,8 @@
 import { useState, useEffect, useRef } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { apiClient } from '@/lib/api-client';
-import { useRouter } from 'next/navigation';
+import { useRouter, Link } from '@/i18n/navigation';
 import { Search, X } from 'lucide-react';
-import Link from 'next/link';
 
 export function SearchBar() {
   const [query, setQuery] = useState('');

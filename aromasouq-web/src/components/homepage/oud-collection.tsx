@@ -3,36 +3,36 @@
  * Displays different types of Oud with descriptions
  */
 
-import Link from 'next/link';
+'use client';
+
+import { useTranslations } from 'next-intl';
+import { Link } from '@/i18n/navigation';
 
 const oudTypes = [
   {
     icon: '🪔',
-    name: 'Cambodian Oud',
-    description: 'Rare and exquisite with deep woody notes',
+    translationKey: 'cambodian',
     slug: 'CAMBODIAN',
   },
   {
     icon: '💎',
-    name: 'Indian Oud',
-    description: 'Rich, bold, and intensely aromatic',
+    translationKey: 'indian',
     slug: 'INDIAN',
   },
   {
     icon: '✨',
-    name: 'Thai Oud',
-    description: 'Sweet, smooth with honey-like undertones',
+    translationKey: 'thai',
     slug: 'THAI',
   },
   {
     icon: '🌙',
-    name: 'Dehn Al Oud',
-    description: 'Pure oil perfection for connoisseurs',
+    translationKey: 'dehnAlOud',
     slug: 'MUKHALLAT',
   },
 ];
 
 export function OudCollection() {
+  const t = useTranslations('homepage.oudCollection');
   return (
     <div className="relative overflow-hidden bg-gradient-to-br from-[#1a0f0a] via-[#3d2817] to-[#5c3a1f] py-20 mb-0">
       {/* Artistic decorative elements - Arabian patterns and premium accents */}
@@ -94,18 +94,18 @@ export function OudCollection() {
         <div className="text-center mb-14">
           <div className="inline-flex items-center gap-2 bg-gradient-to-r from-amber-600 via-yellow-600 to-orange-600 text-white px-6 py-2.5 rounded-full mb-5 shadow-2xl text-sm font-black tracking-wider border-2 border-yellow-400/40 animate-pulse">
             <span className="text-xl">🪔</span>
-            <span>PREMIUM LUXURY</span>
+            <span>{t('badge').toUpperCase()}</span>
             <span className="text-xl">💎</span>
           </div>
 
           <h2 className="text-6xl md:text-7xl font-black mb-4 drop-shadow-[0_6px_24px_rgba(0,0,0,0.7)]">
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-yellow-300 via-amber-400 to-orange-400">
-              Luxury Oud Collection
+              {t('title')}
             </span>
           </h2>
 
           <p className="text-xl md:text-2xl text-amber-100 font-semibold max-w-3xl mx-auto drop-shadow-lg">
-            ✨ Discover the finest oud varieties from around the world • The essence of Arabian luxury
+            ✨ {t('description')}
           </p>
         </div>
 
@@ -125,13 +125,13 @@ export function OudCollection() {
               </div>
               <div className="p-6 text-center bg-gradient-to-br from-white to-amber-50">
                 <div className="text-xl font-black text-transparent bg-clip-text bg-gradient-to-r from-amber-800 to-orange-800 mb-2">
-                  {oud.name}
+                  {t(`oudTypes.${oud.translationKey}.name`)}
                 </div>
                 <div className="text-sm text-gray-700 font-medium mb-5">
-                  {oud.description}
+                  {t(`oudTypes.${oud.translationKey}.description`)}
                 </div>
                 <span className="inline-flex items-center gap-2 bg-gradient-to-r from-amber-600 via-yellow-600 to-orange-600 text-white px-6 py-3 rounded-full font-black text-sm transition-all duration-300 hover:shadow-[0_8px_24px_rgba(245,158,11,0.5)] hover:scale-105 border-2 border-yellow-400/30">
-                  <span>Explore Collection</span>
+                  <span>{t('exploreCollection')}</span>
                   <span>→</span>
                 </span>
               </div>

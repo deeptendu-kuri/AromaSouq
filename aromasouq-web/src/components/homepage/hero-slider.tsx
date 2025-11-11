@@ -3,9 +3,13 @@
  * Main banner section with gradient background
  */
 
-import Link from 'next/link';
+'use client';
+
+import { Link } from '@/i18n/navigation';
+import { useTranslations } from 'next-intl';
 
 export function HeroSlider() {
+  const t = useTranslations('homepage.hero');
   return (
     <div className="relative h-[550px] overflow-hidden mb-0 bg-gradient-to-br from-[#1a1a2e] via-[#16213e] to-[#0f3460]">
       {/* Artistic background elements - Perfume bottle silhouettes and sparkles */}
@@ -58,24 +62,20 @@ export function HeroSlider() {
           {/* Badge */}
           <div className="inline-flex items-center gap-2 bg-gradient-to-r from-[var(--color-oud-gold)] via-amber-500 to-yellow-500 text-white px-5 py-2 rounded-full mb-5 shadow-2xl text-sm font-black tracking-wider border-2 border-yellow-300/30 animate-pulse">
             <span className="text-lg">✨</span>
-            <span>PREMIUM ARABIAN FRAGRANCES</span>
+            <span>{t('subtitle').toUpperCase()}</span>
             <span className="text-lg">✨</span>
           </div>
 
           {/* Heading */}
           <h1 className="text-6xl md:text-7xl font-black mb-5 leading-tight drop-shadow-[0_4px_20px_rgba(0,0,0,0.5)]">
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-white via-yellow-100 to-[var(--color-oud-gold)]">
-              Discover Your
-            </span>
-            <br />
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-[var(--color-oud-gold)] via-amber-400 to-yellow-300">
-              Signature Scent
+              {t('title')}
             </span>
           </h1>
 
           {/* Subtitle */}
           <p className="text-xl md:text-2xl mb-8 font-semibold text-yellow-50 drop-shadow-lg max-w-2xl mx-auto">
-            🌟 Explore our exclusive collection of premium Arabic perfumes & luxury fragrances
+            🌟 {t('description')}
           </p>
 
           {/* CTA Button */}
@@ -83,7 +83,7 @@ export function HeroSlider() {
             href="/products"
             className="inline-flex items-center gap-2 bg-gradient-to-r from-[var(--color-oud-gold)] via-amber-500 to-yellow-500 text-[var(--color-deep-navy)] px-10 py-4 rounded-full text-lg font-black transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_10px_30px_rgba(201,168,106,0.6)] shadow-2xl border-2 border-yellow-300/30 hover:scale-105"
           >
-            <span>Shop Now</span>
+            <span>{t('shopNow')}</span>
             <span className="text-xl">→</span>
           </Link>
         </div>

@@ -6,6 +6,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { useTranslations } from 'next-intl';
 import { Product } from '@/lib/api/homepage';
 import { ProductCarousel } from './product-carousel';
 
@@ -20,6 +21,7 @@ interface TimeLeft {
 }
 
 export function FlashSale({ products }: FlashSaleProps) {
+  const t = useTranslations('homepage.flashSale');
   const [timeLeft, setTimeLeft] = useState<TimeLeft>({ hours: 12, minutes: 34, seconds: 56 });
 
   useEffect(() => {
@@ -92,16 +94,16 @@ export function FlashSale({ products }: FlashSaleProps) {
         <div className="text-center mb-12">
           <div className="inline-flex items-center gap-2 bg-gradient-to-r from-yellow-400 via-orange-500 to-red-600 text-white px-5 py-2 rounded-full mb-4 shadow-2xl text-sm font-black tracking-wider border-2 border-yellow-300/30">
             <span className="text-xl animate-pulse">⚡</span>
-            <span>FLASH SALE</span>
+            <span>{t('badge').toUpperCase()}</span>
             <span className="text-xl animate-pulse">⚡</span>
           </div>
 
           <h2 className="text-5xl md:text-6xl text-white font-black mb-3 drop-shadow-[0_4px_12px_rgba(0,0,0,0.5)]">
-            Lightning Deals
+            {t('title')}
           </h2>
 
           <p className="text-lg text-yellow-100 mb-6 font-semibold">
-            ⏰ Hurry! Limited Time • Limited Stock
+            ⏰ {t('hurry')}
           </p>
 
           {/* Elegant countdown timer */}
@@ -113,7 +115,7 @@ export function FlashSale({ products }: FlashSaleProps) {
                   {String(timeLeft.hours).padStart(2, '0')}
                 </div>
                 <div className="text-xs text-gray-600 uppercase tracking-widest font-bold mt-2">
-                  Hours
+                  {t('hours')}
                 </div>
               </div>
             </div>
@@ -127,7 +129,7 @@ export function FlashSale({ products }: FlashSaleProps) {
                   {String(timeLeft.minutes).padStart(2, '0')}
                 </div>
                 <div className="text-xs text-gray-600 uppercase tracking-widest font-bold mt-2">
-                  Minutes
+                  {t('minutes')}
                 </div>
               </div>
             </div>
@@ -141,7 +143,7 @@ export function FlashSale({ products }: FlashSaleProps) {
                   {String(timeLeft.seconds).padStart(2, '0')}
                 </div>
                 <div className="text-xs text-gray-600 uppercase tracking-widest font-bold mt-2">
-                  Seconds
+                  {t('seconds')}
                 </div>
               </div>
             </div>

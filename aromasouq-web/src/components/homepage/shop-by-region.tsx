@@ -1,14 +1,16 @@
 /**
- * Shop by Region Component
+ * {t('title')} Component
  * Horizontal carousel of regional fragrance origins
  */
 
 'use client';
 
+import { useTranslations } from 'next-intl';
 import { useRef } from 'react';
-import Link from 'next/link';
+import { Link } from '@/i18n/navigation';
 import { Region } from '@/lib/api/homepage';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { translateRegion, safeTranslate } from '@/lib/translation-helpers';
 
 interface ShopByRegionProps {
   regions: Region[];
@@ -52,6 +54,9 @@ function getRegionFlag(regionName: string | undefined): string {
 }
 
 export function ShopByRegion({ regions }: ShopByRegionProps) {
+  const t = useTranslations('homepage.shopByRegion');
+  const tRegions = useTranslations('regions');
+  const tCommon = useTranslations('common');
   const trackRef = useRef<HTMLDivElement>(null);
 
   const scroll = (direction: 'left' | 'right') => {
@@ -75,13 +80,13 @@ export function ShopByRegion({ regions }: ShopByRegionProps) {
         <div className="flex justify-between items-center mb-12">
           <div>
             <div className="inline-flex items-center gap-2 bg-gradient-to-r from-sky-500 to-indigo-500 text-white px-5 py-1.5 rounded-full mb-3 shadow-lg text-xs font-bold tracking-wide">
-              🌍 GLOBAL FRAGRANCE JOURNEY
+              🌍 {t('badge').toUpperCase()}
             </div>
             <h2 className="text-5xl text-[var(--color-deep-navy)] font-bold mb-3 bg-clip-text text-transparent bg-gradient-to-r from-sky-600 to-indigo-600">
-              Shop by Region
+              {t('title')}
             </h2>
             <p className="text-lg text-gray-700">
-              Explore fragrances from around the world • Discover cultural scent traditions
+              {t('description')}
             </p>
           </div>
           <div className="flex gap-3">
@@ -117,10 +122,10 @@ export function ShopByRegion({ regions }: ShopByRegionProps) {
               </div>
               <div className="p-6 text-center bg-gradient-to-br from-white to-sky-50/50">
                 <div className="text-lg font-bold text-[var(--color-deep-navy)] mb-2">
-                  {region.region}
+                  {translateRegion(tRegions, region.region)}
                 </div>
                 <div className="text-sm text-sky-600 font-bold bg-sky-100 px-4 py-1 rounded-full inline-block">
-                  {region.count} Products
+                  {region.count} {safeTranslate(tCommon, 'products', 'Products')}
                 </div>
               </div>
             </Link>

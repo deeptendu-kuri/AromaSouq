@@ -1,8 +1,8 @@
 "use client"
 
 import React from "react"
-import Link from "next/link"
-import { usePathname, useSearchParams } from "next/navigation"
+import { Link, usePathname } from "@/i18n/navigation"
+import { useSearchParams } from "next/navigation"
 import { Search, ShoppingCart, Heart, User, Menu, Coins } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -18,10 +18,17 @@ import { Sheet, SheetContent, SheetTrigger, SheetTitle } from "@/components/ui/s
 import { useAuth } from "@/hooks/useAuth"
 import { useCart } from "@/hooks/useCart"
 import { cn } from "@/lib/utils"
+import { useTranslations } from "next-intl"
+import { useDirection } from "@/lib/rtl-utils"
+import { LanguageSwitcher } from "@/components/language-switcher"
 // import { SearchBar } from "@/components/SearchBar"
 // import { CoinsWidget } from "@/components/layout/CoinsWidget"
 
 export function Header() {
+  const tTopBar = useTranslations('header.topBar')
+  const tNav = useTranslations('header.nav')
+  const tUser = useTranslations('header.user')
+  const { isRTL } = useDirection()
   const { user, isAuthenticated, logout } = useAuth()
   const { cart, itemCount } = useCart()
   const pathname = usePathname()
@@ -33,10 +40,10 @@ export function Header() {
       {/* Top Bar - Promotional */}
       <div className="bg-gradient-to-r from-[#1a1a2e] via-[#16213e] to-[#0f3460] text-white">
         <div className="container mx-auto px-4 py-2.5 flex justify-between items-center text-xs md:text-sm">
-          <p className="font-semibold">✨ Free shipping on orders over 300 AED</p>
+          <p className="font-semibold">{tTopBar('freeShipping')}</p>
           <div className="hidden md:flex gap-4 font-medium">
-            <Link href="/about" className="hover:text-[var(--color-oud-gold)] transition-colors">About</Link>
-            <Link href="/contact" className="hover:text-[var(--color-oud-gold)] transition-colors">Contact</Link>
+            <Link href="/about" className="hover:text-[var(--color-oud-gold)] transition-colors">{tNav('about')}</Link>
+            <Link href="/contact" className="hover:text-[var(--color-oud-gold)] transition-colors">{tNav('contact')}</Link>
           </div>
         </div>
       </div>
@@ -53,8 +60,8 @@ export function Header() {
                   <Menu className="h-5 w-5 text-gray-700" />
                 </Button>
               </SheetTrigger>
-              <SheetContent side="left" className="w-[280px]">
-                <SheetTitle className="sr-only">Navigation Menu</SheetTitle>
+              <SheetContent side={isRTL ? "right" : "left"} className="w-[280px]">
+                <SheetTitle className="sr-only">{tNav('navigationMenu')}</SheetTitle>
                 <nav className="flex flex-col gap-4 mt-8">
                   <Link
                     href="/products"
@@ -65,7 +72,7 @@ export function Header() {
                         : "hover:bg-gray-50"
                     )}
                   >
-                    All Products
+                    {tNav('allProducts')}
                   </Link>
                   <Link
                     href="/products?categorySlug=perfumes"
@@ -76,7 +83,7 @@ export function Header() {
                         : "hover:bg-gray-50"
                     )}
                   >
-                    Perfumes
+                    {tNav('perfumes')}
                   </Link>
                   <Link
                     href="/products?categorySlug=oud"
@@ -87,7 +94,7 @@ export function Header() {
                         : "hover:bg-gray-50"
                     )}
                   >
-                    Oud
+                    {tNav('oud')}
                   </Link>
                   <Link
                     href="/products?categorySlug=attars"
@@ -98,7 +105,7 @@ export function Header() {
                         : "hover:bg-gray-50"
                     )}
                   >
-                    Attars
+                    {tNav('attars')}
                   </Link>
                   <Link
                     href="/products?categorySlug=bakhoor"
@@ -109,7 +116,7 @@ export function Header() {
                         : "hover:bg-gray-50"
                     )}
                   >
-                    Bakhoor
+                    {tNav('bakhoor')}
                   </Link>
                   <Link
                     href="/products?categorySlug=gift-sets"
@@ -120,7 +127,7 @@ export function Header() {
                         : "hover:bg-gray-50"
                     )}
                   >
-                    Gift Sets
+                    {tNav('giftSets')}
                   </Link>
                 </nav>
               </SheetContent>
@@ -144,7 +151,7 @@ export function Header() {
                   : "text-gray-700 hover:bg-amber-50 hover:text-[var(--color-oud-gold)]"
               )}
             >
-              All Products
+              {tNav('allProducts')}
             </Link>
             <Link
               href="/products?categorySlug=perfumes"
@@ -155,7 +162,7 @@ export function Header() {
                   : "text-gray-700 hover:bg-amber-50 hover:text-[var(--color-oud-gold)]"
               )}
             >
-              Perfumes
+              {tNav('perfumes')}
             </Link>
             <Link
               href="/products?categorySlug=oud"
@@ -166,7 +173,7 @@ export function Header() {
                   : "text-gray-700 hover:bg-amber-50 hover:text-[var(--color-oud-gold)]"
               )}
             >
-              Oud
+              {tNav('oud')}
             </Link>
             <Link
               href="/products?categorySlug=attars"
@@ -177,7 +184,7 @@ export function Header() {
                   : "text-gray-700 hover:bg-amber-50 hover:text-[var(--color-oud-gold)]"
               )}
             >
-              Attars
+              {tNav('attars')}
             </Link>
             <Link
               href="/products?categorySlug=bakhoor"
@@ -188,7 +195,7 @@ export function Header() {
                   : "text-gray-700 hover:bg-amber-50 hover:text-[var(--color-oud-gold)]"
               )}
             >
-              Bakhoor
+              {tNav('bakhoor')}
             </Link>
             <Link
               href="/products?categorySlug=gift-sets"
@@ -199,12 +206,15 @@ export function Header() {
                   : "text-gray-700 hover:bg-amber-50 hover:text-[var(--color-oud-gold)]"
               )}
             >
-              Gift Sets
+              {tNav('giftSets')}
             </Link>
           </nav>
 
           {/* Actions - Right */}
           <div className="flex items-center gap-3">
+            {/* Language Switcher */}
+            <LanguageSwitcher />
+
             {/* Coins Widget */}
             {isAuthenticated && user?.coinsBalance !== undefined && (
               <Link
@@ -245,26 +255,26 @@ export function Header() {
                     <User className="h-5 w-5 text-gray-700" />
                   </button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-64 shadow-xl border-gray-200">
+                <DropdownMenuContent align={isRTL ? "start" : "end"} className="w-64 shadow-xl border-gray-200">
                   <div className="px-4 py-3 bg-gradient-to-r from-amber-50 to-orange-50">
                     <p className="text-sm font-bold text-gray-800">{user?.firstName} {user?.lastName}</p>
                     <p className="text-xs text-gray-600 font-medium">{user?.email}</p>
                   </div>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem asChild>
-                    <Link href="/account" className="font-semibold">My Account</Link>
+                    <Link href="/account" className="font-semibold">{tUser('myAccount')}</Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem asChild>
-                    <Link href="/account/orders" className="font-semibold">Orders</Link>
+                    <Link href="/account/orders" className="font-semibold">{tUser('orders')}</Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem asChild>
-                    <Link href="/account/wallet" className="font-semibold">Wallet & Coins</Link>
+                    <Link href="/account/wallet" className="font-semibold">{tUser('wallet')}</Link>
                   </DropdownMenuItem>
                   {user?.role === 'VENDOR' && (
                     <>
                       <DropdownMenuSeparator />
                       <DropdownMenuItem asChild>
-                        <Link href="/vendor" className="font-semibold text-purple-600">Vendor Dashboard</Link>
+                        <Link href="/vendor" className="font-semibold text-purple-600">{tUser('vendorDashboard')}</Link>
                       </DropdownMenuItem>
                     </>
                   )}
@@ -272,13 +282,13 @@ export function Header() {
                     <>
                       <DropdownMenuSeparator />
                       <DropdownMenuItem asChild>
-                        <Link href="/admin" className="font-semibold text-blue-600">Admin Dashboard</Link>
+                        <Link href="/admin" className="font-semibold text-blue-600">{tUser('adminDashboard')}</Link>
                       </DropdownMenuItem>
                     </>
                   )}
                   <DropdownMenuSeparator />
                   <DropdownMenuItem onClick={logout} className="font-semibold text-red-600">
-                    Logout
+                    {tUser('logout')}
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
@@ -287,7 +297,7 @@ export function Header() {
                 href="/login"
                 className="px-5 py-2 bg-gradient-to-r from-amber-500 to-orange-500 text-white font-bold rounded-full hover:shadow-lg transition-all text-sm hover:scale-105"
               >
-                Login
+                {tUser('login')}
               </Link>
             )}
           </div>

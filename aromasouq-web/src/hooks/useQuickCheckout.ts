@@ -2,7 +2,7 @@
 
 import { useMutation } from '@tanstack/react-query'
 import { apiClient } from '@/lib/api-client'
-import { useRouter } from 'next/navigation'
+import { useRouter } from '@/i18n/navigation'
 import toast from 'react-hot-toast'
 
 interface QuickCheckoutData {

@@ -3,6 +3,9 @@
  * Showcases AromaSouq signature products
  */
 
+'use client';
+
+import { useTranslations } from 'next-intl';
 import { Product } from '@/lib/api/homepage';
 import { ProductCarousel } from './product-carousel';
 import { Sparkles, Award } from 'lucide-react';
@@ -12,6 +15,7 @@ interface OurBrandSpotlightProps {
 }
 
 export function OurBrandSpotlight({ products }: OurBrandSpotlightProps) {
+  const t = useTranslations('homepage.ourBrand');
   return (
     <div className="relative overflow-hidden bg-gradient-to-br from-amber-50 via-orange-50 to-yellow-50 py-20 mb-0">
       {/* Decorative background elements */}
