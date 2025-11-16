@@ -16,7 +16,16 @@ interface ShopByRegionProps {
   regions: Region[];
 }
 
-// Flag emoji mapping for regions
+// Custom regions with specific flags as requested
+const customRegions = [
+  { name: 'Hindi', flag: '🇮🇳', key: 'hindi' },
+  { name: 'Silani', flag: '🇱🇰', key: 'silani' },
+  { name: 'Cambodi', flag: '🇰🇭', key: 'cambodi' },
+  { name: 'Philipini', flag: '🇵🇭', key: 'philipini' },
+  { name: 'Meruke', flag: '🇮🇩', key: 'meruke' },
+];
+
+// Flag emoji mapping for regions - extended with new regions
 const regionFlags: Record<string, string> = {
   uae: '🇦🇪',
   'saudi arabia': '🇸🇦',
@@ -37,9 +46,18 @@ const regionFlags: Record<string, string> = {
   america: '🇺🇸',
   india: '🇮🇳',
   indian: '🇮🇳',
+  hindi: '🇮🇳',
   arab: '🇸🇦',
   arabic: '🇸🇦',
   european: '🇪🇺',
+  silani: '🇱🇰',
+  'sri lanka': '🇱🇰',
+  cambodi: '🇰🇭',
+  cambodia: '🇰🇭',
+  philipini: '🇵🇭',
+  philippines: '🇵🇭',
+  meruke: '🇮🇩',
+  indonesia: '🇮🇩',
 };
 
 function getRegionFlag(regionName: string | undefined): string {
@@ -68,41 +86,51 @@ export function ShopByRegion({ regions }: ShopByRegionProps) {
     });
   };
 
+  // ONLY show the 5 custom regions - map them to database data if available
+  const allRegions = customRegions.map(cr => {
+    const dbRegion = regions.find(r => r.region?.toLowerCase().includes(cr.key));
+    return {
+      region: cr.name,
+      count: dbRegion?.count || 0,
+      flag: cr.flag,
+      searchKey: cr.key, // Keep the key for URL filtering
+    };
+  });
+
   return (
-    <div className="relative overflow-hidden bg-gradient-to-br from-sky-50 via-blue-50 to-indigo-50 py-20 mb-0">
-      {/* Decorative elements */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-10 left-10 w-96 h-96 bg-gradient-to-br from-sky-300/20 to-transparent rounded-full blur-3xl"></div>
-        <div className="absolute bottom-10 right-10 w-96 h-96 bg-gradient-to-tr from-indigo-300/20 to-transparent rounded-full blur-3xl"></div>
+    <div className="relative overflow-hidden bg-white py-16 mb-0">
+      {/* Subtle pattern */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none opacity-5">
+        <div className="absolute top-0 left-0 w-full h-full" style={{
+          backgroundImage: `repeating-linear-gradient(45deg, #550000 0px, #550000 1px, transparent 1px, transparent 20px)`,
+          opacity: 0.03
+        }}></div>
       </div>
 
       <div className="container mx-auto px-[5%] relative z-10">
-        <div className="flex justify-between items-center mb-12">
+        <div className="flex justify-between items-center mb-8">
           <div>
-            <div className="inline-flex items-center gap-2 bg-gradient-to-r from-sky-500 to-indigo-500 text-white px-5 py-1.5 rounded-full mb-3 shadow-lg text-xs font-bold tracking-wide">
-              🌍 {t('badge').toUpperCase()}
-            </div>
-            <h2 className="text-5xl text-[var(--color-deep-navy)] font-bold mb-3 bg-clip-text text-transparent bg-gradient-to-r from-sky-600 to-indigo-600">
+            <h2 className="text-3xl md:text-4xl text-[#550000] font-bold mb-2">
               {t('title')}
             </h2>
-            <p className="text-lg text-gray-700">
+            <p className="text-base text-gray-600">
               {t('description')}
             </p>
           </div>
-          <div className="flex gap-3">
+          <div className="flex gap-2">
             <button
               onClick={() => scroll('left')}
-              className="w-12 h-12 rounded-full border-2 border-sky-200 bg-white/80 backdrop-blur-sm flex items-center justify-center transition-all duration-300 hover:bg-sky-500 hover:border-sky-500 hover:text-white shadow-lg hover:scale-110"
+              className="w-9 h-9 rounded-full border-2 border-gray-300 bg-white flex items-center justify-center transition-all duration-300 hover:bg-[#550000] hover:border-[#550000] hover:text-white shadow-sm"
               aria-label="Previous"
             >
-              <ChevronLeft className="w-6 h-6" />
+              <ChevronLeft className="w-5 h-5" />
             </button>
             <button
               onClick={() => scroll('right')}
-              className="w-12 h-12 rounded-full border-2 border-sky-200 bg-white/80 backdrop-blur-sm flex items-center justify-center transition-all duration-300 hover:bg-sky-500 hover:border-sky-500 hover:text-white shadow-lg hover:scale-110"
+              className="w-9 h-9 rounded-full border-2 border-gray-300 bg-white flex items-center justify-center transition-all duration-300 hover:bg-[#550000] hover:border-[#550000] hover:text-white shadow-sm"
               aria-label="Next"
             >
-              <ChevronRight className="w-6 h-6" />
+              <ChevronRight className="w-5 h-5" />
             </button>
           </div>
         </div>
@@ -111,30 +139,26 @@ export function ShopByRegion({ regions }: ShopByRegionProps) {
           ref={trackRef}
           className="flex gap-6 overflow-x-auto scrollbar-hide scroll-smooth pb-4"
         >
-          {regions.filter(region => region.region).map((region, index) => (
+          {allRegions.map((region, index) => (
             <Link
               key={region.region || `region-${index}`}
-              href={`/products?region=${encodeURIComponent(region.region)}`}
-              className="flex-shrink-0 w-[260px] bg-white/80 backdrop-blur-sm rounded-2xl overflow-hidden shadow-xl transition-all duration-300 hover:-translate-y-2 hover:shadow-2xl cursor-pointer border border-white/50 group"
+              href={`/products?region=${encodeURIComponent(region.searchKey)}`}
+              className="flex-shrink-0 w-[220px] bg-white rounded-xl overflow-hidden shadow-md transition-all duration-300 hover:-translate-y-1 hover:shadow-lg cursor-pointer border border-gray-200 group"
             >
-              <div className="h-[160px] flex items-center justify-center text-8xl bg-gradient-to-br from-sky-100 via-blue-50 to-indigo-100 group-hover:from-sky-200 group-hover:via-blue-100 group-hover:to-indigo-200 transition-all duration-300">
-                {getRegionFlag(region.region)}
+              <div className="h-[140px] flex items-center justify-center text-7xl bg-gray-50 group-hover:bg-gray-100 transition-all duration-300">
+                {region.flag}
               </div>
-              <div className="p-6 text-center bg-gradient-to-br from-white to-sky-50/50">
-                <div className="text-lg font-bold text-[var(--color-deep-navy)] mb-2">
-                  {translateRegion(tRegions, region.region)}
+              <div className="p-4 text-center bg-white">
+                <div className="text-base font-bold text-[#550000] mb-1">
+                  {region.region}
                 </div>
-                <div className="text-sm text-sky-600 font-bold bg-sky-100 px-4 py-1 rounded-full inline-block">
+                <div className="text-xs text-gray-600 font-semibold">
                   {region.count} {safeTranslate(tCommon, 'products', 'Products')}
                 </div>
               </div>
             </Link>
-          ))}
-        </div>
+          ))}</div>
       </div>
-
-      {/* Bottom decoration */}
-      <div className="absolute bottom-0 left-0 right-0 h-16 bg-gradient-to-b from-transparent to-white"></div>
     </div>
   );
 }
