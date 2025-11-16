@@ -38,7 +38,12 @@ const regionFlags: Record<string, string> = {
   UK: "🇬🇧",
   USA: "🇺🇸",
   INDIA: "🇮🇳",
-  THAILAND: "🇹🇭"
+  THAILAND: "🇹🇭",
+  HINDI: "🇮🇳",
+  SILANI: "🇱🇰",
+  CAMBODI: "🇰🇭",
+  PHILIPINI: "🇵🇭",
+  MERUKE: "🇮🇩"
 };
 
 const occasionIcons: Record<string, string> = {
@@ -1029,6 +1034,11 @@ export default function ProductsPage() {
                           {expandedSections.region && (
                             <select value={filters.region} onChange={(e) => handleFilterChange('region', e.target.value)} className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#C9A86A] focus:border-transparent">
                               <option value="">{t('ui.allRegions')}</option>
+                              <option value="HINDI">{t('ui.hindi')}</option>
+                              <option value="SILANI">{t('ui.silani')}</option>
+                              <option value="CAMBODI">{t('ui.cambodi')}</option>
+                              <option value="PHILIPINI">{t('ui.philipini')}</option>
+                              <option value="MERUKE">{t('ui.meruke')}</option>
                               <option value="UAE">{t('ui.uae')}</option>
                               <option value="SAUDI">{t('ui.saudi')}</option>
                               <option value="KUWAIT">{t('ui.kuwait')}</option>
